@@ -1,5 +1,5 @@
 import { type ChangeEvent, type SubmitEvent, useState } from "react";
-import { loginUser, signupUser } from "../services/userService.ts";
+import { loginUser, signupUser, updateUser } from "../services/userService.ts";
 import type { AuthContext } from "../contexts/LoginContext.ts";
 import { useNavigate } from "react-router-dom";
 import type { SafeUserInfo } from "@gamenite/shared";
@@ -17,7 +17,9 @@ import type { SafeUserInfo } from "@gamenite/shared";
  *   - handleInputChange: Function to handle changes in input fields.
  *   - handleSubmit: Function to handle form submission.
  */
-export default function useLoginForm(setAuth: (auth: AuthContext | null) => void) {
+export default function useLoginForm(
+  setAuth: React.Dispatch<React.SetStateAction<AuthContext | null>>,
+) {
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>("");
@@ -85,7 +87,20 @@ export default function useLoginForm(setAuth: (auth: AuthContext | null) => void
       } else {
         user = await loginUser({ username, password });
       }
-      setAuth({ user, pass: password, reset: () => setAuth(null) });
+
+      let newPassword = password;
+      setAuth({
+        user,
+        pass: password,
+        reset: () => setAuth(null),
+        update: async (info) => {
+          const result = await updateUser({ username, password: newPassword }, info);
+          if (info.password) newPassword = info.password;
+          setAuth((a) => a && { ...a, user: result, pass: newPassword });
+
+          return result;
+        },
+      });
       await navigate("/");
     } catch (err) {
       setErr(`${err}`);

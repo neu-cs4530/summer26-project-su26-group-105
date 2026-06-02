@@ -1,7 +1,5 @@
 import { useState, type SubmitEvent } from "react";
 import useLoginContext from "./useLoginContext.ts";
-import useAuth from "./useAuth.ts";
-import { updateUser } from "../services/userService.ts";
 import type { UserUpdateRequest } from "@gamenite/shared";
 
 /**
@@ -13,12 +11,11 @@ import type { UserUpdateRequest } from "@gamenite/shared";
  *  - Submission handler `handleSubmit`
  */
 export default function useEditProfileForm() {
-  const { user, reset } = useLoginContext();
+  const { user, update: updateUser } = useLoginContext();
   const [display, setDisplay] = useState(user.display);
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [err, setErr] = useState<null | string>(null);
-  const auth = useAuth();
 
   /**
    * Handles submission of the form
@@ -55,14 +52,11 @@ export default function useEditProfileForm() {
     if (display !== user.display) updates.display = display;
     if (password !== "") updates.password = password;
     try {
-      await updateUser(auth, updates);
+      await updateUser(updates);
     } catch (err) {
       setErr(`${err}`);
       return;
     }
-
-    // We need to do this — or do something else that resets the login context
-    reset();
   };
 
   return {

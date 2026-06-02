@@ -1,4 +1,4 @@
-import type { SafeUserInfo } from "@gamenite/shared";
+import type { SafeUserInfo, UserUpdateRequest } from "@gamenite/shared";
 import { createContext } from "react";
 import type { GameSocket } from "../util/types.ts";
 
@@ -13,14 +13,13 @@ export interface AuthContext {
   user: SafeUserInfo;
   pass: string;
   reset: () => void;
+  update: (info: UserUpdateRequest) => Promise<SafeUserInfo>;
 }
+export type LoginContextType = AuthContext & {
+  socket: GameSocket;
+};
 
 /**
  * See useLoginContext()
  */
-export const LoginContext = createContext<
-  | (AuthContext & {
-      socket: GameSocket;
-    })
-  | null
->(null);
+export const LoginContext = createContext<LoginContextType | null>(null);

@@ -50,7 +50,7 @@ export default function App() {
     socket && (
       <BrowserRouter>
         <Routes>
-          <Route path="/login" element={<Login setAuth={(auth) => setAuth(auth)} />} />
+          <Route path="/login" element={<Login setAuth={setAuth} />} />
           <Route
             element={
               <LoggedInRoute auth={auth} socket={socket}>

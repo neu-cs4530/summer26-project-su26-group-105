@@ -87,7 +87,6 @@ export default function Profile() {
       <div>
         <button className="primary narrow">Submit</button>
       </div>
-      <div className="smallAndGray">After updating your profile, you will be logged out</div>
     </form>
   );
 }
