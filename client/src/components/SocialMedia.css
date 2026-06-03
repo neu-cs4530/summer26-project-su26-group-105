@@ -1,0 +1,11 @@
+.social {
+  text-decoration: none;
+  color: #444444;
+  img {
+    display: inline-block;
+    vertical-align: middle;
+    width: 2em;
+    object-fit: cover;
+    margin-right: 0.5em;
+  }
+}

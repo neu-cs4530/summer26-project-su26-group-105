@@ -1,0 +1,16 @@
+.text-input-container {
+  display: flex;
+  padding-block: 0.5rem;
+
+  input {
+    border: 0;
+    outline: none;
+    flex-grow: 1;
+  }
+
+  .buttons {
+    /*font-size: 0.8em;*/
+    display: flex;
+    gap: 0.5em;
+  }
+}

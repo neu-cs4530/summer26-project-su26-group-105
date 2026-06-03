@@ -13,6 +13,11 @@ import type { UserUpdateRequest } from "@gamenite/shared";
 export default function useEditProfileForm() {
   const { user, update: updateUser } = useLoginContext();
   const [display, setDisplay] = useState(user.display);
+  const [bio, setBio] = useState(user.bio);
+  const [socialMediaModalVisible, setSocialMediaModalVisible] = useState(false);
+  const [newSocialMediaUsername, setNewSocialMediaUsername] = useState("");
+  const [newSocialMediaLink, setNewSocialMediaLink] = useState("");
+  const [socialMedias, setSocialMedias] = useState(user.socialMedias);
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [err, setErr] = useState<null | string>(null);
@@ -53,15 +58,43 @@ export default function useEditProfileForm() {
     if (password !== "") updates.password = password;
     try {
       await updateUser(updates);
+      setPassword("");
+      setConfirm("");
     } catch (err) {
       setErr(`${err}`);
       return;
     }
   };
 
+  const resetSocialMediaModal = () => {
+    setNewSocialMediaUsername("");
+    setNewSocialMediaLink("");
+    setSocialMediaModalVisible(false);
+  };
+
   return {
     display,
     setDisplay,
+    bio,
+    setBio,
+    socialMedias,
+    openSocialMediaModal: () => setSocialMediaModalVisible(true),
+    closeSocialMediaModal: resetSocialMediaModal,
+    confirmSocialMedia: () => {
+      setSocialMedias((prev) => [
+        ...prev,
+        { username: newSocialMediaUsername, link: newSocialMediaLink },
+      ]);
+      resetSocialMediaModal();
+    },
+    removeSocialMedia: (index: number) => {
+      setSocialMedias((prev) => prev.filter((_, i) => i !== index));
+    },
+    isSocialMediaModalVisible: socialMediaModalVisible,
+    newSocialMediaUsername,
+    setNewSocialMediaUsername,
+    newSocialMediaLink,
+    setNewSocialMediaLink,
     password,
     setPassword,
     confirm,

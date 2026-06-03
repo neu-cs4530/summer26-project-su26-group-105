@@ -1,0 +1,11 @@
+.content {
+  label {
+    font-weight: bold;
+  }
+
+  .account-settings {
+    .setting {
+      margin-bottom: 1em;
+    }
+  }
+}
