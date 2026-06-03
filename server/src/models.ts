@@ -119,7 +119,7 @@ export interface UserRecord {
 export interface FriendsRecord {
   fromUserId: RecordId;
   toUserId: RecordId;
-  status: "pending" | "accepted" | "blocked";
+  status: "pending" | "accepted" | "blocked" | "removed";
   createdAt: DateISO;
   respondedAt: DateISO;
 }
