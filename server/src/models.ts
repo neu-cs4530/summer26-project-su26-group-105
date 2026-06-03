@@ -66,6 +66,7 @@ export interface GameRecord {
   players: RecordId[]; // References User records
   createdAt: DateISO;
   createdBy: RecordId; // References User records
+  winner?: RecordId;
 }
 
 /**

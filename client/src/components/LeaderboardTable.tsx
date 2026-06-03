@@ -1,22 +1,21 @@
 import "./LeaderboardTable.css";
-
-//creates the type for each row in the leaderboard table
-export type LeaderboardPlayer = {
-  rank: number;
-  status: string;
-  profilePictureUrl: string;
-  username: string;
-  winRate: number;
-};
+import type { LeaderboardPlayer } from "@gamenite/shared";
 
 //creates the type to pass in to the component as props
 type LeaderboardTableProps = {
   title: string;
   rows: LeaderboardPlayer[];
+  currentUsername: string;
 };
 
-//component that just loads in the UI for the leaderboard with the given title and rows
-export default function LeaderboardTable({ title, rows }: LeaderboardTableProps) {
+/**
+ * loads in the UI for the leaderboard with the given title, rows, and username
+ * @param title the title shown above the leaderboard table
+ * @param rows the leaderboard rows to display
+ * @param currentUsername the signed in user's username, used to show (you) next to their row
+ * @returns
+ */
+export default function LeaderboardTable({ title, rows, currentUsername }: LeaderboardTableProps) {
   return (
     <div className="leaderboardContainer">
       <h1 className="leaderboardTitle">{title}</h1>
@@ -29,7 +28,8 @@ export default function LeaderboardTable({ title, rows }: LeaderboardTableProps)
             <th>Status</th>
             <th>Profile Picture</th>
             <th>Username</th>
-            <th>Win Rate</th>
+            <th>Total Games</th>
+            <th>Total Wins</th>
           </tr>
         </thead>
 
@@ -47,8 +47,12 @@ export default function LeaderboardTable({ title, rows }: LeaderboardTableProps)
                   />
                 )}
               </td>
-              <td>{player.username}</td>
-              <td>{player.winRate}%</td>
+              <td>
+                {player.display}
+                {player.username === currentUsername && " (you)"}
+              </td>
+              <td>{player.totalGames}</td>
+              <td>{player.totalWins}</td>
             </tr>
           ))}
         </tbody>

@@ -1,61 +1,46 @@
-import { useState } from "react";
-import type { GameKey } from "@gamenite/shared";
+import { useState, useEffect } from "react";
+import type { GameKey, LeaderboardPlayer } from "@gamenite/shared";
 import { gameNames } from "../util/consts";
-import LeaderboardTable, { type LeaderboardPlayer } from "../components/LeaderboardTable";
+import LeaderboardTable from "../components/LeaderboardTable";
+import useAuth from "../hooks/useAuth";
 
+//leaderboard can either be global or for a specific game id
 type LeaderboardFilter = "global" | GameKey;
-
-const GLOBAL_LEADERBOARD: LeaderboardPlayer[] = [
-  {
-    rank: 1,
-    status: "Gold",
-    profilePictureUrl: "",
-    username: "test",
-    winRate: 92,
-  },
-  {
-    rank: 2,
-    status: "Silver",
-    profilePictureUrl: "",
-    username: "test2",
-    winRate: 84,
-  },
-];
-
-//creates temporary Number Guesser and nim leaderboard rows
-const gameLeaderboards: Record<GameKey, LeaderboardPlayer[]> = {
-  nim: [
-    {
-      rank: 1,
-      status: "Gold",
-      profilePictureUrl: "",
-      username: "nim player",
-      winRate: 88,
-    },
-  ],
-  guess: [
-    {
-      rank: 1,
-      status: "Gold",
-      profilePictureUrl: "",
-      username: "guess player",
-      winRate: 80,
-    },
-  ],
-};
 
 export default function Leaderboard() {
   //keeps track of which leaderboard was selected
   const [selectedLeaderboard, setSelectedLeaderboard] = useState<LeaderboardFilter>("global");
+  const [leaderboardRows, setLeaderboardRows] = useState<LeaderboardPlayer[]>([]);
+  const { username } = useAuth();
 
   let leaderboardTitle = "Global Leaderboard";
-  let leaderboardRows = GLOBAL_LEADERBOARD;
 
   //checks whether the selected leaderboard is game specific
   if (selectedLeaderboard !== "global") {
     leaderboardTitle = `${gameNames[selectedLeaderboard]} Leaderboard`;
-    leaderboardRows = gameLeaderboards[selectedLeaderboard];
   }
+
+  useEffect(() => {
+    // reloads leaderboard rows whenever the selected leaderboard changes
+    async function loadLeaderboard() {
+      // calls the backend route for the selected leaderboard
+      const response = await fetch(`/api/leaderboard/list?type=${selectedLeaderboard}`);
+
+      // handles a failed backend request
+      if (!response.ok) {
+        //clears rows
+        setLeaderboardRows([]);
+        return;
+      }
+
+      // reads the backend response as leaderboard rows and sets it
+      const rows = (await response.json()) as LeaderboardPlayer[];
+      setLeaderboardRows(rows);
+    }
+
+    //runs async helper
+    void loadLeaderboard();
+  }, [selectedLeaderboard]); // refetches rows when the dropdown selection changes
 
   return (
     <div>
@@ -75,7 +60,11 @@ export default function Leaderboard() {
           </option>
         ))}
       </select>
-      <LeaderboardTable title={leaderboardTitle} rows={leaderboardRows} />
+      <LeaderboardTable
+        title={leaderboardTitle}
+        rows={leaderboardRows}
+        currentUsername={username}
+      />
     </div>
   );
 }
