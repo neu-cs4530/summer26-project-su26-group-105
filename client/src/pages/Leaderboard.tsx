@@ -38,8 +38,19 @@ export default function Leaderboard() {
       setLeaderboardRows(rows);
     }
 
-    //runs async helper
+    //runs once immediately when the page loads or the selected leaderboard changes
     void loadLeaderboard();
+
+    //refreshes leaderboard data every 5 minutes while this page is open
+    const refreshPage = window.setInterval(
+      () => {
+        void loadLeaderboard();
+      },
+      5 * 60 * 1000,
+    );
+    return () => {
+      window.clearInterval(refreshPage);
+    };
   }, [selectedLeaderboard]); // refetches rows when the dropdown selection changes
 
   return (
