@@ -15,15 +15,90 @@ async function signUpAndLogIn(page: Page, username: string) {
   await page.waitForURL("/");
 }
 
+//mocks the leaderboard backend route so the UI can be tested
+async function mockLeaderboardRows(page: Page, currentUsername: string) {
+  await page.route("**/api/leaderboard/list?**", async (route) => {
+    const url = new URL(route.request().url());
+    const type = url.searchParams.get("type");
+
+    if (type === "nim") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify([
+          {
+            rank: 1,
+            status: "Gold",
+            profilePictureUrl: "",
+            username: currentUsername,
+            display: "Current Player",
+            totalGames: 2,
+            totalWins: 2,
+            gameWins: { nim: 2 },
+          },
+        ]),
+      });
+      return;
+    }
+
+    if (type === "guess") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify([
+          {
+            rank: 1,
+            status: "Gold",
+            profilePictureUrl: "",
+            username: "guessWinner",
+            display: "Guess Winner",
+            totalGames: 3,
+            totalWins: 1,
+            gameWins: { guess: 1 },
+          },
+        ]),
+      });
+      return;
+    }
+
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify([
+        {
+          rank: 1,
+          status: "Gold",
+          profilePictureUrl: "",
+          username: currentUsername,
+          display: "Current Player",
+          totalGames: 5,
+          totalWins: 4,
+          gameWins: { nim: 2, guess: 2 },
+        },
+        {
+          rank: 2,
+          status: "Silver",
+          profilePictureUrl: "",
+          username: "otherPlayer",
+          display: "Other Player",
+          totalGames: 4,
+          totalWins: 2,
+          gameWins: { nim: 1, guess: 1 },
+        },
+      ]),
+    });
+  });
+}
+
 test.describe("Leaderboard UI", () => {
   test("should open the leaderboard page from the sidebar", async ({ page }) => {
     const username = "leaderboardUser" + Math.floor(Math.random() * 1000000);
 
+    await mockLeaderboardRows(page, username);
     await signUpAndLogIn(page, username);
 
-    await page.getByRole("link", { name: /LeaderBoard|Leaderboard/ }).click();
-
     //goes to the leaderboard page
+    await page.getByRole("link", { name: /LeaderBoard|Leaderboard/ }).click();
     await page.waitForURL("/leaderboard");
 
     //checks that the table is shown with what it's supposed to be
@@ -32,37 +107,37 @@ test.describe("Leaderboard UI", () => {
     await expect(page.getByRole("columnheader", { name: "Status" })).toBeVisible();
     await expect(page.getByRole("columnheader", { name: "Profile Picture" })).toBeVisible();
     await expect(page.getByRole("columnheader", { name: "Username" })).toBeVisible();
-    await expect(page.getByRole("columnheader", { name: "Win Rate" })).toBeVisible();
+    await expect(page.getByRole("columnheader", { name: "Total Games" })).toBeVisible();
+    await expect(page.getByRole("columnheader", { name: "Total Wins" })).toBeVisible();
 
-    await expect(page.getByText("test", { exact: true })).toBeVisible();
-    await expect(page.getByText("92%")).toBeVisible();
+    await expect(page.getByText("Current Player (you)", { exact: true })).toBeVisible();
+    await expect(page.getByText("Other Player", { exact: true })).toBeVisible();
+    await expect(page.getByRole("row", { name: /Current Player \(you\).*5.*4/ })).toBeVisible();
   });
 
   test("should switch between global and game specific leaderboard data", async ({ page }) => {
     const username = "leaderboardFilterUser" + Math.floor(Math.random() * 1000000);
 
+    await mockLeaderboardRows(page, username);
     await signUpAndLogIn(page, username);
 
-    await page.getByRole("link", { name: /Leaderboard/ }).click();
+    await page.getByRole("link", { name: /LeaderBoard|Leaderboard/ }).click();
     await page.waitForURL("/leaderboard");
 
     await expect(page.getByRole("heading", { name: "Global Leaderboard" })).toBeVisible();
-    await expect(page.getByText("test", { exact: true })).toBeVisible();
-    await expect(page.getByText("92%")).toBeVisible();
+    await expect(page.getByText("Current Player (you)", { exact: true })).toBeVisible();
+    await expect(page.getByText("Other Player", { exact: true })).toBeVisible();
 
     //gets nim game
     await page.getByLabel("Choose Leaderboard").selectOption("nim");
     await expect(page.getByRole("heading", { name: "Nim Leaderboard" })).toBeVisible();
-    //checks nim player is seen
-    await expect(page.getByText("nim player", { exact: true })).toBeVisible();
-    await expect(page.getByText("88%")).toBeVisible();
-    await expect(page.getByText("test", { exact: true })).not.toBeVisible();
+    await expect(page.getByText("Current Player (you)", { exact: true })).toBeVisible();
+    await expect(page.getByText("Other Player", { exact: true })).not.toBeVisible();
 
-    await page.getByLabel("Choose Leaderboard").selectOption("guess");
     //makes sure number guesser leaderboard is shown
+    await page.getByLabel("Choose Leaderboard").selectOption("guess");
     await expect(page.getByRole("heading", { name: "Number Guesser Leaderboard" })).toBeVisible();
-    await expect(page.getByText("guess player", { exact: true })).toBeVisible();
-    await expect(page.getByText("80%")).toBeVisible();
-    await expect(page.getByText("nim player", { exact: true })).not.toBeVisible();
+    await expect(page.getByText("Guess Winner", { exact: true })).toBeVisible();
+    await expect(page.getByText("Current Player (you)", { exact: true })).not.toBeVisible();
   });
 });
