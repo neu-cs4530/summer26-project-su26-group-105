@@ -5,6 +5,7 @@ import {
   acceptFriendRequest,
   blockUser,
   declineFriendRequest,
+  getBlockedUsers,
   getFriends,
   getIncomingRequests,
   getOutgoingRequests,
@@ -26,12 +27,13 @@ function userRoom(userId: string) {
  * friend list to their personal userRoom
  */
 async function pushFriendList(io: GameServer, userId: string) {
-  const [friends, incoming, outgoing] = await Promise.all([
+  const [friends, incoming, outgoing, blocked] = await Promise.all([
     getFriends(userId),
     getIncomingRequests(userId),
     getOutgoingRequests(userId),
+    getBlockedUsers(userId),
   ]);
-  io.to(userRoom(userId)).emit("friendListUpdated", { friends, incoming, outgoing });
+  io.to(userRoom(userId)).emit("friendListUpdated", { friends, incoming, outgoing, blocked });
 }
 
 /**

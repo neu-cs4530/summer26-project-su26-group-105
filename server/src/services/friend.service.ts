@@ -265,3 +265,24 @@ export async function getOutgoingRequests(userId: RecordId): Promise<FriendEntry
   }
   return results;
 }
+
+/** Gets all users blocked by the current user. */
+export async function getBlockedUsers(userId: RecordId): Promise<FriendEntry[]> {
+  const all = await getAllFriendRecords();
+  const results: FriendEntry[] = [];
+
+  for (const [id, record] of all) {
+    if (record.status !== "blocked" || record.fromUserId !== userId) continue;
+    const blocked = await UserRepo.find(record.toUserId);
+    if (!blocked) continue;
+
+    results.push({
+      friendId: id,
+      userId: record.toUserId,
+      username: blocked.username,
+      display: blocked.display,
+      requestDirection: "outgoing",
+    });
+  }
+  return results;
+}

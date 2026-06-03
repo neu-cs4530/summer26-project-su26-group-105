@@ -42,6 +42,7 @@ export interface ServerToClientEvents {
     friends: FriendEntry[];
     incoming: FriendEntry[];
     outgoing: FriendEntry[];
+    blocked: FriendEntry[];
   }) => void;
   gamePlayersUpdated: (payload: SafeUserInfo[]) => void;
   gameStateUpdated: (payload: TaggedGameView & { forPlayer: boolean }) => void;
