@@ -8,7 +8,13 @@ type SocialMediaProps = {
 };
 
 export default function SocialMedia({ socialMedia }: SocialMediaProps) {
-  const favicon = new URL(socialMedia.link).origin + "/favicon.ico";
+  let favicon = Link;
+
+  try {
+    favicon = new URL(socialMedia.link).origin + "/favicon.ico";
+  } catch (_) {
+    // If the URL is invalid, we just use the default link icon.
+  }
 
   return (
     <a href={socialMedia.link} target="_blank" rel="noopener noreferrer" className="social">

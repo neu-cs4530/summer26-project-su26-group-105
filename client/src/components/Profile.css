@@ -33,4 +33,9 @@
     grid-area: bio;
     width: 100%;
   }
+
+  .join-date {
+    color: gray;
+    font-size: 0.9em;
+  }
 }

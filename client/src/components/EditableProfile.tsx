@@ -47,6 +47,7 @@ export default function EditableProfile() {
       <h2 style={{ textAlign: "center" }}>Public Profile</h2>
       <div className="profile-container">
         <div className="pfp">
+          {/*<button>Edit</button>*/}
           <ProfileImage src={user.image} size="large" />
         </div>
         <div className="name">
@@ -68,8 +69,8 @@ export default function EditableProfile() {
               </button>
             }
           />
+          <span className="join-date">Joined {timeSince(user.createdAt)}</span>
         </div>
-        {/*<h1 className="name">{user.display}</h1>*/}
         <div className="socials">
           {socialMedias.map((s, i) => (
             <div style={{ display: "flex", gap: "0.5rem" }}>
@@ -84,39 +85,6 @@ export default function EditableProfile() {
               Add New Social Media
             </button>
           )}
-          {/*<SocialMedia
-            socialMedia={{ link: "https://myspace.com/something", username: "something" }}
-          />
-          <SocialMedia
-            socialMedia={{ link: "https://facebook.com/something", username: "something" }}
-          />
-          <SocialMedia
-            socialMedia={{ link: "https://linkedin.com/something", username: "something" }}
-          />
-          <SocialMedia
-            socialMedia={{ link: "https://piazza.com/something", username: "something" }}
-          />
-          <SocialMedia
-            socialMedia={{ link: "https://teams.microsoft.com/something", username: "something" }}
-          />
-          <SocialMedia
-            socialMedia={{ link: "https://github.com/something", username: "something" }}
-          />
-          <SocialMedia
-            socialMedia={{ link: "https://steamcommunity.com/something", username: "something" }}
-          />
-          <SocialMedia
-            socialMedia={{ link: "https://drive.google.com/something", username: "something" }}
-          />
-          <SocialMedia
-            socialMedia={{ link: "https://youtube.com/something", username: "something" }}
-          />
-          <SocialMedia
-            socialMedia={{ link: "https://canva.com/something", username: "something" }}
-          />
-          <SocialMedia
-            socialMedia={{ link: "https://instagram.com/something", username: "something" }}
-          />*/}
         </div>
         <div className="bio">
           <label htmlFor={bioId}>Bio</label>
@@ -178,94 +146,6 @@ export default function EditableProfile() {
       <div style={{ display: "flex", justifyContent: "center" }}>
         <button className="primary narrow">Submit</button>
       </div>
-      {/*<div className="bio">
-        Lorem ipsum dolor sit amet consectetur adipisicing elit. Minus earum enim ut rem? Provident
-        eos cupiditate consequatur illo, iste eligendi ad corporis, blanditiis commodi voluptas sunt
-        impedit aut quidem aliquid aspernatur a maiores molestiae? Quae dolore odit rem quas
-        consequuntur quasi iusto ducimus dolor, pariatur magni qui voluptatum voluptatem
-        perspiciatis fuga est ea veniam suscipit voluptas eveniet animi praesentium eos doloremque.
-        Nesciunt aspernatur id nihil cumque. Dicta recusandae in inventore quisquam maxime
-        laudantium a mollitia magni harum quasi aspernatur asperiores, fuga praesentium tempora sint
-        ut enim quos! Necessitatibus ad molestiae eveniet voluptas eligendi numquam voluptatem,
-        nihil nesciunt vitae enim reprehenderit.
-      </div>*/}
-      {/*<div>
-        <h2>Profile</h2>
-        <div>
-          <h3>General information</h3>
-          <ul>
-            <li>Username: {user.username}</li>
-            <li>Account created {timeSince(user.createdAt)}</li>
-          </ul>
-        </div>
-        <hr />
-        <div className="spacedSection">
-          <h3>Display name</h3>
-          <div style={{ display: "flex", flexDirection: "row", gap: "0.5rem" }}>
-            <input
-              className="widefill notTooWide"
-              value={display}
-              onChange={(e) => setDisplay(e.target.value)}
-            />
-            <button
-              className="secondary narrow"
-              onClick={(e) => {
-                e.preventDefault(); // Don't submit form
-                setDisplay(user.display);
-              }}
-            >
-              Reset
-            </button>
-          </div>
-        </div>
-        <hr />
-        <div className="spacedSection">
-          <h3>Reset password</h3>
-          <div style={{ display: "flex", flexDirection: "row", gap: "0.5rem" }}>
-            <input
-              type={showPass ? "input" : "password"}
-              className="widefill notTooWide"
-              placeholder="New password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-            <button
-              className="secondary narrow"
-              type="button"
-              onClick={() => {
-                setPassword("");
-                setConfirm("");
-              }}
-            >
-              Reset
-            </button>
-            <button
-              className="secondary narrow"
-              aria-label="Toggle show password"
-              type="button"
-              onClick={() => {
-                setShowPass((v) => !v);
-              }}
-            >
-              {showPass ? "Hide" : "Reveal"}
-            </button>
-          </div>
-          <div style={{ display: "flex", flexDirection: "row", gap: "0.5rem" }}>
-            <input
-              type={showPass ? "input" : "password"}
-              className="widefill notTooWide"
-              placeholder="Confirm new password"
-              value={confirm}
-              onChange={(e) => setConfirm(e.target.value)}
-            />
-          </div>
-        </div>
-        <hr />
-        {err && <p className="error-message">{err}</p>}
-        <div>
-          <button className="primary narrow">Submit</button>
-        </div>
-      </div>*/}
       {isSocialMediaModalVisible &&
         createPortal(
           <Modal close={closeSocialMediaModal}>
