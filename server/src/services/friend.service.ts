@@ -286,3 +286,51 @@ export async function getBlockedUsers(userId: RecordId): Promise<FriendEntry[]> 
   }
   return results;
 }
+
+export interface SearchResult {
+  userId: string;
+  username: string;
+  display: string;
+  relationship: "friend" | "incoming" | "outgoing" | "none";
+}
+
+export async function searchUsers(currentUserId: RecordId, query: string): Promise<SearchResult[]> {
+  const q = query.toLowerCase().trim();
+  if (!q) return [];
+
+  const [friends, incoming, outgoing, blocked] = await Promise.all([
+    getFriends(currentUserId),
+    getIncomingRequests(currentUserId),
+    getOutgoingRequests(currentUserId),
+    getBlockedUsers(currentUserId),
+  ]);
+
+  const friendUserIds = new Set(friends.map((f) => f.userId));
+  const incomingUserIds = new Set(incoming.map((f) => f.userId));
+  const outgoingUserIds = new Set(outgoing.map((f) => f.userId));
+  const blockedUserIds = new Set(blocked.map((f) => f.userId));
+
+  const userKeys = await UserRepo.getAllKeys();
+  const users = await UserRepo.getMany(userKeys);
+
+  const results: SearchResult[] = [];
+  for (let i = 0; i < userKeys.length; i++) {
+    const id = userKeys[i];
+    const u = users[i];
+    if (id === currentUserId) continue;
+    if (blockedUserIds.has(id)) continue;
+
+    const theyBlockedYou = await findRecord(id, currentUserId);
+    if (theyBlockedYou && theyBlockedYou.record.status === "blocked") continue;
+
+    if (!u.username.toLowerCase().includes(q) && !u.display.toLowerCase().includes(q)) continue;
+
+    let relationship: SearchResult["relationship"] = "none";
+    if (friendUserIds.has(id)) relationship = "friend";
+    else if (incomingUserIds.has(id)) relationship = "incoming";
+    else if (outgoingUserIds.has(id)) relationship = "outgoing";
+
+    results.push({ userId: id, username: u.username, display: u.display, relationship });
+  }
+  return results;
+}

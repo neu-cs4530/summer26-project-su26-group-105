@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import useAuth from "./useAuth";
 import useLoginContext from "./useLoginContext";
-import type { FriendEntry } from "@gamenite/shared/src/friend.types";
+import type { FriendEntry, SearchResult } from "@gamenite/shared/src/friend.types";
 
 /**
  * Custom hook to manage socket connection for friends page.
@@ -11,11 +11,13 @@ import type { FriendEntry } from "@gamenite/shared/src/friend.types";
  * - `incoming`: the pending incoming friend requests
  * - `outgoing`: the pending outgoing friend requests
  * - `blocked`: the users blocked by the current user
+ * - `searchResults`: the results from the search query
  * - `acceptRequest`: accepts a pending friend request
  * - `declineRequest`: decline a pending friend request
  * - `removeFriend`: removes an existing friend from user's accepted friends
  * - `blockUser`: blocks a user (doesn't have to be an existing friend)
  * - `unblockUser`: unblocks a user that was previously blocked
+ * - `searchUsers`: searches all users by username or display name
  */
 export default function useSocketsForFriends() {
   const { socket } = useLoginContext();
@@ -24,6 +26,7 @@ export default function useSocketsForFriends() {
   const [incoming, setIncoming] = useState<FriendEntry[]>([]);
   const [outgoing, setOutgoing] = useState<FriendEntry[]>([]);
   const [blocked, setBlocked] = useState<FriendEntry[]>([]);
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
 
   useEffect(() => {
     const handleFriendListUpdated = (payload: {
@@ -38,11 +41,16 @@ export default function useSocketsForFriends() {
       setBlocked(payload.blocked);
     };
 
+    const handleSearchResults = (payload: { results: SearchResult[] }) => {
+      setSearchResults(payload.results);
+    };
     socket.on("friendListUpdated", handleFriendListUpdated);
+    socket.on("friendSearchResults", handleSearchResults);
     socket.emit("friendList", { auth, payload: {} });
 
     return () => {
       socket.off("friendListUpdated", handleFriendListUpdated);
+      socket.off("friendSearchResults", handleSearchResults);
     };
   }, [socket, auth]);
 
@@ -70,16 +78,25 @@ export default function useSocketsForFriends() {
     socket.emit("friendUnblock", { auth, payload: { username } });
   }
 
+  const searchUsers = useCallback(
+    (query: string) => {
+      socket.emit("friendSearch", { auth, payload: { query } });
+    },
+    [socket, auth],
+  );
+
   return {
     friends,
     incoming,
     outgoing,
     blocked,
+    searchResults,
     sendRequest,
     acceptRequest,
     declineRequest,
     removeFriend,
     blockUser,
     unblockUser,
+    searchUsers,
   };
 }

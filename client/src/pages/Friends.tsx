@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 import useSocketsForFriends from "../hooks/useSocketsForFriends";
-import type { FriendEntry } from "@gamenite/shared/src/friend.types";
+import type { FriendEntry, SearchResult } from "@gamenite/shared/src/friend.types";
 
-type Tab = "friends" | "pending" | "blocked";
+type Tab = "friends" | "pending" | "search" | "blocked";
 
 interface ConfirmModalProps {
   message: string;
@@ -142,16 +142,27 @@ export default function Friends() {
     incoming,
     outgoing,
     blocked,
+    searchResults,
     sendRequest,
     acceptRequest,
     declineRequest,
     removeFriend,
     blockUser,
     unblockUser,
+    searchUsers,
   } = useSocketsForFriends();
 
   const [tab, setTab] = useState<Tab>("friends");
   const [modal, setModal] = useState<{ message: string; onConfirm: () => void } | null>(null);
+  const [searchInput, setSearchInput] = useState("");
+
+  useEffect(() => {
+    if (tab !== "search") return;
+    const timer = setTimeout(() => {
+      searchUsers(searchInput);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchInput, tab, searchUsers]);
 
   function confirmRemove(f: FriendEntry) {
     setModal({
@@ -185,4 +196,214 @@ export default function Friends() {
       },
     });
   }
+
+  function relationshipLabel(relationship: SearchResult["relationship"]) {
+    if (relationship === "friend") return <span className="smallAndGray"> · Already friends</span>;
+    if (relationship === "incoming")
+      return <span className="smallAndGray"> · Request received</span>;
+    if (relationship === "outgoing") return <span className="smallAndGray"> · Request sent</span>;
+    return null;
+  }
+
+  return (
+    <div className="content spacedSection">
+      {modal && (
+        <ConfirmModal
+          message={modal.message}
+          onConfirm={modal.onConfirm}
+          onCancel={() => setModal(null)}
+        />
+      )}
+
+      <h2>Friends</h2>
+
+      <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1rem" }}>
+        <button
+          className={tab === "friends" ? "primary narrow" : "secondary narrow"}
+          onClick={() => setTab("friends")}
+        >
+          Friends {friends.length > 0 && `(${friends.length})`}
+        </button>
+        <button
+          className={tab === "pending" ? "primary narrow" : "secondary narrow"}
+          onClick={() => setTab("pending")}
+        >
+          Pending {incoming.length > 0 && `(${incoming.length})`}
+        </button>
+        <button
+          className={tab === "search" ? "primary narrow" : "secondary narrow"}
+          onClick={() => setTab("search")}
+        >
+          Add Friend
+        </button>
+        <button
+          className={tab === "blocked" ? "primary narrow" : "secondary narrow"}
+          onClick={() => setTab("blocked")}
+        >
+          Blocked {blocked.length > 0 && `(${blocked.length})`}
+        </button>
+      </div>
+
+      <hr />
+
+      {tab === "friends" && (
+        <div className="spacedSection">
+          {friends.length === 0 ? (
+            <p className="smallAndGray">No friends yet. Use the Add Friend tab to get started!</p>
+          ) : (
+            <ul style={{ listStyle: "none", padding: 0 }}>
+              {friends.map((f: FriendEntry) => (
+                <li
+                  key={f.friendId}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.5rem",
+                    marginBottom: "0.5rem",
+                  }}
+                >
+                  <span style={{ flex: 1 }}>
+                    {f.display} <span className="smallAndGray">@{f.username}</span>
+                  </span>
+                  <ThreeDotMenu onRemove={() => confirmRemove(f)} onBlock={() => confirmBlock(f)} />
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+
+      {tab === "pending" && (
+        <div className="spacedSection">
+          {incoming.length > 0 && (
+            <>
+              <h3>Incoming</h3>
+              <ul style={{ listStyle: "none", padding: 0 }}>
+                {incoming.map((f: FriendEntry) => (
+                  <li
+                    key={f.friendId}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "0.5rem",
+                      marginBottom: "0.5rem",
+                    }}
+                  >
+                    <span style={{ flex: 1 }}>
+                      {f.display} <span className="smallAndGray">@{f.username}</span>
+                    </span>
+                    <button className="primary narrow" onClick={() => acceptRequest(f.friendId)}>
+                      Accept
+                    </button>
+                    <button className="secondary narrow" onClick={() => declineRequest(f.friendId)}>
+                      Decline
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+          {outgoing.length > 0 && (
+            <>
+              <h3>Sent</h3>
+              <ul style={{ listStyle: "none", padding: 0 }}>
+                {outgoing.map((f: FriendEntry) => (
+                  <li
+                    key={f.friendId}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "0.5rem",
+                      marginBottom: "0.5rem",
+                    }}
+                  >
+                    <span style={{ flex: 1 }}>
+                      {f.display} <span className="smallAndGray">@{f.username}</span>
+                    </span>
+                    <span className="smallAndGray">Pending...</span>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+          {incoming.length === 0 && outgoing.length === 0 && (
+            <p className="smallAndGray">No pending requests.</p>
+          )}
+        </div>
+      )}
+
+      {tab === "search" && (
+        <div className="spacedSection">
+          <h3>Find Players</h3>
+          <input
+            className="widefill notTooWide"
+            placeholder="Search by username or display name..."
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            autoFocus
+          />
+          {searchInput.trim() && (
+            <ul style={{ listStyle: "none", padding: 0, marginTop: "0.75rem" }}>
+              {searchResults.length === 0 ? (
+                <li>
+                  <p className="smallAndGray">No players found.</p>
+                </li>
+              ) : (
+                searchResults.map((r: SearchResult) => (
+                  <li
+                    key={r.userId}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "0.5rem",
+                      marginBottom: "0.5rem",
+                    }}
+                  >
+                    <span style={{ flex: 1 }}>
+                      {r.display} <span className="smallAndGray">@{r.username}</span>
+                      {relationshipLabel(r.relationship)}
+                    </span>
+                    {r.relationship === "none" && (
+                      <button className="primary narrow" onClick={() => sendRequest(r.username)}>
+                        Add Friend
+                      </button>
+                    )}
+                  </li>
+                ))
+              )}
+            </ul>
+          )}
+        </div>
+      )}
+
+      {tab === "blocked" && (
+        <div className="spacedSection">
+          {blocked.length === 0 ? (
+            <p className="smallAndGray">You haven't blocked anyone.</p>
+          ) : (
+            <ul style={{ listStyle: "none", padding: 0 }}>
+              {blocked.map((f: FriendEntry) => (
+                <li
+                  key={f.friendId}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.5rem",
+                    marginBottom: "0.5rem",
+                  }}
+                >
+                  <span style={{ flex: 1 }} className="smallAndGray">
+                    @{f.username}
+                  </span>
+                  <button className="secondary narrow" onClick={() => confirmUnblock(f)}>
+                    Unblock
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+    </div>
+  );
 }

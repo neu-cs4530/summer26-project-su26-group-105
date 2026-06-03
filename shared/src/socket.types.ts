@@ -8,7 +8,7 @@ import { type NewMessagePayload } from "./message.types.ts";
 import { type WithAuth } from "./auth.types.ts";
 import { type GameMakeMovePayload, type GamePlayInfo, type TaggedGameView } from "./game.types.ts";
 import { type SafeUserInfo } from "./user.types.ts";
-import { type FriendEntry } from "./friend.types.ts";
+import { type FriendEntry, type SearchResult } from "./friend.types.ts";
 
 /**
  * The Socket.io interface for client to server communication
@@ -24,6 +24,7 @@ export interface ClientToServerEvents {
   friendRemove: (payload: WithAuth<{ username: string }>) => void;
   friendRequest: (payload: WithAuth<{ username: string }>) => void;
   friendUnblock: (payload: WithAuth<{ username: string }>) => void;
+  friendSearch: (payload: WithAuth<{ query: string }>) => void;
   gameJoinAsPlayer: (payload: WithAuth<string>) => void;
   gameMakeMove: (payload: WithAuth<GameMakeMovePayload>) => void;
   gameStart: (payload: WithAuth<string>) => void;
@@ -44,6 +45,7 @@ export interface ServerToClientEvents {
     outgoing: FriendEntry[];
     blocked: FriendEntry[];
   }) => void;
+  friendSearchResults: (payload: { results: SearchResult[] }) => void;
   gamePlayersUpdated: (payload: SafeUserInfo[]) => void;
   gameStateUpdated: (payload: TaggedGameView & { forPlayer: boolean }) => void;
   gameWatched: (payload: GamePlayInfo) => void;

@@ -10,6 +10,7 @@ import {
   getIncomingRequests,
   getOutgoingRequests,
   removeFriend,
+  searchUsers,
   sendFriendRequest,
   unblockUser,
 } from "../services/friend.service.ts";
@@ -187,6 +188,24 @@ export const socketUnblock: SocketAPI = (socket, io) => async (body) => {
     if ("error" in result) throw new Error(result.error);
 
     await pushFriendList(io, user.userId);
+  } catch (err) {
+    logSocketError(socket, err);
+  }
+};
+
+/**
+ * Handles `friendSearch` which searches through all users by username or display name,
+ * filtered by searching user's relationships with other users (blocked or not).
+ */
+export const socketSearch: SocketAPI = (socket) => async (body) => {
+  try {
+    const {
+      auth,
+      payload: { query },
+    } = withAuth(z.object({ query: z.string() })).parse(body);
+    const user = await enforceAuth(auth);
+    const results = await searchUsers(user.userId, query);
+    socket.emit("friendSearchResults", { results });
   } catch (err) {
     logSocketError(socket, err);
   }
