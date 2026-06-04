@@ -67,6 +67,7 @@ io.on("connection", (socket) => {
   socket.on("friendRemove", friend.socketRemove(socket, io));
   socket.on("friendBlock", friend.socketBlock(socket, io));
   socket.on("friendUnblock", friend.socketUnblock(socket, io));
+  socket.on("friendSearch", friend.socketSearch(socket, io));
 
   socket.on("gameJoinAsPlayer", game.socketJoinAsPlayer(socket, io));
   socket.on("gameMakeMove", game.socketMakeMove(socket, io));
