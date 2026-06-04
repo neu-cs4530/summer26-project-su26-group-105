@@ -4,7 +4,7 @@ import FallbackImage from "./FallbackImage";
 
 type ProfileImageProps = {
   src: string | null;
-  size: "small" | "large";
+  size: "small" | "medium" | "large";
 };
 
 /**

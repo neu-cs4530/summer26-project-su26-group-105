@@ -5,9 +5,10 @@ import Link from "../assets/link-icon.svg";
 
 type SocialMediaProps = {
   socialMedia: SocialMedia;
+  iconOnly?: boolean;
 };
 
-export default function SocialMedia({ socialMedia }: SocialMediaProps) {
+export default function SocialMedia({ socialMedia, iconOnly }: SocialMediaProps) {
   let favicon = Link;
 
   try {
@@ -19,7 +20,7 @@ export default function SocialMedia({ socialMedia }: SocialMediaProps) {
   return (
     <a href={socialMedia.link} target="_blank" rel="noopener noreferrer" className="social">
       <FallbackImage src={favicon} fallback={Link} />
-      <span>@{socialMedia.username}</span>
+      {!iconOnly && <span>@{socialMedia.username}</span>}
     </a>
   );
 }

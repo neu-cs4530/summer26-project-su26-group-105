@@ -1,0 +1,47 @@
+.card {
+  position: fixed;
+  top: calc(anchor(top));
+  left: calc(anchor(right));
+  width: max-content;
+  max-width: 400px;
+  background: var(--gray-background);
+  box-shadow: 0px 5px 10px 1px #00000033;
+  border-radius: 10px;
+  position-try-fallbacks:
+    flip-block,
+    flip-inline,
+    flip-block flip-inline;
+
+  padding: 1rem;
+
+  .user-info {
+    display: flex;
+    gap: 1em;
+    margin-bottom: 0.5em;
+
+    .pfp {
+      flex-shrink: 0;
+    }
+
+    .user {
+      height: fit-content;
+      align-self: center;
+
+      .display {
+        font-size: 1.25rem;
+        font-weight: 600;
+      }
+
+      .username {
+        font-size: 0.75rem;
+        color: var(--gray-foreground);
+      }
+    }
+  }
+
+  .socials {
+    display: flex;
+    justify-content: space-evenly;
+    margin-bottom: 0.5em;
+  }
+}
