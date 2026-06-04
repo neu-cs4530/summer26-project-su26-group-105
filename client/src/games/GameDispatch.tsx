@@ -31,5 +31,8 @@ export default function GameDispatch({
       return <NimGame {...{ ...childProps, view: view.view }} />;
     case "guess":
       return <GuessGame {...{ ...childProps, view: view.view }} />;
+    case "one":
+      // Temporary placeholder until frontend exists
+      return <div>Playing One! UI Coming Soon.</div>;
   }
 }
