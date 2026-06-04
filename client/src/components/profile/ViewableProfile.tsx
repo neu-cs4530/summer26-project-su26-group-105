@@ -1,8 +1,8 @@
 import "./Profile.css";
-import ProfileImage from "./ProfileImage";
-import SocialMedia from "./SocialMedia";
-import useUser from "../hooks/useUser";
-import useTimeSince from "../hooks/useTimeSince";
+import ProfileImage from "../ProfileImage";
+import SocialMedia from "../SocialMedia";
+import useUser from "../../hooks/useUser";
+import useTimeSince from "../../hooks/useTimeSince";
 
 type ViewableProfileProps = {
   username: string;

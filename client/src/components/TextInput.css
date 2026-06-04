@@ -1,16 +1,30 @@
 .text-input-container {
-  display: flex;
-  padding-block: 0.5rem;
+  width: 100%;
 
-  input {
-    border: 0;
-    outline: none;
-    flex-grow: 1;
+  .text-input {
+    display: flex;
+    padding-block: 0.5rem;
+
+    label {
+      font-weight: bold;
+    }
+
+    input,
+    textarea {
+      border: 0;
+      outline: none;
+      flex-grow: 1;
+      background: inherit;
+    }
+
+    .buttons {
+      display: flex;
+      gap: 0.5em;
+    }
   }
 
-  .buttons {
-    /*font-size: 0.8em;*/
-    display: flex;
-    gap: 0.5em;
+  .error {
+    color: red;
+    font-size: 0.8em;
   }
 }

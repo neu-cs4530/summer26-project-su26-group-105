@@ -1,7 +1,7 @@
 import { useParams } from "react-router-dom";
-import EditableProfile from "../components/EditableProfile.tsx";
+import EditableProfile from "../components/profile/EditableProfile.tsx";
 import useLoginContext from "../hooks/useLoginContext.ts";
-import ViewableProfile from "../components/ViewableProfile.tsx";
+import ViewableProfile from "../components/profile/ViewableProfile.tsx";
 
 export default function Profile() {
   const { user } = useLoginContext();

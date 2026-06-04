@@ -1,6 +1,22 @@
 import { useState, type SubmitEvent } from "react";
 import useLoginContext from "./useLoginContext.ts";
-import type { UserUpdateRequest } from "@gamenite/shared";
+import { zSocialMedia, zUserUpdateRequest, type SocialMedia } from "@gamenite/shared";
+import { z, ZodError } from "zod";
+
+const zUpdateForm = zUserUpdateRequest
+  .extend({
+    confirm: z.preprocess((p) => (p === "" ? undefined : p), z.string().optional()),
+  })
+  .refine((val) => val.password === val.confirm, {
+    message: "Passwords don't match",
+    path: ["confirm"],
+  })
+  .transform((form) => {
+    delete form["confirm"];
+    return form;
+  });
+
+type UpdateForm = z.infer<typeof zUpdateForm>;
 
 /**
  * Custom hook to manage profile form logic
@@ -12,14 +28,12 @@ import type { UserUpdateRequest } from "@gamenite/shared";
  */
 export default function useEditProfileForm() {
   const { user, update: updateUser } = useLoginContext();
-  const [display, setDisplay] = useState(user.display);
-  const [bio, setBio] = useState(user.bio);
   const [socialMediaModalVisible, setSocialMediaModalVisible] = useState(false);
-  const [newSocialMediaUsername, setNewSocialMediaUsername] = useState("");
-  const [newSocialMediaLink, setNewSocialMediaLink] = useState("");
-  const [socialMedias, setSocialMedias] = useState(user.socialMedias);
-  const [password, setPassword] = useState("");
-  const [confirm, setConfirm] = useState("");
+  const [newSocialMedia, setNewSocialMedia] = useState<SocialMedia>({ username: "", link: "" });
+  const [updatedForm, setUpdatedForm] = useState<UpdateForm>({});
+  const [validationError, setValidationError] = useState<null | ZodError<UpdateForm>>(null);
+  const [socialMediaValidationError, setSocialMediaValidationError] =
+    useState<null | ZodError<SocialMedia>>(null);
   const [err, setErr] = useState<null | string>(null);
 
   /**
@@ -28,78 +42,85 @@ export default function useEditProfileForm() {
   const handleSubmit = async (e: SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (user.display === display && password === confirm && password === "") {
+    if (Object.keys(updatedForm).length === 0) {
       setErr("No changes to submit");
       return;
     }
 
-    if (display.trim() !== display) {
-      setErr("Display names can't begin or end with whitespace");
+    const valid = zUpdateForm.safeParse(updatedForm);
+    if (!valid.success) {
+      setValidationError(valid.error);
       return;
     }
 
-    if (display.trim() === "") {
-      setErr("Please enter a display name");
-      return;
-    }
-
-    if (password.trim() !== password) {
-      setErr("Passwords can't begin or end with whitespace");
-      return;
-    }
-
-    if (password !== confirm) {
-      setErr("Passwords don't match");
-      return;
-    }
-
-    const updates: UserUpdateRequest = {};
-    if (display !== user.display) updates.display = display;
-    if (password !== "") updates.password = password;
     try {
-      await updateUser(updates);
-      setPassword("");
-      setConfirm("");
+      await updateUser(valid.data);
+      setUpdatedForm({});
     } catch (err) {
       setErr(`${err}`);
       return;
     }
   };
 
+  const handleConfirmSocialMedia = () => {
+    const valid = zSocialMedia.safeParse(newSocialMedia);
+    if (!valid.success) {
+      setSocialMediaValidationError(valid.error);
+      return;
+    }
+
+    updateValue("socialMedias", (prev) => [...(prev ?? user.socialMedias), valid.data]);
+    resetSocialMediaModal();
+  };
+
   const resetSocialMediaModal = () => {
-    setNewSocialMediaUsername("");
-    setNewSocialMediaLink("");
+    setNewSocialMedia({ username: "", link: "" });
     setSocialMediaModalVisible(false);
   };
 
+  const updateValue = <K extends keyof UpdateForm>(
+    key: K,
+    value: UpdateForm[K] | ((value: UpdateForm[K]) => UpdateForm[K]),
+  ) => {
+    setUpdatedForm((prev) => ({
+      ...prev,
+      [key]: typeof value === "function" ? value(prev[key]) : value,
+    }));
+  };
+
+  const validationErrors = validationError && z.treeifyError(validationError);
+  const socialMediaValidationErrors =
+    socialMediaValidationError && z.treeifyError(socialMediaValidationError);
+
   return {
-    display,
-    setDisplay,
-    bio,
-    setBio,
-    socialMedias,
+    display: updatedForm.display ?? user.display,
+    bio: updatedForm.bio ?? user.bio,
+    socialMedias: updatedForm.socialMedias ?? user.socialMedias,
+    password: updatedForm.password ?? "",
+    confirm: updatedForm.confirm ?? "",
+    setDisplay: (display: string | undefined) => updateValue("display", display),
+    setBio: (bio: string) => updateValue("bio", bio),
+    setPassword: (password: string) => updateValue("password", password),
+    setConfirm: (confirm: string) => updateValue("confirm", confirm),
     openSocialMediaModal: () => setSocialMediaModalVisible(true),
-    closeSocialMediaModal: resetSocialMediaModal,
-    confirmSocialMedia: () => {
-      setSocialMedias((prev) => [
-        ...prev,
-        { username: newSocialMediaUsername, link: newSocialMediaLink },
-      ]);
-      resetSocialMediaModal();
+    socialMediaModal: {
+      isVisible: socialMediaModalVisible,
+      close: resetSocialMediaModal,
+      confirm: handleConfirmSocialMedia,
+      link: newSocialMedia.link,
+      username: newSocialMedia.username,
+      setLink: (link: string) => setNewSocialMedia((prev) => ({ ...prev, link })),
+      setUsername: (username: string) => setNewSocialMedia((prev) => ({ ...prev, username })),
+      validationErrors: socialMediaValidationErrors,
     },
     removeSocialMedia: (index: number) => {
-      setSocialMedias((prev) => prev.filter((_, i) => i !== index));
+      updateValue("socialMedias", (prev) => {
+        if (!prev) return user.socialMedias.filter((_, i) => i !== index);
+        return prev.filter((_, i) => i !== index);
+      });
     },
-    isSocialMediaModalVisible: socialMediaModalVisible,
-    newSocialMediaUsername,
-    setNewSocialMediaUsername,
-    newSocialMediaLink,
-    setNewSocialMediaLink,
-    password,
-    setPassword,
-    confirm,
-    setConfirm,
     err,
+    validationErrors: validationErrors,
     handleSubmit,
   };
 }

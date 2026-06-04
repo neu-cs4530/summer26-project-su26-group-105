@@ -1,14 +1,13 @@
-import { useId, useState } from "react";
-import useLoginContext from "../hooks/useLoginContext";
-import useTimeSince from "../hooks/useTimeSince";
-import useEditProfileForm from "../hooks/useEditProfileForm";
-import ProfileImage from "./ProfileImage";
-import SocialMedia from "./SocialMedia";
+import { useState } from "react";
+import useLoginContext from "../../hooks/useLoginContext";
+import useTimeSince from "../../hooks/useTimeSince";
+import useEditProfileForm from "../../hooks/useEditProfileForm";
+import ProfileImage from "../ProfileImage";
+import SocialMedia from "../SocialMedia";
 import "./Profile.css";
 import "./EditableProfile.css";
-import TextInput from "./TextInput";
-import { createPortal } from "react-dom";
-import Modal from "./Modal";
+import TextInput from "../TextInput";
+import SocialMediaModal from "./SocialMediaModal";
 
 export default function EditableProfile() {
   const { user } = useLoginContext();
@@ -20,27 +19,17 @@ export default function EditableProfile() {
     bio,
     setBio,
     socialMedias,
-    isSocialMediaModalVisible,
     openSocialMediaModal,
-    confirmSocialMedia,
-    closeSocialMediaModal,
-    newSocialMediaUsername,
-    setNewSocialMediaUsername,
-    newSocialMediaLink,
-    setNewSocialMediaLink,
+    socialMediaModal,
     removeSocialMedia,
     password,
     setPassword,
     confirm,
     setConfirm,
     err,
+    validationErrors,
     handleSubmit,
   } = useEditProfileForm();
-
-  const displayId = useId();
-  const bioId = useId();
-  const passwordId = useId();
-  const confirmPasswordId = useId();
 
   return (
     <form className="content spacedSection" onSubmit={handleSubmit}>
@@ -51,18 +40,18 @@ export default function EditableProfile() {
           <ProfileImage src={user.image} size="large" />
         </div>
         <div className="name">
-          <label htmlFor={displayId}>Display Name</label>
           <TextInput
+            label="Display Name"
             className="widefill"
-            id={displayId}
             value={display}
             onChange={(e) => setDisplay(e.target.value)}
+            error={validationErrors?.properties?.display?.errors?.[0]}
             buttons={
               <button
                 className="secondary small"
                 type="button"
                 onClick={(e) => {
-                  setDisplay(user.display);
+                  setDisplay(undefined);
                 }}
               >
                 Reset
@@ -73,7 +62,7 @@ export default function EditableProfile() {
         </div>
         <div className="socials">
           {socialMedias.map((s, i) => (
-            <div style={{ display: "flex", gap: "0.5rem" }}>
+            <div style={{ display: "flex", gap: "0.5rem" }} key={i + s.link + s.username}>
               <SocialMedia socialMedia={s} />
               <button className="cancel small" type="button" onClick={() => removeSocialMedia(i)}>
                 Remove
@@ -87,26 +76,28 @@ export default function EditableProfile() {
           )}
         </div>
         <div className="bio">
-          <label htmlFor={bioId}>Bio</label>
-          <textarea
-            id={bioId}
-            className="widefill"
+          <TextInput
+            label="Bio"
+            isTextArea
             value={bio}
             onChange={(e) => setBio(e.target.value)}
+            className="widefill"
+            error={validationErrors?.properties?.bio?.errors?.[0]}
           />
         </div>
       </div>
       <hr />
       <h2 style={{ textAlign: "center" }}>Account Settings</h2>
       <div className="account-settings">
-        <label htmlFor={passwordId}>New Password</label>
         <TextInput
-          id={passwordId}
+          label="New Password"
           type={showPass ? "input" : "password"}
           placeholder="New password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="setting widefill notTooWide"
+          className="widefill notTooWide"
+          containerClassName="setting"
+          error={validationErrors?.properties?.password?.errors?.[0]}
           buttons={
             <>
               <button
@@ -132,49 +123,22 @@ export default function EditableProfile() {
             </>
           }
         />
-        <label htmlFor={confirmPasswordId}>Confirm New Password</label>
         <TextInput
-          id={confirmPasswordId}
+          label="Confirm New Password"
           type={showPass ? "input" : "password"}
           placeholder="Confirm new password"
           value={confirm}
           onChange={(e) => setConfirm(e.target.value)}
-          className="setting widefill notTooWide"
+          className="widefill notTooWide"
+          containerClassName="setting"
+          error={validationErrors?.properties?.confirm?.errors?.[0]}
         />
       </div>
       {err && <p className="error-message">{err}</p>}
       <div style={{ display: "flex", justifyContent: "center" }}>
         <button className="primary narrow">Submit</button>
       </div>
-      {isSocialMediaModalVisible &&
-        createPortal(
-          <Modal close={closeSocialMediaModal}>
-            <h3>Add New Social Media</h3>
-            <input
-              type="text"
-              placeholder="Link to social media profile"
-              className="widefill notTooWide"
-              value={newSocialMediaLink}
-              onChange={(e) => setNewSocialMediaLink(e.target.value)}
-            />
-            <input
-              type="text"
-              placeholder="Username on that platform"
-              className="widefill notTooWide"
-              value={newSocialMediaUsername}
-              onChange={(e) => setNewSocialMediaUsername(e.target.value)}
-            />
-            <div style={{ display: "flex", justifyContent: "center", gap: "0.5rem" }}>
-              <button className="cancel narrow" type="button" onClick={closeSocialMediaModal}>
-                Cancel
-              </button>
-              <button className="primary narrow" type="button" onClick={confirmSocialMedia}>
-                Add
-              </button>
-            </div>
-          </Modal>,
-          document.body,
-        )}
+      <SocialMediaModal {...socialMediaModal} />
     </form>
   );
 }

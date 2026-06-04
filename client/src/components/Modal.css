@@ -11,7 +11,7 @@
   place-items: center;
 
   .modal {
-    min-width: 300px;
+    min-width: max(300px, 25vw);
     min-height: 150px;
     background: var(--gray-background);
     border-radius: 10px;
