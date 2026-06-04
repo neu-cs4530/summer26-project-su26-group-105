@@ -4,10 +4,28 @@ import supertest, { type Response } from "supertest";
 import { app } from "../src/app.ts";
 
 let response: Response;
+const baseUser = {
+  bio: expect.any(String),
+  createdAt: expect.any(String),
+  image: null,
+  socialMedias: [],
+  settings: {
+    receivesFriendGameNotifications: true,
+    receivesFriendRequestNotifications: true,
+  },
+};
 const auth1 = { username: "user1", password: "pwd1111" };
-const user1 = { username: "user1", display: "Yāo" };
+const user1 = {
+  username: "user1",
+  display: "Yāo",
+  ...baseUser,
+};
 const auth2 = { username: "user2", password: "pwd2222" };
-const user2 = { username: "user2", display: "Sénior Dos" };
+const user2 = {
+  username: "user2",
+  display: "Sénior Dos",
+  ...baseUser,
+};
 
 describe("GET /api/user/:id", () => {
   it("should 404 for nonexistent users", async () => {
@@ -19,11 +37,11 @@ describe("GET /api/user/:id", () => {
   it("should return existing users", async () => {
     response = await supertest(app).get(`/api/user/user1`);
     expect(response.status).toBe(200);
-    expect(response.body).toStrictEqual({ ...user1, createdAt: expect.anything() });
+    expect(response.body).toStrictEqual(user1);
 
     response = await supertest(app).get(`/api/user/user2`);
     expect(response.status).toBe(200);
-    expect(response.body).toStrictEqual({ ...user2, createdAt: expect.anything() });
+    expect(response.body).toStrictEqual(user2);
   });
 });
 
@@ -56,7 +74,7 @@ describe("POST /api/user/login", () => {
   it("should accept a correct username/password combination", async () => {
     response = await supertest(app).post("/api/user/login").send(auth1);
     expect(response.status).toBe(200);
-    expect(response.body).toStrictEqual({ ...user1, createdAt: expect.anything() });
+    expect(response.body).toStrictEqual(user1);
   });
 });
 
@@ -89,7 +107,6 @@ describe("POST/api/user/:username", () => {
     expect(response.body).toStrictEqual({
       ...user1,
       display: "New User 1 Display",
-      createdAt: expect.anything(),
     });
 
     // We have changed the username, which should be reflected
@@ -98,7 +115,6 @@ describe("POST/api/user/:username", () => {
     expect(response.body).toStrictEqual({
       ...user1,
       display: "New User 1 Display",
-      createdAt: expect.anything(),
     });
 
     // Change the password
@@ -109,7 +125,6 @@ describe("POST/api/user/:username", () => {
     expect(response.body).toStrictEqual({
       ...user1,
       display: "New User 1 Display",
-      createdAt: expect.anything(),
     });
 
     // We have changed the password, so auth shouldn't work
@@ -129,7 +144,6 @@ describe("POST/api/user/:username", () => {
     expect(response.body).toStrictEqual({
       ...user1,
       display: "Newer User 1 Display",
-      createdAt: expect.anything(),
     });
   });
 });
@@ -143,9 +157,9 @@ describe("POST /api/user/signup", () => {
     expect(response.status).toBe(200);
     expect(response.headers["content-type"]).toMatch(/^application.json/);
     expect(response.body).toStrictEqual({
+      ...baseUser,
       username,
       display: username,
-      createdAt: expect.anything(),
     });
   });
 
@@ -198,19 +212,12 @@ describe("POST /api/user/list", () => {
   it("accepts valid usernames and returns appropriate responses", async () => {
     response = await supertest(app).post("/api/user/list").send(["user2", "user1"]);
     expect(response.status).toBe(200);
-    expect(response.body).toStrictEqual([
-      { ...user2, createdAt: expect.anything() },
-      { ...user1, createdAt: expect.anything() },
-    ]);
+    expect(response.body).toStrictEqual([user2, user1]);
   });
 
   it("accepts duplicates and returns users in the order provided", async () => {
     response = await supertest(app).post("/api/user/list").send(["user1", "user2", "user1"]);
     expect(response.status).toBe(200);
-    expect(response.body).toStrictEqual([
-      { ...user1, createdAt: expect.anything() },
-      { ...user2, createdAt: expect.anything() },
-      { ...user1, createdAt: expect.anything() },
-    ]);
+    expect(response.body).toStrictEqual([user1, user2, user1]);
   });
 });
