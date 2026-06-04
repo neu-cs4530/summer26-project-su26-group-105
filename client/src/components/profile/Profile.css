@@ -1,5 +1,6 @@
 .profile-container {
   display: grid;
+  grid-template-columns: repeat(4, 1fr);
   grid-template-areas:
     "pfp socials socials socials"
     "pfp socials socials socials"

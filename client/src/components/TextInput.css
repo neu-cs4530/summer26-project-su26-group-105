@@ -1,13 +1,13 @@
 .text-input-container {
   width: 100%;
 
+  label {
+    font-weight: bold;
+  }
+
   .text-input {
     display: flex;
     padding-block: 0.5rem;
-
-    label {
-      font-weight: bold;
-    }
 
     input,
     textarea {

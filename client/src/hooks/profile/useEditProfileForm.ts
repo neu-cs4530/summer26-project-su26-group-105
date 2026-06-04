@@ -1,6 +1,6 @@
 import { useState, type SubmitEvent } from "react";
-import useLoginContext from "./useLoginContext.ts";
-import { zSocialMedia, zUserUpdateRequest, type SocialMedia } from "@gamenite/shared";
+import useLoginContext from "../useLoginContext.ts";
+import { zUserUpdateRequest, type SocialMedia } from "@gamenite/shared";
 import { z, ZodError } from "zod";
 
 const zUpdateForm = zUserUpdateRequest
@@ -28,12 +28,8 @@ type UpdateForm = z.infer<typeof zUpdateForm>;
  */
 export default function useEditProfileForm() {
   const { user, update: updateUser } = useLoginContext();
-  const [socialMediaModalVisible, setSocialMediaModalVisible] = useState(false);
-  const [newSocialMedia, setNewSocialMedia] = useState<SocialMedia>({ username: "", link: "" });
   const [updatedForm, setUpdatedForm] = useState<UpdateForm>({});
   const [validationError, setValidationError] = useState<null | ZodError<UpdateForm>>(null);
-  const [socialMediaValidationError, setSocialMediaValidationError] =
-    useState<null | ZodError<SocialMedia>>(null);
   const [err, setErr] = useState<null | string>(null);
 
   /**
@@ -62,22 +58,6 @@ export default function useEditProfileForm() {
     }
   };
 
-  const handleConfirmSocialMedia = () => {
-    const valid = zSocialMedia.safeParse(newSocialMedia);
-    if (!valid.success) {
-      setSocialMediaValidationError(valid.error);
-      return;
-    }
-
-    updateValue("socialMedias", (prev) => [...(prev ?? user.socialMedias), valid.data]);
-    resetSocialMediaModal();
-  };
-
-  const resetSocialMediaModal = () => {
-    setNewSocialMedia({ username: "", link: "" });
-    setSocialMediaModalVisible(false);
-  };
-
   const updateValue = <K extends keyof UpdateForm>(
     key: K,
     value: UpdateForm[K] | ((value: UpdateForm[K]) => UpdateForm[K]),
@@ -89,29 +69,20 @@ export default function useEditProfileForm() {
   };
 
   const validationErrors = validationError && z.treeifyError(validationError);
-  const socialMediaValidationErrors =
-    socialMediaValidationError && z.treeifyError(socialMediaValidationError);
-
   return {
     display: updatedForm.display ?? user.display,
     bio: updatedForm.bio ?? user.bio,
     socialMedias: updatedForm.socialMedias ?? user.socialMedias,
     password: updatedForm.password ?? "",
     confirm: updatedForm.confirm ?? "",
+    image: updatedForm.image === undefined ? user.image : updatedForm.image,
     setDisplay: (display: string | undefined) => updateValue("display", display),
     setBio: (bio: string) => updateValue("bio", bio),
     setPassword: (password: string) => updateValue("password", password),
     setConfirm: (confirm: string) => updateValue("confirm", confirm),
-    openSocialMediaModal: () => setSocialMediaModalVisible(true),
-    socialMediaModal: {
-      isVisible: socialMediaModalVisible,
-      close: resetSocialMediaModal,
-      confirm: handleConfirmSocialMedia,
-      link: newSocialMedia.link,
-      username: newSocialMedia.username,
-      setLink: (link: string) => setNewSocialMedia((prev) => ({ ...prev, link })),
-      setUsername: (username: string) => setNewSocialMedia((prev) => ({ ...prev, username })),
-      validationErrors: socialMediaValidationErrors,
+    setImage: (image: string | null) => updateValue("image", image),
+    addSocialMedia: (socialMedia: SocialMedia) => {
+      updateValue("socialMedias", (prev) => [...(prev ?? user.socialMedias), socialMedia]);
     },
     removeSocialMedia: (index: number) => {
       updateValue("socialMedias", (prev) => {

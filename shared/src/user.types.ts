@@ -45,7 +45,12 @@ export const zUserUpdateRequest = z.object({
     .min(1, { error: "Please enter a display name" })
     .regex(/^\S.*\S$/, { error: "Display names can't begin or end with whitespace" })
     .optional(),
-  image: z.url().nullable().optional(),
+  image: z
+    .preprocess(
+      (i) => (i === "" ? null : i),
+      z.url({ error: "Please enter a valid image URL" }).nullable(),
+    )
+    .optional(),
   bio: z.string().optional(),
   socialMedias: z.array(zSocialMedia).optional(),
   settings: z

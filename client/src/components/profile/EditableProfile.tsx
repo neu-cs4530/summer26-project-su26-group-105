@@ -1,31 +1,35 @@
 import { useState } from "react";
 import useLoginContext from "../../hooks/useLoginContext";
 import useTimeSince from "../../hooks/useTimeSince";
-import useEditProfileForm from "../../hooks/useEditProfileForm";
+import useEditProfileForm from "../../hooks/profile/useEditProfileForm";
 import ProfileImage from "../ProfileImage";
 import SocialMedia from "../SocialMedia";
 import "./Profile.css";
 import "./EditableProfile.css";
 import TextInput from "../TextInput";
 import SocialMediaModal from "./SocialMediaModal";
+import ImageModal from "./ImageModal";
 
 export default function EditableProfile() {
   const { user } = useLoginContext();
   const timeSince = useTimeSince();
   const [showPass, setShowPass] = useState(false);
+  const [showSocialMediaModal, setShowSocialMediaModal] = useState(false);
+  const [showImageModal, setShowImageModal] = useState(false);
   const {
     display,
     setDisplay,
     bio,
     setBio,
     socialMedias,
-    openSocialMediaModal,
-    socialMediaModal,
+    addSocialMedia,
     removeSocialMedia,
     password,
     setPassword,
     confirm,
     setConfirm,
+    image,
+    setImage,
     err,
     validationErrors,
     handleSubmit,
@@ -36,8 +40,13 @@ export default function EditableProfile() {
       <h2 style={{ textAlign: "center" }}>Public Profile</h2>
       <div className="profile-container">
         <div className="pfp">
-          {/*<button>Edit</button>*/}
-          <ProfileImage src={user.image} size="large" />
+          <button
+            type="button"
+            onClick={() => setShowImageModal(true)}
+            aria-label="Edit Profile Image"
+          >
+            <ProfileImage src={image} size="large" />
+          </button>
         </div>
         <div className="name">
           <TextInput
@@ -70,7 +79,11 @@ export default function EditableProfile() {
             </div>
           ))}
           {socialMedias.length < 12 && (
-            <button type="button" className="secondary narrow" onClick={openSocialMediaModal}>
+            <button
+              type="button"
+              className="secondary narrow"
+              onClick={() => setShowSocialMediaModal(true)}
+            >
               Add New Social Media
             </button>
           )}
@@ -138,7 +151,12 @@ export default function EditableProfile() {
       <div style={{ display: "flex", justifyContent: "center" }}>
         <button className="primary narrow">Submit</button>
       </div>
-      <SocialMediaModal {...socialMediaModal} />
+      {showSocialMediaModal && (
+        <SocialMediaModal save={addSocialMedia} close={() => setShowSocialMediaModal(false)} />
+      )}
+      {showImageModal && (
+        <ImageModal save={setImage} close={() => setShowImageModal(false)} currentImage={image} />
+      )}
     </form>
   );
 }

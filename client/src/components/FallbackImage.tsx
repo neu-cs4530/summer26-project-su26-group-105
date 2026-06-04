@@ -7,7 +7,7 @@ export default function FallbackImage({ src, fallback, ...props }: FallbackImage
   return (
     <img
       key={src}
-      src={src ?? fallback}
+      src={src || fallback}
       onError={(e) => {
         e.currentTarget.src = fallback;
         props.onError?.(e);

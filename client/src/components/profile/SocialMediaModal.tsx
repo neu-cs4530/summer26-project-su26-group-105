@@ -1,21 +1,17 @@
 import { createPortal } from "react-dom";
-import type useEditProfileForm from "../../hooks/useEditProfileForm";
 import Modal from "../Modal";
 import TextInput from "../TextInput";
+import useSocialMediaModal from "../../hooks/profile/useSocialMediaModal";
+import type { SocialMedia } from "@gamenite/shared";
 
-type SocialMediaModalProps = ReturnType<typeof useEditProfileForm>["socialMediaModal"];
+type SocialMediaModalProps = {
+  save: (socialMedia: SocialMedia) => void;
+  close: () => void;
+};
 
-export default function SocialMediaModal({
-  isVisible,
-  close,
-  link,
-  username,
-  setLink,
-  setUsername,
-  confirm,
-  validationErrors,
-}: SocialMediaModalProps) {
-  if (!isVisible) return null;
+export default function SocialMediaModal({ save, close }: SocialMediaModalProps) {
+  const { link, setLink, username, setUsername, confirm, reset, validationErrors } =
+    useSocialMediaModal(save, close);
 
   return createPortal(
     <Modal close={close}>
@@ -39,7 +35,7 @@ export default function SocialMediaModal({
         error={validationErrors?.properties?.username?.errors?.[0]}
       />
       <div style={{ display: "flex", justifyContent: "center", gap: "0.5rem" }}>
-        <button className="cancel narrow" type="button" onClick={close}>
+        <button className="cancel narrow" type="button" onClick={reset}>
           Cancel
         </button>
         <button className="primary narrow" type="button" onClick={confirm}>
