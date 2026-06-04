@@ -29,9 +29,11 @@ async function mockLeaderboardRows(page: Page, currentUsername: string) {
           {
             rank: 1,
             status: "Gold",
-            profilePictureUrl: "",
-            username: currentUsername,
-            display: "Current Player",
+            user: {
+              username: currentUsername,
+              display: "Current Player",
+              createdAt: new Date().toISOString(),
+            },
             totalGames: 2,
             totalWins: 2,
             gameWins: { nim: 2 },
@@ -49,9 +51,11 @@ async function mockLeaderboardRows(page: Page, currentUsername: string) {
           {
             rank: 1,
             status: "Gold",
-            profilePictureUrl: "",
-            username: "guessWinner",
-            display: "Guess Winner",
+            user: {
+              username: "guessWinner",
+              display: "Guess Winner",
+              createdAt: new Date().toISOString(),
+            },
             totalGames: 3,
             totalWins: 1,
             gameWins: { guess: 1 },
@@ -68,9 +72,11 @@ async function mockLeaderboardRows(page: Page, currentUsername: string) {
         {
           rank: 1,
           status: "Gold",
-          profilePictureUrl: "",
-          username: currentUsername,
-          display: "Current Player",
+          user: {
+            username: currentUsername,
+            display: "Current Player",
+            createdAt: new Date().toISOString(),
+          },
           totalGames: 5,
           totalWins: 4,
           gameWins: { nim: 2, guess: 2 },
@@ -78,9 +84,11 @@ async function mockLeaderboardRows(page: Page, currentUsername: string) {
         {
           rank: 2,
           status: "Silver",
-          profilePictureUrl: "",
-          username: "otherPlayer",
-          display: "Other Player",
+          user: {
+            username: "otherPlayer",
+            display: "Other Player",
+            createdAt: new Date().toISOString(),
+          },
           totalGames: 4,
           totalWins: 2,
           gameWins: { nim: 1, guess: 1 },
@@ -105,8 +113,7 @@ test.describe("Leaderboard UI", () => {
     await expect(page.getByRole("heading", { name: "Global Leaderboard" })).toBeVisible();
     await expect(page.getByRole("columnheader", { name: "Rank" })).toBeVisible();
     await expect(page.getByRole("columnheader", { name: "Status" })).toBeVisible();
-    await expect(page.getByRole("columnheader", { name: "Profile Picture" })).toBeVisible();
-    await expect(page.getByRole("columnheader", { name: "Username" })).toBeVisible();
+    await expect(page.getByRole("columnheader", { name: "Display Name" })).toBeVisible();
     await expect(page.getByRole("columnheader", { name: "Total Games" })).toBeVisible();
     await expect(page.getByRole("columnheader", { name: "Total Wins" })).toBeVisible();
 
