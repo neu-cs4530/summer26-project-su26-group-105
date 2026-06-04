@@ -1,11 +1,10 @@
-import type { GameKey, LeaderboardPlayer } from "@gamenite/shared";
+import type { GameKey, LeaderboardPlayer, SafeUserInfo } from "@gamenite/shared";
 import { GameRepo } from "../repository.ts";
 import { populateSafeUserInfo } from "./user.service.ts";
 
 //stores the stats for a single player for the leaderboard
 type LeaderboardStats = {
-  username: string;
-  display: string;
+  user: SafeUserInfo;
   totalGames: number;
   totalWins: number;
   gameWins: Partial<Record<GameKey, number>>;
@@ -32,14 +31,12 @@ function statusForRank(rank: number): string {
 //creates a new stat if this is the first game for the given player
 function getOrCreatePlayerStats(
   stats: Map<string, LeaderboardStats>,
-  username: string,
-  display: string,
+  user: SafeUserInfo,
 ): LeaderboardStats {
   //creates an entry if they're not in the leaderboard
-  if (!stats.has(username)) {
-    stats.set(username, {
-      username,
-      display,
+  if (!stats.has(user.username)) {
+    stats.set(user.username, {
+      user,
       totalGames: 0,
       totalWins: 0,
       gameWins: {},
@@ -47,11 +44,11 @@ function getOrCreatePlayerStats(
   }
 
   //gets the player's stat from leaderboard
-  const playerStats = stats.get(username);
+  const playerStats = stats.get(user.username);
 
   //throws error if theres no player stat
   if (playerStats === undefined) {
-    throw new Error(`No leaderboard stats for ${username}`);
+    throw new Error(`No leaderboard stats for ${user.username}`);
   }
 
   return playerStats;
@@ -83,7 +80,7 @@ export async function getLeaderboard(type: "global" | GameKey): Promise<Leaderbo
     //loops through all game players and counts their played games and wins
     for (let i = 0; i < game.players.length; i += 1) {
       const player = await populateSafeUserInfo(game.players[i]);
-      const playerStats = getOrCreatePlayerStats(stats, player.username, player.display);
+      const playerStats = getOrCreatePlayerStats(stats, player);
 
       playerStats.totalGames += 1;
       //only counts win if the user id matches the stored game winner
@@ -100,9 +97,7 @@ export async function getLeaderboard(type: "global" | GameKey): Promise<Leaderbo
     .map((playerStats, index) => ({
       rank: index + 1,
       status: statusForRank(index + 1),
-      profilePictureUrl: "",
-      username: playerStats.username,
-      display: playerStats.display,
+      user: playerStats.user,
       totalGames: playerStats.totalGames,
       totalWins: playerStats.totalWins,
       gameWins: playerStats.gameWins,

@@ -26,8 +26,7 @@ export default function LeaderboardTable({ title, rows, currentUsername }: Leade
           <tr>
             <th>Rank</th>
             <th>Status</th>
-            <th>Profile Picture</th>
-            <th>Username</th>
+            <th>Display Name</th>
             <th>Total Games</th>
             <th>Total Wins</th>
           </tr>
@@ -35,21 +34,12 @@ export default function LeaderboardTable({ title, rows, currentUsername }: Leade
 
         <tbody>
           {rows.map((player) => (
-            <tr key={player.username}>
+            <tr key={player.user.username}>
               <td>{player.rank}</td>
               <td>{player.status}</td>
               <td>
-                {player.profilePictureUrl && (
-                  <img
-                    className="leaderboardProfilePicture"
-                    src={player.profilePictureUrl}
-                    alt={`${player.username}'s profile`}
-                  />
-                )}
-              </td>
-              <td>
-                {player.display}
-                {player.username === currentUsername && " (you)"}
+                {player.user.display}
+                {player.user.username === currentUsername && " (you)"}
               </td>
               <td>{player.totalGames}</td>
               <td>{player.totalWins}</td>
