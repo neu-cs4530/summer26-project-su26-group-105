@@ -21,9 +21,11 @@ type UpdateForm = z.infer<typeof zUpdateForm>;
 /**
  * Custom hook to manage profile form logic
  * @returns an object containing
- *  - Form values `display`, `password`, and `confirm`
- *  - Form setters `setDisplay`, `setPassword`, and `setConfirm`
+ *  - Form values `display`, `bio`, `socialMedias` `password`, `confirm`, `image`
+ *  - Form setters `setDisplay`, `setBio`, `setPassword`, `setConfirm`, `setImage`
+ *  - Social media modifiers `addSocialMedia`, `removeSocialMedia`
  *  - Possibly-null error message `err`
+ *  - Possibly-null validation errors `validationErrors`
  *  - Submission handler `handleSubmit`
  */
 export default function useEditProfileForm() {

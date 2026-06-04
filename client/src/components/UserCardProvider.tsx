@@ -5,6 +5,11 @@ import "./UserCardProvider.css";
 import ProfileImage from "./ProfileImage";
 import SocialMedia from "./SocialMedia";
 
+/**
+ * Provider for managing the user card state. Contains the actual context provider,
+ * as well as the user card UI.
+ * @param children The child nodes to render.
+ */
 export default function UserCardProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<{
     isHovered: boolean;

@@ -10,6 +10,12 @@ type ImageModalProps = {
   save: (img: string | null) => void;
 };
 
+/**
+ * Modal for changing profile picture. Uses `useImageModal` to manage state and validation.
+ * @param close Function to close the modal
+ * @param currentImage The user's current profile image URL (or null if none)
+ * @param save Function to confirm the new profile image URL
+ */
 export default function ImageModal({ close, currentImage, save }: ImageModalProps) {
   const { image, setImage, confirm, reset, validationErrors } = useImageModal(
     currentImage,

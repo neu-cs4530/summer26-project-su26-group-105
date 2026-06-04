@@ -9,6 +9,12 @@ type SocialMediaModalProps = {
   close: () => void;
 };
 
+/**
+ * Modal for adding a new social media link. Uses `useSocialMediaModal` to manage state and validation.
+ *
+ * @param save to confirm the new social media link
+ * @param close to close the modal
+ */
 export default function SocialMediaModal({ save, close }: SocialMediaModalProps) {
   const { link, setLink, username, setUsername, confirm, reset, validationErrors } =
     useSocialMediaModal(save, close);

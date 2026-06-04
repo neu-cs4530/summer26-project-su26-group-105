@@ -20,6 +20,15 @@ function Input(props: BaseProps) {
   }
 }
 
+/**
+ * Component for displaying a text input field.
+ * @param buttons Buttons to display next to the input
+ * @param className Additional classes for the input
+ * @param containerClassName Additional classes for the container
+ * @param error Error message to display
+ * @param label Label for the input
+ * @param props Props for the underlying input element
+ */
 export default function TextInput({
   buttons,
   className,

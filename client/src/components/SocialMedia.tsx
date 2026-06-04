@@ -8,6 +8,11 @@ type SocialMediaProps = {
   iconOnly?: boolean;
 };
 
+/**
+ * Component for displaying a user's social media link with an icon.
+ * @param socialMedia The social media information to display
+ * @param iconOnly Whether to display only the icon, without the username
+ */
 export default function SocialMedia({ socialMedia, iconOnly }: SocialMediaProps) {
   let favicon = Link;
 

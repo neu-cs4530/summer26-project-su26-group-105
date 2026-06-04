@@ -10,6 +10,11 @@ type DisplayNameProps = {
   user: SafeUserInfo;
 };
 
+/**
+ * Component for displaying a user's display name with a link to their profile.
+ * Also displays profile image and shows a user card on hover.
+ * @param user The user whose display name to show
+ */
 export default function DisplayName({ user }: DisplayNameProps) {
   const { user: currentUser } = useLoginContext();
   const { setDisplayedUser, stopDisplaying } = useUserCard();

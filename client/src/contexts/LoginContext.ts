@@ -8,6 +8,7 @@ import type { GameSocket } from "../util/types.ts";
  * - user - the current user
  * - pass - the user's password
  * - reset - a callback that logs out the user
+ * - update - a callback that updates the user's information, returning the new user info
  */
 export interface AuthContext {
   user: SafeUserInfo;
@@ -15,6 +16,15 @@ export interface AuthContext {
   reset: () => void;
   update: (info: UserUpdateRequest) => Promise<SafeUserInfo>;
 }
+
+/**
+ * The entire login context, consisting of auth info and the game socket
+ * - user - the current user
+ * - pass - the user's password
+ * - reset - a callback that logs out the user
+ * - update - a callback that updates the user's information, returning the new user info
+ * - socket - the game socket, which can be used to send and receive game events
+ */
 export type LoginContextType = AuthContext & {
   socket: GameSocket;
 };

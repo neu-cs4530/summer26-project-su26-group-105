@@ -22,11 +22,14 @@ export interface SafeUserInfo {
 
 /*** TYPES USED IN THE USER API ***/
 
+/**
+ * Represents allowed social medias.
+ */
+export type SocialMedia = z.infer<typeof zSocialMedia>;
 export const zSocialMedia = z.object({
   username: z.string(),
   link: z.url(),
 });
-export type SocialMedia = z.infer<typeof zSocialMedia>;
 
 /**
  * Represents allowed updates to a user.

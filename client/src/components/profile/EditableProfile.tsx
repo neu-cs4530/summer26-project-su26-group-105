@@ -10,6 +10,9 @@ import TextInput from "../TextInput";
 import SocialMediaModal from "./SocialMediaModal";
 import ImageModal from "./ImageModal";
 
+/**
+ * Component for editing a user's profile. Allows changing display name, bio, social media links, profile image, etc.
+ */
 export default function EditableProfile() {
   const { user } = useLoginContext();
   const timeSince = useTimeSince();

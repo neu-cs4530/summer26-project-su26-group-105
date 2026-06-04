@@ -2,6 +2,19 @@ import { zSocialMedia, type SocialMedia } from "@gamenite/shared";
 import { useState } from "react";
 import { z, type ZodError } from "zod";
 
+/**
+ * Custom hook to manage the social media modal logic
+ * @param save - Function to save the updated social media info
+ * @param close - Function to close the modal
+ * @returns an object containing the social media state and related functions
+ *  - `link`: the current social media link
+ *  - `username`: the current social media username
+ *  - `setLink`: function to update the link state
+ *  - `setUsername`: function to update the username state
+ *  - `validationErrors`: any validation errors from the zod schema
+ *  - `confirm`: function to validate and save the social media info, then close the modal
+ *  - `reset`: function to clear validation errors and close the modal
+ */
 export default function useSocialMediaModal(
   save: (socialMedia: SocialMedia) => void,
   close: () => void,

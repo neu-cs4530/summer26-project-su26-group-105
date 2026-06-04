@@ -8,6 +8,10 @@ type ViewableProfileProps = {
   username: string;
 };
 
+/**
+ * Component for displaying a user's profile information.
+ * @param username The username of the user whose profile to display
+ */
 export default function ViewableProfile({ username }: ViewableProfileProps) {
   const user = useUser(username);
   const timeSince = useTimeSince();
