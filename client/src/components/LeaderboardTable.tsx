@@ -1,3 +1,4 @@
+import DisplayName from "./DisplayName";
 import "./LeaderboardTable.css";
 import type { LeaderboardPlayer } from "@gamenite/shared";
 
@@ -26,7 +27,7 @@ export default function LeaderboardTable({ title, rows, currentUsername }: Leade
           <tr>
             <th>Rank</th>
             <th>Status</th>
-            <th>Display Name</th>
+            <th>User</th>
             <th>Total Games</th>
             <th>Total Wins</th>
           </tr>
@@ -38,7 +39,7 @@ export default function LeaderboardTable({ title, rows, currentUsername }: Leade
               <td>{player.rank}</td>
               <td>{player.status}</td>
               <td>
-                {player.user.display}
+                <DisplayName user={player.user} showFullInfo />
                 {player.user.username === currentUsername && " (you)"}
               </td>
               <td>{player.totalGames}</td>

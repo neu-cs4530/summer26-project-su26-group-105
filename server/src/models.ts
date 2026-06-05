@@ -106,5 +106,15 @@ export interface ThreadRecord {
 export interface UserRecord {
   username: string; // References Auth records
   display: string;
+  image: string | null;
+  bio: string;
+  socialMedias: {
+    username: string;
+    link: string;
+  }[];
+  settings: {
+    receivesFriendRequestNotifications: boolean;
+    receivesFriendGameNotifications: boolean;
+  };
   createdAt: DateISO;
 }

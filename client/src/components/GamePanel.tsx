@@ -5,6 +5,7 @@ import useLoginContext from "../hooks/useLoginContext.ts";
 import GameDispatch from "../games/GameDispatch.tsx";
 import useSocketsForGame from "../hooks/useSocketsForGame.ts";
 import useTimeSince from "../hooks/useTimeSince.ts";
+import DisplayName from "./DisplayName.tsx";
 
 /**
  * A game panel allows viewing the status and players of a live game
@@ -31,10 +32,19 @@ export default function GamePanel({
         <div className="smallAndGray">Game room created {timeSince(createdAt)}</div>
         <div className="dottedList">
           {players.map((player, index) => (
-            <div className="dottedListItem" role="listitem" key={player.username}>
-              {player.username === user.username
-                ? `you are player #${index + 1}`
-                : `Player #${index + 1} is ${player.display}`}
+            <div
+              className="dottedListItem"
+              role="listitem"
+              key={player.username}
+              style={{ gap: "1ch", alignItems: "center" }}
+            >
+              {player.username === user.username ? (
+                `you are player #${index + 1}`
+              ) : (
+                <>
+                  Player #{index + 1} is <DisplayName user={player} />
+                </>
+              )}
             </div>
           ))}
         </div>

@@ -113,7 +113,7 @@ test.describe("Leaderboard UI", () => {
     await expect(page.getByRole("heading", { name: "Global Leaderboard" })).toBeVisible();
     await expect(page.getByRole("columnheader", { name: "Rank" })).toBeVisible();
     await expect(page.getByRole("columnheader", { name: "Status" })).toBeVisible();
-    await expect(page.getByRole("columnheader", { name: "Display Name" })).toBeVisible();
+    await expect(page.getByRole("columnheader", { name: "User" })).toBeVisible();
     await expect(page.getByRole("columnheader", { name: "Total Games" })).toBeVisible();
     await expect(page.getByRole("columnheader", { name: "Total Wins" })).toBeVisible();
 

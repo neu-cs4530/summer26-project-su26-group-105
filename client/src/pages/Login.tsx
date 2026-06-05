@@ -4,7 +4,7 @@ import { useState } from "react";
 import type { AuthContext } from "../contexts/LoginContext.ts";
 
 interface LoginProps {
-  setAuth: (s: AuthContext | null) => void;
+  setAuth: React.Dispatch<React.SetStateAction<AuthContext | null>>;
 }
 
 /**

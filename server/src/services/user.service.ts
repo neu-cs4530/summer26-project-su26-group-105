@@ -1,8 +1,24 @@
 import { type SafeUserInfo, type UserUpdateRequest } from "@gamenite/shared";
 import { getUserByUsername, updateAuth } from "./auth.service.ts";
 import { UserRepo } from "../repository.ts";
+import type { UserRecord } from "../models.ts";
 
 const disallowedUsernames = new Set(["login", "signup", "list"]);
+
+function recordToSafeUserInfo(record: UserRecord): SafeUserInfo {
+  return {
+    username: record.username,
+    display: record.display,
+    createdAt: new Date(record.createdAt),
+    bio: record.bio,
+    image: record.image,
+    socialMedias: record.socialMedias,
+    settings: {
+      receivesFriendGameNotifications: record.settings.receivesFriendGameNotifications,
+      receivesFriendRequestNotifications: record.settings.receivesFriendRequestNotifications,
+    },
+  };
+}
 
 /**
  * Retrieves a single user from the database.
@@ -12,11 +28,7 @@ const disallowedUsernames = new Set(["login", "signup", "list"]);
  */
 export async function populateSafeUserInfo(userId: string): Promise<SafeUserInfo> {
   const record = await UserRepo.get(userId);
-  return {
-    username: record.username,
-    display: record.display,
-    createdAt: new Date(record.createdAt),
-  };
+  return recordToSafeUserInfo(record);
 }
 
 /**
@@ -36,17 +48,21 @@ export async function createUser(
   if (disallowedUsernames.has(username)) {
     return { error: "That is not a permitted username" };
   }
-  const id = await UserRepo.add({
+  const record = {
     username,
     createdAt: createdAt.toISOString(),
     display: username,
-  });
-  await updateAuth(username, password, id);
-  return {
-    username,
-    createdAt,
-    display: username,
+    bio: `Hi, I'm ${username}!`,
+    image: null,
+    socialMedias: [],
+    settings: {
+      receivesFriendGameNotifications: true,
+      receivesFriendRequestNotifications: true,
+    },
   };
+  const id = await UserRepo.add(record);
+  await updateAuth(username, password, id);
+  return recordToSafeUserInfo(record);
 }
 
 /**
@@ -78,13 +94,23 @@ export async function getUsersByUsername(usernames: string[]): Promise<SafeUserI
  */
 export async function updateUser(
   username: string,
-  { display, password }: UserUpdateRequest,
+  { display, password, bio, image, socialMedias, settings }: UserUpdateRequest,
 ): Promise<SafeUserInfo> {
   const user = await getUserByUsername(username);
   if (!user) throw new Error(`No user ${username}`);
   if (password !== undefined) await updateAuth(username, password, user.userId);
   const newUser = await UserRepo.get(user.userId);
   if (display !== undefined) newUser.display = display;
+  if (bio !== undefined) newUser.bio = bio;
+  if (image !== undefined) newUser.image = image;
+  if (socialMedias !== undefined) newUser.socialMedias = socialMedias;
+  if (settings) {
+    const { receivesFriendGameNotifications, receivesFriendRequestNotifications } = settings;
+    if (receivesFriendGameNotifications !== undefined)
+      newUser.settings.receivesFriendGameNotifications = receivesFriendGameNotifications;
+    if (receivesFriendRequestNotifications !== undefined)
+      newUser.settings.receivesFriendRequestNotifications = receivesFriendRequestNotifications;
+  }
   await UserRepo.set(user.userId, newUser);
   return populateSafeUserInfo(user.userId);
 }

@@ -5,8 +5,23 @@ import { randomUUID } from "crypto";
 
 let response: Response;
 
+const baseUser = {
+  bio: expect.any(String),
+  createdAt: expect.any(String),
+  image: null,
+  socialMedias: [],
+  settings: {
+    receivesFriendGameNotifications: true,
+    receivesFriendRequestNotifications: true,
+  },
+};
 const auth3 = { username: "user3", password: "pwd3333" };
 const authBad = { username: "user3", password: "user3" };
+const user3 = {
+  username: "user3",
+  display: "Frau Drei",
+  ...baseUser,
+};
 
 describe("POST /api/game/create", () => {
   it("should return 400 on ill-formed payload or invalid game key", async () => {
@@ -40,20 +55,10 @@ describe("POST /api/game/create", () => {
       chat: expect.anything(),
       type: "nim",
       status: "waiting",
-      createdBy: {
-        username: "user3",
-        display: "Frau Drei",
-        createdAt: expect.anything(),
-      },
+      createdBy: user3,
       createdAt: expect.anything(),
       minPlayers: 2,
-      players: [
-        {
-          username: "user3",
-          display: "Frau Drei",
-          createdAt: expect.anything(),
-        },
-      ],
+      players: [user3],
     });
   });
 });

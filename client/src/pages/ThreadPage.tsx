@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import useThreadInfo from "../hooks/useThreadInfo.ts";
 import NewForumComment from "../components/NewForumComment.tsx";
 import useTimeSince from "../hooks/useTimeSince.ts";
+import DisplayName from "../components/DisplayName.tsx";
 
 export default function ThreadPage() {
   const formatTimeSince = useTimeSince();
@@ -21,7 +22,8 @@ export default function ThreadPage() {
           <h2>{threadInfo.title}</h2>
           <div className="notTooWide">{threadInfo.text}</div>
           <div className="smallAndGray">
-            Posted by {threadInfo.createdBy.display} {formatTimeSince(threadInfo.createdAt)}
+            Posted by <DisplayName user={threadInfo.createdBy} />{" "}
+            {formatTimeSince(threadInfo.createdAt)}
           </div>
           <div className="dottedList">
             {threadInfo.comments.map(({ commentId, text, createdBy, createdAt, editedAt }) => (
@@ -29,7 +31,7 @@ export default function ThreadPage() {
                 <div>
                   <div>{text}</div>
                   <div className="smallAndGray">
-                    Reply by {createdBy.display}
+                    Reply by <DisplayName user={createdBy} />
                     {createdBy.username === threadInfo.createdBy.username && (
                       <span className="opBlue"> OP</span>
                     )}{" "}
