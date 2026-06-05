@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 import useSocketsForFriends from "../hooks/useSocketsForFriends";
 import type { FriendEntry, SearchResult } from "@gamenite/shared/src/friend.types";
+import { createPortal } from "react-dom";
+import Modal from "../components/Modal";
 
 type Tab = "friends" | "pending" | "search" | "blocked";
 
@@ -11,39 +13,19 @@ interface ConfirmModalProps {
 }
 
 function ConfirmModal({ message, onConfirm, onCancel }: ConfirmModalProps) {
-  return (
-    <div
-      style={{
-        position: "fixed",
-        inset: 0,
-        background: "rgba(0,0,0,0.4)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        zIndex: 1000,
-      }}
-    >
-      <div
-        style={{
-          background: "var(--background, white)",
-          padding: "1.5rem",
-          borderRadius: "8px",
-          maxWidth: "400px",
-          width: "90%",
-          boxShadow: "0 4px 20px rgba(0,0,0,0.2)",
-        }}
-      >
-        <p style={{ marginBottom: "1.25rem" }}>{message}</p>
-        <div style={{ display: "flex", gap: "0.5rem", justifyContent: "flex-end" }}>
-          <button className="secondary narrow" onClick={onCancel}>
-            Cancel
-          </button>
-          <button className="primary narrow" onClick={onConfirm}>
-            OK
-          </button>
-        </div>
+  return createPortal(
+    <Modal close={onCancel}>
+      <p style={{ textAlign: "center" }}>{message}</p>
+      <div style={{ display: "flex", gap: "0.5rem", justifyContent: "center" }}>
+        <button className="cancel narrow" type="button" onClick={onCancel}>
+          Cancel
+        </button>
+        <button className="primary narrow" type="button" onClick={onConfirm}>
+          OK
+        </button>
       </div>
-    </div>
+    </Modal>,
+    document.body,
   );
 }
 
