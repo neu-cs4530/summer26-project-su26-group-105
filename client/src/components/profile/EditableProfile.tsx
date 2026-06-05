@@ -35,6 +35,7 @@ export default function EditableProfile() {
     image,
     setImage,
     isLoading,
+    isSaved,
     err,
     validationErrors,
     handleSubmit,
@@ -162,7 +163,7 @@ export default function EditableProfile() {
           disabled={isLoading}
         >
           {isLoading && <Loading />}
-          Save All Changes
+          {isSaved ? "Saved Successfully" : "Save All Changes"}
         </button>
       </div>
       {showSocialMediaModal && (

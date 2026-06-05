@@ -1,4 +1,4 @@
-import { useState, type SubmitEvent } from "react";
+import { useRef, useState, type SubmitEvent } from "react";
 import useLoginContext from "../useLoginContext.ts";
 import { zUserUpdateRequest, type SocialMedia } from "@gamenite/shared";
 import { z, ZodError } from "zod";
@@ -24,6 +24,7 @@ type UpdateForm = z.infer<typeof zUpdateForm>;
  *  - Form values `display`, `bio`, `socialMedias` `password`, `confirm`, `image`
  *  - Form setters `setDisplay`, `setBio`, `setPassword`, `setConfirm`, `setImage`
  *  - Form loading state `isLoading`
+ *  - Form saved state `isSaved` (will only be true for 5 seconds after a successful save)
  *  - Social media modifiers `addSocialMedia`, `removeSocialMedia`
  *  - Possibly-null error message `err`
  *  - Possibly-null validation errors `validationErrors`
@@ -33,6 +34,8 @@ export default function useEditProfileForm() {
   const { user, update: updateUser } = useLoginContext();
   const [updatedForm, setUpdatedForm] = useState<UpdateForm>({});
   const [isLoading, setIsLoading] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
+  const savedTextTimeout = useRef<number | null>(null);
   const [validationError, setValidationError] = useState<null | ZodError<UpdateForm>>(null);
   const [err, setErr] = useState<null | string>(null);
 
@@ -44,6 +47,11 @@ export default function useEditProfileForm() {
 
     setValidationError(null);
     setErr(null);
+    if (savedTextTimeout.current) {
+      clearTimeout(savedTextTimeout.current);
+      savedTextTimeout.current = null;
+    }
+    setIsSaved(false);
 
     if (Object.keys(updatedForm).length === 0) {
       setErr("No changes to submit");
@@ -60,6 +68,10 @@ export default function useEditProfileForm() {
     try {
       await updateUser(valid.data);
       setUpdatedForm({});
+      setIsSaved(true);
+      savedTextTimeout.current = setTimeout(() => {
+        setIsSaved(false);
+      }, 5000);
     } catch (err) {
       setErr(`${err}`);
       return;
@@ -101,6 +113,7 @@ export default function useEditProfileForm() {
       });
     },
     isLoading,
+    isSaved,
     err,
     validationErrors: validationErrors,
     handleSubmit,
