@@ -152,6 +152,12 @@ export const socketMakeMove: SocketAPI = (socket, io) => async (body) => {
     const user = await enforceAuth(auth);
     const viewUpdates = await updateGame(gameId, user, move);
     sendViewUpdates(io, gameId, viewUpdates);
+    const updatedGame = await getGameById(gameId);
+    if (updatedGame?.status === "done" && updatedGame.winner) {
+      io.emit("leaderboardUpdated", {
+        gameType: updatedGame.type,
+      });
+    }
   } catch (err) {
     logSocketError(socket, err);
   }
