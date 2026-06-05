@@ -46,6 +46,7 @@ export const zUserUpdateRequest = z.object({
   display: z
     .string()
     .min(1, { error: "Please enter a display name" })
+    .max(50, { error: "Display names can't be longer than 50 characters" })
     .regex(/^\S.*\S$/, { error: "Display names can't begin or end with whitespace" })
     .optional(),
   image: z
