@@ -59,7 +59,7 @@ export async function sendFriendRequest(
         await FriendRepo.set(existingFriend.id, {
           ...record,
           status: "accepted",
-          respondedAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
         });
         return { friendId: existingFriend.id };
       }
@@ -74,7 +74,7 @@ export async function sendFriendRequest(
     toUserId,
     status: "pending",
     createdAt: now,
-    respondedAt: now,
+    updatedAt: now,
   });
   return { friendId };
 }
@@ -98,7 +98,7 @@ export async function acceptFriendRequest(
   await FriendRepo.set(requestId, {
     ...record,
     status: "accepted",
-    respondedAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
   });
   return { success: true };
 }
@@ -125,7 +125,7 @@ export async function declineFriendRequest(
   await FriendRepo.set(requestId, {
     ...record,
     status: "removed",
-    respondedAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
   });
   return { success: true };
 }
@@ -143,7 +143,7 @@ export async function removeFriend(
   await FriendRepo.set(existingFriend.id, {
     ...existingFriend.record,
     status: "removed",
-    respondedAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
   });
   return { success: true };
 }
@@ -166,7 +166,7 @@ export async function blockUser(
     toUserId: chosenUserId,
     status: "blocked",
     createdAt: now,
-    respondedAt: now,
+    updatedAt: now,
   });
   return { success: true };
 }
@@ -184,7 +184,7 @@ export async function unblockUser(
   await FriendRepo.set(existingUser.id, {
     ...existingUser.record,
     status: "removed",
-    respondedAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
   });
   return { success: true };
 }

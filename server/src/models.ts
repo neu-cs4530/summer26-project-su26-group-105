@@ -114,12 +114,12 @@ export interface UserRecord {
  * - `toUserId`: the user ID who received the friend request
  * - `status`: the status of the request
  * - `createdAt`: when the request was sent
- * - `respondedAt`: when the request state was last updated
+ * - `updatedAt`: when the request state was last updated
  */
 export interface FriendsRecord {
   fromUserId: RecordId;
   toUserId: RecordId;
   status: "pending" | "accepted" | "blocked" | "removed";
   createdAt: DateISO;
-  respondedAt: DateISO;
+  updatedAt: DateISO;
 }
