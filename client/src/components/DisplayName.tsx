@@ -8,21 +8,23 @@ import useUserCard from "../hooks/useUserCard";
 
 type DisplayNameProps = {
   user: SafeUserInfo;
+  showFullInfo?: boolean;
 };
 
 /**
  * Component for displaying a user's display name with a link to their profile.
  * Also displays profile image and shows a user card on hover.
  * @param user The user whose display name to show
+ * @param showFullInfo If false/not specified, the current user will only be displayed as "you"
  */
-export default function DisplayName({ user }: DisplayNameProps) {
+export default function DisplayName({ user, showFullInfo }: DisplayNameProps) {
   const { user: currentUser } = useLoginContext();
   const { setDisplayedUser, stopDisplaying } = useUserCard();
   const id = useId();
 
   const anchorName = `--user-card-anchor-${id}`;
 
-  if (currentUser.username === user.username) return "you";
+  if (currentUser.username === user.username && !showFullInfo) return "you";
 
   const handleMouseEnter = () => {
     setDisplayedUser(user, anchorName);
