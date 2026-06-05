@@ -9,6 +9,7 @@ import "./EditableProfile.css";
 import TextInput from "../TextInput";
 import SocialMediaModal from "./SocialMediaModal";
 import ImageModal from "./ImageModal";
+import Loading from "../Loading";
 
 /**
  * Component for editing a user's profile. Allows changing display name, bio, social media links, profile image, etc.
@@ -33,6 +34,7 @@ export default function EditableProfile() {
     setConfirm,
     image,
     setImage,
+    isLoading,
     err,
     validationErrors,
     handleSubmit,
@@ -151,8 +153,17 @@ export default function EditableProfile() {
         />
       </div>
       {err && <p className="error-message">{err}</p>}
-      <div style={{ display: "flex", justifyContent: "center" }}>
-        <button className="primary narrow">Submit</button>
+      <div
+        style={{ display: "flex", justifyContent: "center", position: "sticky", bottom: "1rem" }}
+      >
+        <button
+          className="primary narrow"
+          style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}
+          disabled={isLoading}
+        >
+          {isLoading && <Loading />}
+          Save All Changes
+        </button>
       </div>
       {showSocialMediaModal && (
         <SocialMediaModal save={addSocialMedia} close={() => setShowSocialMediaModal(false)} />

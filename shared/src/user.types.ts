@@ -54,8 +54,11 @@ export const zUserUpdateRequest = z.object({
       z.url({ error: "Please enter a valid image URL" }).nullable(),
     )
     .optional(),
-  bio: z.string().optional(),
-  socialMedias: z.array(zSocialMedia).optional(),
+  bio: z.string().max(300, { error: "Bio can't be longer than 300 characters" }).optional(),
+  socialMedias: z
+    .array(zSocialMedia)
+    .max(12, { error: "You may only have up to 12 social media links" })
+    .optional(),
   settings: z
     .object({
       receivesFriendRequestNotifications: z.boolean().optional(),

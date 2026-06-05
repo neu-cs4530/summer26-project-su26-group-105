@@ -23,6 +23,7 @@ type UpdateForm = z.infer<typeof zUpdateForm>;
  * @returns an object containing
  *  - Form values `display`, `bio`, `socialMedias` `password`, `confirm`, `image`
  *  - Form setters `setDisplay`, `setBio`, `setPassword`, `setConfirm`, `setImage`
+ *  - Form loading state `isLoading`
  *  - Social media modifiers `addSocialMedia`, `removeSocialMedia`
  *  - Possibly-null error message `err`
  *  - Possibly-null validation errors `validationErrors`
@@ -31,6 +32,7 @@ type UpdateForm = z.infer<typeof zUpdateForm>;
 export default function useEditProfileForm() {
   const { user, update: updateUser } = useLoginContext();
   const [updatedForm, setUpdatedForm] = useState<UpdateForm>({});
+  const [isLoading, setIsLoading] = useState(false);
   const [validationError, setValidationError] = useState<null | ZodError<UpdateForm>>(null);
   const [err, setErr] = useState<null | string>(null);
 
@@ -39,6 +41,9 @@ export default function useEditProfileForm() {
    */
   const handleSubmit = async (e: SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    setValidationError(null);
+    setErr(null);
 
     if (Object.keys(updatedForm).length === 0) {
       setErr("No changes to submit");
@@ -51,12 +56,15 @@ export default function useEditProfileForm() {
       return;
     }
 
+    setIsLoading(true);
     try {
       await updateUser(valid.data);
       setUpdatedForm({});
     } catch (err) {
       setErr(`${err}`);
       return;
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -92,6 +100,7 @@ export default function useEditProfileForm() {
         return prev.filter((_, i) => i !== index);
       });
     },
+    isLoading,
     err,
     validationErrors: validationErrors,
     handleSubmit,
