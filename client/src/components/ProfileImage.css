@@ -1,0 +1,23 @@
+.profile-image {
+  display: inline-block;
+  vertical-align: middle;
+  border-radius: 50%;
+  border: solid black;
+  aspect-ratio: 1;
+  object-fit: cover;
+
+  &.small {
+    width: 2rem;
+    border-width: 1px;
+  }
+
+  &.medium {
+    width: 5rem;
+    border-width: 2px;
+  }
+
+  &.large {
+    width: 10rem;
+    border-width: 3px;
+  }
+}

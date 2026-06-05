@@ -66,6 +66,7 @@ export interface GameRecord {
   players: RecordId[]; // References User records
   createdAt: DateISO;
   createdBy: RecordId; // References User records
+  winner?: RecordId;
 }
 
 /**
@@ -105,6 +106,16 @@ export interface ThreadRecord {
 export interface UserRecord {
   username: string; // References Auth records
   display: string;
+  image: string | null;
+  bio: string;
+  socialMedias: {
+    username: string;
+    link: string;
+  }[];
+  settings: {
+    receivesFriendRequestNotifications: boolean;
+    receivesFriendGameNotifications: boolean;
+  };
   createdAt: DateISO;
 }
 

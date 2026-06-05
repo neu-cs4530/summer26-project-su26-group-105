@@ -3,6 +3,7 @@ import useLoginContext from "../hooks/useLoginContext.ts";
 import type { ChatMessage } from "../util/types.ts";
 import { useEffect, useRef } from "react";
 import useTimeSince from "../hooks/useTimeSince.ts";
+import DisplayName from "./DisplayName.tsx";
 
 interface MessageListProps {
   messages: ChatMessage[];
@@ -42,7 +43,7 @@ export default function MessageList({ messages }: MessageListProps) {
           return (
             <div key={message.messageId} className="chatOther">
               <div className="chatSender">
-                {message.createdBy.display} {timeSince(message.createdAt)}
+                <DisplayName user={message.createdBy} /> {timeSince(message.createdAt)}
               </div>
               <div className="chatContent">{message.text}</div>
             </div>

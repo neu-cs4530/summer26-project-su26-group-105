@@ -9,6 +9,7 @@ import * as friend from "./controllers/friend.controller.ts";
 import * as game from "./controllers/game.controller.ts";
 import * as user from "./controllers/user.controller.ts";
 import * as thread from "./controllers/thread.controller.ts";
+import * as leaderboard from "./controllers/leaderboard.controller.ts";
 import { type GameServer } from "./types.ts";
 
 export const app = express();
@@ -20,6 +21,7 @@ app.use(express.json());
 app.use(
   "/api",
   Router()
+    .use("/leaderboard", express.Router().get("/list", leaderboard.getList))
     .use(
       "/game",
       express
