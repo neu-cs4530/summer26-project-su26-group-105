@@ -20,6 +20,7 @@ import fallback from "./fallback.tsx";
 import NewThread from "./pages/NewThread.tsx";
 import TimeContextKeeper from "./components/UpdatingTimeContext.tsx";
 import Leaderboard from "./pages/Leaderboard.tsx";
+import Friends from "./pages/Friends.tsx";
 
 /** If `true`, all incoming socket messages will be logged */
 const DEBUG_SOCKETS = false;
@@ -71,6 +72,7 @@ export default function App() {
             <Route path="/game/:gameId" element={<Game />} />
             <Route path="/leaderboard" element={<Leaderboard />} />
             <Route path="/profile/:username" element={<Profile />} />
+            <Route path="/friends" element={<Friends />} />
             <Route path="/*" element={<NoSuchRoute />} />
           </Route>
         </Routes>
