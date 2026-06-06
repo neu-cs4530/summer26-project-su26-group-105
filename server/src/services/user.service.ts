@@ -11,6 +11,17 @@ const disallowedUsernames = new Set(["login", "signup", "list"]);
  * @returns the found user object (without the password).
  */
 export async function populateSafeUserInfo(userId: string): Promise<SafeUserInfo> {
+  // Catch bot IDs and return a virtual profile without messing with the database
+  if (userId.startsWith("bot_")) {
+    const parts = userId.split(":");
+    const displayName = parts[1];
+    return {
+      username: userId,
+      // robot emoji cause why not hehe
+      display: `🤖 ${displayName}`,
+      createdAt: new Date(),
+    };
+  }
   const record = await UserRepo.get(userId);
   return {
     username: record.username,

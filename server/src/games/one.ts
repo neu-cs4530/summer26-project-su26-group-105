@@ -1,5 +1,6 @@
 import { GameService } from "./gameServiceManager.ts";
 import { type GameLogic } from "./gameLogic.ts";
+import { generateBotMove } from "../bots/oneBot.ts";
 import {
   type OneState,
   type OneView,
@@ -215,6 +216,10 @@ export const oneLogic: GameLogic<OneState, OneView> = {
 };
 
 export const oneGameService = new GameService<OneState, OneView>(oneLogic);
+
+oneGameService.generateBotMove = (state: OneState, playerIndex: number) => {
+  return generateBotMove(state, playerIndex);
+};
 
 //Helpers:)
 

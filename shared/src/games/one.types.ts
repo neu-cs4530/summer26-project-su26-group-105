@@ -68,7 +68,7 @@ export const zDrawCardMove = z.object({
   type: z.literal("draw"),
 });
 /**
- *
+ * Pass turn after drawing card
  */
 export const zPassTurnMove = z.object({
   type: z.literal("pass"),
