@@ -17,6 +17,20 @@ export async function logInUser(page: Page, username: string, password: string) 
   await page.waitForURL("/");
 }
 
+export async function createUser(page: Page) {
+  const username = "user" + Math.floor(Math.random() * 2_000_000);
+  const password = "pwd_for_" + username;
+  await page.goto("/login");
+  await page.getByRole("button", { name: "Create New Account" }).click();
+  await page.getByLabel("Username").fill(username);
+  await page.getByLabel("Password", { exact: true }).fill(password);
+  await page.getByLabel("Confirm Password").fill(password);
+  await page.getByRole("button", { name: "Sign Up" }).click();
+  await page.waitForURL("/");
+
+  return { username, password };
+}
+
 /**
  * Set up a test of two users joining and starting a 2+ player game
  *
@@ -35,19 +49,9 @@ export async function createAndLoadGame(
   doAssess: boolean,
 ) {
   // Create a random new user and username to give this test unique identity
-  const username1 = "user" + Math.floor(Math.random() * 2_000_000);
-  const password1 = "pwd_for_" + username1;
+  const { username: username1 } = await createUser(page1);
   const username2 = "user2";
   const password2 = "pwd2222";
-
-  // Create a user for user1
-  await page1.goto("/login");
-  await page1.getByRole("button", { name: "Create New Account" }).click();
-  await page1.getByLabel("Username").fill(username1);
-  await page1.getByLabel("Password", { exact: true }).fill(password1);
-  await page1.getByLabel("Confirm Password").fill(password1);
-  await page1.getByRole("button", { name: "Sign Up" }).click();
-  await page1.waitForURL("/");
 
   // User 1 creates a new game
   await page1.getByRole("button", { name: "Create New Game" }).click();

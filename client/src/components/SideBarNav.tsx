@@ -27,8 +27,14 @@ export default function SideBarNav() {
       <NavLink to="/games" className={navClass}>
         Games
       </NavLink>
+      <NavLink to="/leaderboard" className={navClass}>
+        Leaderboard
+      </NavLink>
       <NavLink to="/forum" className={navClass}>
         Forum
+      </NavLink>
+      <NavLink to="/friends" className={navClass}>
+        Friends
       </NavLink>
       <NavLink
         to={`/profile/${username}`}

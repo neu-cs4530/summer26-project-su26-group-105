@@ -1,6 +1,7 @@
 import useLoginContext from "../hooks/useLoginContext.ts";
 import "./Header.css";
 import { useNavigate } from "react-router-dom";
+import ProfileImage from "./ProfileImage.tsx";
 
 /**
  * Header component that renders the main title.
@@ -12,7 +13,9 @@ export default function Header() {
   return (
     <div id="header" className="header">
       <div className="title">GameNite!</div>
-      signed in as {user.display}
+      <span>
+        signed in as <ProfileImage src={user.image} size="small" /> {user.display}
+      </span>
       <button
         className="narrowcenter secondary"
         onClick={async () => {

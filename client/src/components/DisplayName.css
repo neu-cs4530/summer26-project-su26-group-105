@@ -1,0 +1,11 @@
+.display-name {
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+  gap: 0.25em;
+  margin-block: 0.5em;
+
+  text-decoration: none;
+  color: inherit;
+  font-size: inherit;
+}

@@ -4,6 +4,7 @@ import {
   AuthRepo,
   ChatRepo,
   CommentRepo,
+  FriendRepo,
   GameRepo,
   MessageRepo,
   ThreadRepo,
@@ -117,6 +118,7 @@ export async function resetEverythingToDefaults() {
   await AuthRepo.clear();
   await ChatRepo.clear();
   await CommentRepo.clear();
+  await FriendRepo.clear();
   await GameRepo.clear();
   await MessageRepo.clear();
   await ThreadRepo.clear();

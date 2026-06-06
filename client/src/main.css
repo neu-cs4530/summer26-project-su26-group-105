@@ -33,10 +33,19 @@ button.narrowcenter {
 
 button.narrow {
   border-radius: 0.5rem;
-  padding-inline: 1rem;
+  padding-inline: 1em;
   border: none;
   font-weight: 600;
-  min-height: 2.5rem;
+  min-height: 2.5em;
+}
+
+button.small {
+  font-size: 0.8em;
+  border-radius: 0.5rem;
+  padding: 0.25em 0.75em;
+  border: none;
+  font-weight: 600;
+  min-height: 2em;
 }
 
 button.primary {
@@ -51,6 +60,11 @@ button.primary:hover {
 button.secondary {
   color: #fff;
   background-color: oklch(0.55 0.1 140);
+}
+
+button.cancel {
+  color: #fff;
+  background-color: oklch(0.55 0.1 0);
 }
 
 button.secondary:hover {
@@ -71,7 +85,7 @@ textarea {
   min-height: 2.5rem;
 }
 
-input.widefill {
+.widefill {
   border-radius: 0.5rem;
   border: 1px solid var(--gray-foreground);
   width: 100%;

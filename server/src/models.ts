@@ -66,6 +66,7 @@ export interface GameRecord {
   players: RecordId[]; // References User records
   createdAt: DateISO;
   createdBy: RecordId; // References User records
+  winner?: RecordId;
 }
 
 /**
@@ -105,5 +106,31 @@ export interface ThreadRecord {
 export interface UserRecord {
   username: string; // References Auth records
   display: string;
+  image: string | null;
+  bio: string;
+  socialMedias: {
+    username: string;
+    link: string;
+  }[];
+  settings: {
+    receivesFriendRequestNotifications: boolean;
+    receivesFriendGameNotifications: boolean;
+  };
   createdAt: DateISO;
+}
+
+/**
+ * Represents a friend relationship between two users.
+ * - `fromUserId`: the user ID who sent the friend request
+ * - `toUserId`: the user ID who received the friend request
+ * - `status`: the status of the request
+ * - `createdAt`: when the request was sent
+ * - `updatedAt`: when the request state was last updated
+ */
+export interface FriendsRecord {
+  fromUserId: RecordId;
+  toUserId: RecordId;
+  status: "pending" | "accepted" | "blocked" | "removed";
+  createdAt: DateISO;
+  updatedAt: DateISO;
 }

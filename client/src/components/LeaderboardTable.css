@@ -1,0 +1,31 @@
+.leaderboardContainer {
+  width: 100%;
+  padding: 24px;
+}
+
+.leaderboardTitle {
+  margin-bottom: 16px;
+}
+
+.leaderboardTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.leaderboardTable th,
+.leaderboardTable td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.leaderboardTable th {
+  font-weight: bold;
+}
+
+.leaderboardProfilePicture {
+  width: "40";
+  height: "40";
+  border-radius: 50%;
+  object-fit: cover;
+}

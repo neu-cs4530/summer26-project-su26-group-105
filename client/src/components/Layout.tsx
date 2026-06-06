@@ -2,6 +2,7 @@ import "./Layout.css";
 import { Outlet } from "react-router-dom";
 import Header from "./Header.tsx";
 import SideBarNav from "./SideBarNav.tsx";
+import UserCardProvider from "./UserCardProvider.tsx";
 
 /**
  * Main component represents the layout of the main page, including a sidebar
@@ -9,7 +10,7 @@ import SideBarNav from "./SideBarNav.tsx";
  */
 export default function Layout() {
   return (
-    <>
+    <UserCardProvider>
       <div id="main" className="main">
         <Header />
         <SideBarNav />
@@ -17,6 +18,6 @@ export default function Layout() {
           <Outlet />
         </div>
       </div>
-    </>
+    </UserCardProvider>
   );
 }

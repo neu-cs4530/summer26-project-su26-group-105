@@ -5,8 +5,28 @@ import { randomUUID } from "node:crypto";
 
 let response: Response;
 
+const baseUser = {
+  bio: expect.any(String),
+  createdAt: expect.any(String),
+  image: null,
+  socialMedias: [],
+  settings: {
+    receivesFriendGameNotifications: true,
+    receivesFriendRequestNotifications: true,
+  },
+};
 const auth1 = { username: "user1", password: "pwd1111" };
+const user1 = {
+  username: "user1",
+  display: "Yāo",
+  ...baseUser,
+};
 const auth2 = { username: "user2", password: "pwd2222" };
+const user2 = {
+  username: "user2",
+  display: "Sénior Dos",
+  ...baseUser,
+};
 
 describe("GET /api/thread/list", () => {
   it("should return all threads", async () => {
@@ -23,11 +43,7 @@ describe("GET /api/thread/list", () => {
       comments: 0,
       createdAt: expect.anything(),
       title: "Nim?",
-      createdBy: {
-        createdAt: expect.anything(),
-        display: "Yāo",
-        username: "user1",
-      },
+      createdBy: user1,
     });
   });
 });
@@ -46,7 +62,7 @@ describe("GET /api/thread/:id", () => {
       title: "Hello game knights",
       text: "I'm a big Nim buff and am excited to join this community.",
       comments: [],
-      createdBy: { username: "user1", display: "Yāo", createdAt: expect.anything() },
+      createdBy: user1,
       createdAt: new Date("2025-04-02").toISOString(),
     });
   });
@@ -78,11 +94,7 @@ describe("POST /api/thread/create", () => {
       title: "Title",
       text: "Text",
       createdAt: expect.anything(),
-      createdBy: {
-        username: "user2",
-        display: expect.any(String),
-        createdAt: expect.anything(),
-      },
+      createdBy: user2,
       comments: [],
     });
   });
@@ -122,7 +134,7 @@ describe("POST /api/thread/:id/comment", () => {
         commentId: expect.anything(),
         createdAt: expect.anything(),
         text: "FIRST!",
-        createdBy: { username: "user2", display: "Sénior Dos", createdAt: expect.anything() },
+        createdBy: user2,
       },
     ]);
   });

@@ -36,6 +36,93 @@ async function populateGameInfo(gameId: string): Promise<GameInfo> {
   };
 }
 
+//gets the winner index if the game already stores a winner field
+function getStoredWinnerIndex(state: object): number | undefined {
+  if (!("winner" in state)) {
+    return undefined;
+  }
+
+  const winner = state.winner;
+  if (typeof winner === "number") {
+    return winner;
+  }
+  return undefined;
+}
+
+//gets the winner index for the game Nim
+function getNimWinnerIndex(state: object): number | undefined {
+  //checks Nim state has field for winner
+  if (!("remaining" in state) || !("nextPlayer" in state)) {
+    return undefined;
+  }
+
+  const remaining = state.remaining;
+  const nextPlayer = state.nextPlayer;
+
+  //checks that if no objects are left, then the nextplayer is the winner
+  if (remaining === 0 && typeof nextPlayer === "number") {
+    return nextPlayer;
+  }
+
+  return undefined;
+}
+
+//gets the winner index for Number Guesser
+function getGuessWinnerIndex(state: object): number | undefined {
+  const guessState = state as { secret?: unknown; guesses?: unknown };
+
+  //checks that the secret is a number
+  if (typeof guessState.secret !== "number" || !Array.isArray(guessState.guesses)) {
+    return undefined;
+  }
+
+  const guesses: unknown[] = guessState.guesses;
+  let winnerIndex = 0;
+  let closestDistance = Number.POSITIVE_INFINITY;
+
+  //loops through each player's guess to find which one is closest to the secret
+  for (let i = 0; i < guesses.length; i += 1) {
+    const guess = guesses[i];
+    if (typeof guess !== "number") {
+      continue;
+    }
+    const distance = Math.abs(guess - guessState.secret);
+
+    //updates winner if guess is closest to number
+    if (distance < closestDistance) {
+      winnerIndex = i;
+      closestDistance = distance;
+    }
+  }
+
+  return winnerIndex;
+}
+
+//gets the winner index for a finished game
+function getWinnerIndex(type: GameKey, state: unknown): number | undefined {
+  //checks if state is an object
+  if (typeof state !== "object" || state === null) {
+    return undefined;
+  }
+
+  const storedWinner = getStoredWinnerIndex(state);
+
+  if (storedWinner !== undefined) {
+    return storedWinner;
+  }
+
+  if (type === "nim") {
+    return getNimWinnerIndex(state);
+  }
+
+  if (type === "guess") {
+    return getGuessWinnerIndex(state);
+  }
+
+  //returns if there is no supported winner logic
+  return undefined;
+}
+
 /**
  * Create and store a new game
  *
@@ -170,6 +257,15 @@ export async function updateGame(gameId: string, user: UserWithId, move: unknown
 
   game.state = result.state;
   game.done = game.done || result.done;
+
+  //if game is done, then set the winner
+  if (result.done) {
+    const winnerIndex = getWinnerIndex(game.type, result.state);
+
+    if (winnerIndex !== undefined) {
+      game.winner = game.players[winnerIndex];
+    }
+  }
   await GameRepo.set(gameId, game);
 
   return result.views;

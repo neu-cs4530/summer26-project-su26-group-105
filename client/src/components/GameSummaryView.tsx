@@ -3,6 +3,7 @@ import type { GameInfo } from "@gamenite/shared";
 import { NavLink, useNavigate } from "react-router-dom";
 import { gameNames } from "../util/consts.ts";
 import useTimeSince from "../hooks/useTimeSince.ts";
+import DisplayName from "./DisplayName.tsx";
 
 /**
  * Summarizes information for a single game as part of a list of games
@@ -28,7 +29,7 @@ export default function GameSummaryView({
         A game of {gameNames[type]}
       </NavLink>
       <div className="lastActivity">
-        {createdBy.display} created {timeSince(createdAt)}
+        <DisplayName user={createdBy} /> created {timeSince(createdAt)}
       </div>
     </div>
   );
