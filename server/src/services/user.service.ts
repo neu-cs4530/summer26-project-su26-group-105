@@ -36,6 +36,13 @@ export async function populateSafeUserInfo(userId: string): Promise<SafeUserInfo
       // robot emoji cause why not hehe
       display: `🤖 ${displayName}`,
       createdAt: new Date(),
+      image: null,
+      bio: `Hi, I'm ${displayName}!`,
+      socialMedias: [],
+      settings: {
+        receivesFriendGameNotifications: false,
+        receivesFriendRequestNotifications: false,
+      },
     };
   }
   const record = await UserRepo.get(userId);
