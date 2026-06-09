@@ -183,9 +183,24 @@ export const socketAddBot: SocketAPI = (socket, io) => async (body) => {
   if (game.players.length >= gameServices.one.maxPlayers!) return;
 
   //bot names lol
-  const names = ["BlitzBotRiley", "CardSharkBotNathan", "RoboBotSabrina", "PhotonBotLiu"];
-  const randomName = names[Math.floor(Math.random() * names.length)];
-  const uniqueBotId = `bot_${Math.random().toString(36).substring(2, 8)}:${randomName}`;
+  const adjectives = [
+    "Blitzing",
+    "CardShark",
+    "Sneaky",
+    "Calculated",
+    "Turbo",
+    "Savage",
+    "Ghostly",
+    "Quantum",
+  ];
+  const botNames = ["Riley", "Nathan", "Sabrina", "Liu", "Alex", "Jordan", "Taylor", "Morgan"];
+
+  const randomAdjective = adjectives[Math.floor(Math.random() * adjectives.length)];
+  const randomBotName = botNames[Math.floor(Math.random() * botNames.length)];
+
+  // Combines them into a distinct username variant (e.g., "SneakySabrina" or "TurboRiley")
+  const combinedName = `${randomAdjective}${randomBotName}`;
+  const uniqueBotId = `bot_${Math.random().toString(36).substring(2, 8)}:${combinedName}`;
 
   game.players.push(uniqueBotId);
   await GameRepo.set(gameId, game);
@@ -228,7 +243,7 @@ function checkAndRunBotTurn(io: GameServer, gameId: string, currentPlayers: stri
       const botMove = service.generateBotMove(game.state, stateWithTurn.nextPlayer);
       if (!botMove) return;
 
-      // Execute the move uniformly
+      // Execute the move
       const viewUpdates = await updateGame(
         gameId,
         { userId: nextPlayerId, username: nextPlayerId },

@@ -76,6 +76,8 @@ io.on("connection", (socket) => {
   socket.on("gameStart", game.socketStart(socket, io));
   socket.on("gameWatch", game.socketWatch(socket, io));
 
+  socket.on("gameAddBot", game.socketAddBot(socket, io));
+
   socket.onAny((name, payload) => {
     const zPayload = z.object({ auth: z.object({ username: z.string() }), payload: z.any() });
     const checked = zPayload.safeParse(payload);
