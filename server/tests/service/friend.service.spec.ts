@@ -237,13 +237,13 @@ describe("blockUser", () => {
 
   it("blocked user does not appear in search results for blocker", async () => {
     await blockUser(userAId, userBId);
-    const results = await searchUsers(userAId, "bob");
+    const results = await searchUsers(userAId, "bob", "all");
     expect(results.some((r) => r.userId === userBId)).toBe(false);
   });
 
   it("blocker does not appear in search results for blocked user", async () => {
     await blockUser(userAId, userBId);
-    const results = await searchUsers(userBId, "alice");
+    const results = await searchUsers(userBId, "alice", "all");
     expect(results.some((r) => r.userId === userAId)).toBe(false);
   });
 });
@@ -319,48 +319,79 @@ describe("getFriends, getIncomingRequests,ngetOutgoingRequests", () => {
 
 // searchUsers
 describe("searchUsers", () => {
-  it("returns users matching a username query", async () => {
-    const results = await searchUsers(userAId, "bob");
-    expect(results.some((r) => r.username === "bob")).toBe(true);
+  describe("searching all users", () => {
+    it("returns users matching a username query", async () => {
+      const results = await searchUsers(userAId, "bob", "all");
+      expect(results.some((r) => r.username === "bob")).toBe(true);
+    });
+
+    it("does not return the searching user", async () => {
+      const results = await searchUsers(userAId, "alice", "all");
+      expect(results.some((r) => r.userId === userAId)).toBe(false);
+    });
+
+    it("returns empty array for empty query", async () => {
+      const results = await searchUsers(userAId, "", "all");
+      expect(results).toHaveLength(0);
+    });
+
+    it("returns empty array for no matches", async () => {
+      const results = await searchUsers(userAId, "zzznomatch", "all");
+      expect(results).toHaveLength(0);
+    });
+
+    it("annotates results with correct relationship status", async () => {
+      // userA -> userB pending -- outgoing for userA
+      await sendFriendRequest(userAId, userBId);
+      // userC -> userA pending -- incoming for A
+      await sendFriendRequest(userCId, userAId);
+
+      const results = await searchUsers(userAId, "b", "all");
+      const bobResult = results.find((r) => r.userId === userBId);
+      expect(bobResult?.relationship).toBe("outgoing");
+
+      const catherineResult = (await searchUsers(userAId, "catherine", "all")).find(
+        (r) => r.userId === userCId,
+      );
+      expect(catherineResult?.relationship).toBe("incoming");
+    });
+
+    it("annotates accepted friends correctly", async () => {
+      const { friendId } = (await sendFriendRequest(userAId, userBId)) as { friendId: string };
+      await acceptFriendRequest(friendId, userBId);
+
+      const results = await searchUsers(userAId, "bob", "all");
+      const bobResult = results.find((r) => r.userId === userBId);
+      expect(bobResult?.relationship).toBe("friend");
+    });
   });
 
-  it("does not return the searching user", async () => {
-    const results = await searchUsers(userAId, "alice");
-    expect(results.some((r) => r.userId === userAId)).toBe(false);
-  });
+  describe("searching friends only", () => {
+    it("returns users matching a username query who are friends", async () => {
+      const { friendId } = (await sendFriendRequest(userAId, userBId)) as { friendId: string };
+      await acceptFriendRequest(friendId, userBId);
+      const results = await searchUsers(userAId, "bob", "existing");
+      expect(results.some((r) => r.username === "bob")).toBe(true);
+    });
 
-  it("returns empty array for empty query", async () => {
-    const results = await searchUsers(userAId, "");
-    expect(results).toHaveLength(0);
-  });
+    it("does not return users matching a username query who are not friends", async () => {
+      const results = await searchUsers(userAId, "bob", "existing");
+      expect(results.some((r) => r.username === "bob")).toBe(false);
+    });
 
-  it("returns empty array for no matches", async () => {
-    const results = await searchUsers(userAId, "zzznomatch");
-    expect(results).toHaveLength(0);
-  });
+    it("does not return the searching user", async () => {
+      const results = await searchUsers(userAId, "alice", "existing");
+      expect(results.some((r) => r.userId === userAId)).toBe(false);
+    });
 
-  it("annotates results with correct relationship status", async () => {
-    // userA -> userB pending -- outgoing for userA
-    await sendFriendRequest(userAId, userBId);
-    // userC -> userA pending -- incoming for A
-    await sendFriendRequest(userCId, userAId);
+    it("returns empty array for empty query", async () => {
+      const results = await searchUsers(userAId, "", "existing");
+      expect(results).toHaveLength(0);
+    });
 
-    const results = await searchUsers(userAId, "b");
-    const bobResult = results.find((r) => r.userId === userBId);
-    expect(bobResult?.relationship).toBe("outgoing");
-
-    const catherineResult = (await searchUsers(userAId, "catherine")).find(
-      (r) => r.userId === userCId,
-    );
-    expect(catherineResult?.relationship).toBe("incoming");
-  });
-
-  it("annotates accepted friends correctly", async () => {
-    const { friendId } = (await sendFriendRequest(userAId, userBId)) as { friendId: string };
-    await acceptFriendRequest(friendId, userBId);
-
-    const results = await searchUsers(userAId, "bob");
-    const bobResult = results.find((r) => r.userId === userBId);
-    expect(bobResult?.relationship).toBe("friend");
+    it("returns empty array for no matches", async () => {
+      const results = await searchUsers(userAId, "zzznomatch", "existing");
+      expect(results).toHaveLength(0);
+    });
   });
 });

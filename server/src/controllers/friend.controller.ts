@@ -201,10 +201,12 @@ export const socketSearch: SocketAPI = (socket) => async (body) => {
   try {
     const {
       auth,
-      payload: { query },
-    } = withAuth(z.object({ query: z.string() })).parse(body);
+      payload: { query, type },
+    } = withAuth(
+      z.object({ query: z.string(), type: z.union([z.literal("existing"), z.literal("all")]) }),
+    ).parse(body);
     const user = await enforceAuth(auth);
-    const results = await searchUsers(user.userId, query);
+    const results = await searchUsers(user.userId, query, type);
     socket.emit("friendSearchResults", { results });
   } catch (err) {
     logSocketError(socket, err);

@@ -294,9 +294,30 @@ export interface SearchResult {
   relationship: "friend" | "incoming" | "outgoing" | "none";
 }
 
-export async function searchUsers(currentUserId: RecordId, query: string): Promise<SearchResult[]> {
+async function searchFriends(currentUserId: RecordId, query: string): Promise<SearchResult[]> {
   const q = query.toLowerCase().trim();
   if (!q) return [];
+
+  const friends = await getFriends(currentUserId);
+  return friends
+    .filter((u) => u.username.toLowerCase().includes(q) || u.display.toLowerCase().includes(q))
+    .map((u) => ({
+      userId: u.userId,
+      username: u.username,
+      display: u.display,
+      relationship: "friend",
+    }));
+}
+
+export async function searchUsers(
+  currentUserId: RecordId,
+  query: string,
+  type: "existing" | "all",
+): Promise<SearchResult[]> {
+  const q = query.toLowerCase().trim();
+  if (!q) return [];
+
+  if (type === "existing") return await searchFriends(currentUserId, query);
 
   const [friends, incoming, outgoing, blocked] = await Promise.all([
     getFriends(currentUserId),

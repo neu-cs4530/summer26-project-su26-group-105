@@ -79,8 +79,8 @@ export default function useSocketsForFriends() {
   }
 
   const searchUsers = useCallback(
-    (query: string) => {
-      socket.emit("friendSearch", { auth, payload: { query } });
+    (query: string, type: "existing" | "all") => {
+      socket.emit("friendSearch", { auth, payload: { query, type } });
     },
     [socket, auth],
   );

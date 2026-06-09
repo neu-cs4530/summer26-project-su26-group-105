@@ -24,7 +24,7 @@ export interface ClientToServerEvents {
   friendRemove: (payload: WithAuth<{ username: string }>) => void;
   friendRequest: (payload: WithAuth<{ username: string }>) => void;
   friendUnblock: (payload: WithAuth<{ username: string }>) => void;
-  friendSearch: (payload: WithAuth<{ query: string }>) => void;
+  friendSearch: (payload: WithAuth<{ query: string; type: "existing" | "all" }>) => void;
   gameJoinAsPlayer: (payload: WithAuth<string>) => void;
   gameMakeMove: (payload: WithAuth<GameMakeMovePayload>) => void;
   gameStart: (payload: WithAuth<string>) => void;
