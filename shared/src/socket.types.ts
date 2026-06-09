@@ -29,6 +29,7 @@ export interface ClientToServerEvents {
   gameMakeMove: (payload: WithAuth<GameMakeMovePayload>) => void;
   gameStart: (payload: WithAuth<string>) => void;
   gameWatch: (payload: WithAuth<string>) => void;
+  gameAddBot: (payload: WithAuth<string>) => void; // string represents the gameId
 }
 
 /**
