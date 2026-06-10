@@ -72,7 +72,7 @@ export default function OneGame({
     ...players.slice(userPlayerIndex + 1),
     ...players.slice(0, userPlayerIndex),
   ];
-  const playersPerSide = Math.floor(otherPlayers.length / 3);
+  const playersPerSide = Math.max(Math.floor(otherPlayers.length / 3), 1);
 
   const discardCard =
     view.discardTop.color === "wild"
