@@ -1,5 +1,6 @@
 import { type GameInfo, withAuth, zGameKey, zGameMakeMovePayload } from "@gamenite/shared";
 import { type RestAPI, type GameViewUpdates, type SocketAPI, type GameServer } from "../types.ts";
+import { GameRepo } from "../repository.ts";
 import {
   createGame,
   gameServices,
@@ -121,6 +122,8 @@ export const socketJoinAsPlayer: SocketAPI = (socket, io) => async (body) => {
     // If the game is full, it starts automatically
     if (game.players.length === gameServices[game.type].maxPlayers) {
       sendViewUpdates(io, gameId, await startGame(gameId, user));
+      const playerUsernames = game.players.map((p) => p.username);
+      checkAndRunBotTurn(io, gameId, playerUsernames);
     }
   } catch (err) {
     logSocketError(socket, err);
@@ -135,6 +138,10 @@ export const socketStart: SocketAPI = (socket, io) => async (body) => {
     const { auth, payload: gameId } = withAuth(z.string()).parse(body);
     const user = await enforceAuth(auth);
     sendViewUpdates(io, gameId, await startGame(gameId, user));
+    const game = await GameRepo.find(gameId);
+    if (game) {
+      checkAndRunBotTurn(io, gameId, game.players);
+    }
   } catch (err) {
     logSocketError(socket, err);
   }
@@ -157,8 +164,102 @@ export const socketMakeMove: SocketAPI = (socket, io) => async (body) => {
       io.emit("leaderboardUpdated", {
         gameType: updatedGame.type,
       });
+    const game = await GameRepo.find(gameId);
+    if (game) {
+      checkAndRunBotTurn(io, gameId, game.players);
     }
   } catch (err) {
     logSocketError(socket, err);
   }
 };
+
+/**
+ * Handle lobby request to add an automated bot profile
+ * Support is only there for "One"
+ * edit the if filters if adding more
+ */
+export const socketAddBot: SocketAPI = (socket, io) => async (body) => {
+  const { auth, payload: gameId } = withAuth(z.string()).parse(body);
+  const user = await enforceAuth(auth);
+  const game = await GameRepo.find(gameId);
+
+  //right now, we only have bot support for "One" game. update if add more
+  if (!game || game.state || game.type !== "one" || game.createdBy !== user.userId) return;
+  if (game.players.length >= gameServices.one.maxPlayers!) return;
+
+  //bot names lol
+  const adjectives = [
+    "Blitzing",
+    "CardShark",
+    "Sneaky",
+    "Calculated",
+    "Turbo",
+    "Savage",
+    "Ghostly",
+    "Quantum",
+  ];
+  const botNames = ["Riley", "Nathan", "Sabrina", "Liu", "Alex", "Jordan", "Taylor", "Morgan"];
+
+  const randomAdjective = adjectives[Math.floor(Math.random() * adjectives.length)];
+  const randomBotName = botNames[Math.floor(Math.random() * botNames.length)];
+
+  // Combines them into a distinct username variant (e.g., "SneakySabrina" or "TurboRiley")
+  const combinedName = `${randomAdjective}${randomBotName}`;
+  const uniqueBotId = `bot_${Math.random().toString(36).substring(2, 8)}:${combinedName}`;
+
+  game.players.push(uniqueBotId);
+  await GameRepo.set(gameId, game);
+
+  const expandedGameInfo = await getGameById(gameId);
+  if (expandedGameInfo) {
+    io.to(gameId).emit("gamePlayersUpdated", expandedGameInfo.players);
+  }
+
+  if (game.players.length === gameServices.one.maxPlayers) {
+    sendViewUpdates(io, gameId, await startGame(gameId, user));
+    checkAndRunBotTurn(io, gameId, game.players);
+  }
+};
+
+/**
+ * Game-agnostic bot turn
+ * Automatically checks if the next player is a bot and executes their move
+ * using the registered bot brain for that specific game type.
+ */
+function checkAndRunBotTurn(io: GameServer, gameId: string, currentPlayers: string[]) {
+  // 1-second pause for UI readability
+  setTimeout(async () => {
+    const game = await GameRepo.find(gameId);
+    if (!game || !game.state || game.done) return;
+
+    // Find the service matching this game type (e.g., 'one', 'nim', etc)
+    const service = gameServices[game.type];
+
+    // If this game engine doesn't support bots, just return
+    if (!service || !service.generateBotMove) return;
+
+    const stateWithTurn = game.state as { nextPlayer: number };
+    const nextPlayerId = currentPlayers[stateWithTurn.nextPlayer];
+
+    // Detect if the next player is a bot
+    if (nextPlayerId && nextPlayerId.startsWith("bot_")) {
+      // Calculate the move using the game's registered service handler
+      const stateWithTurn = game.state as { nextPlayer: number };
+      const botMove = service.generateBotMove(game.state, stateWithTurn.nextPlayer);
+      if (!botMove) return;
+
+      // Execute the move
+      const viewUpdates = await updateGame(
+        gameId,
+        { userId: nextPlayerId, username: nextPlayerId },
+        botMove,
+      );
+
+      // Broadcast updates
+      sendViewUpdates(io, gameId, viewUpdates);
+
+      // Recursively trigger the check for back-to-back bot sequences
+      checkAndRunBotTurn(io, gameId, currentPlayers);
+    }
+  }, 1000);
+}

@@ -5,6 +5,7 @@ import { Server } from "socket.io";
 import { z } from "zod";
 import * as http from "node:http";
 import * as chat from "./controllers/chat.controller.ts";
+import * as friend from "./controllers/friend.controller.ts";
 import * as game from "./controllers/game.controller.ts";
 import * as user from "./controllers/user.controller.ts";
 import * as thread from "./controllers/thread.controller.ts";
@@ -61,10 +62,21 @@ io.on("connection", (socket) => {
   socket.on("chatLeave", chat.socketLeave(socket, io));
   socket.on("chatSendMessage", chat.socketSendMessage(socket, io));
 
+  socket.on("friendList", friend.socketList(socket, io));
+  socket.on("friendRequest", friend.socketRequest(socket, io));
+  socket.on("friendAccept", friend.socketAccept(socket, io));
+  socket.on("friendDecline", friend.socketDecline(socket, io));
+  socket.on("friendRemove", friend.socketRemove(socket, io));
+  socket.on("friendBlock", friend.socketBlock(socket, io));
+  socket.on("friendUnblock", friend.socketUnblock(socket, io));
+  socket.on("friendSearch", friend.socketSearch(socket, io));
+
   socket.on("gameJoinAsPlayer", game.socketJoinAsPlayer(socket, io));
   socket.on("gameMakeMove", game.socketMakeMove(socket, io));
   socket.on("gameStart", game.socketStart(socket, io));
   socket.on("gameWatch", game.socketWatch(socket, io));
+
+  socket.on("gameAddBot", game.socketAddBot(socket, io));
 
   socket.onAny((name, payload) => {
     const zPayload = z.object({ auth: z.object({ username: z.string() }), payload: z.any() });
