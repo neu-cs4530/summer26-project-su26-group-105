@@ -122,54 +122,68 @@ export default function Leaderboard() {
 
   return (
     <div>
-      <label htmlFor="leaderboardFilter">Choose Leaderboard</label>{" "}
-      {/* adds a label for the leaderboard dropdown */}
-      <select
-        id="leaderboardFilter"
-        value={selectedLeaderboard}
-        onChange={(event) => setSelectedLeaderboard(event.target.value as LeaderboardFilter)}
-      >
-        <option value="global">Global</option>
+      <div className="leaderboardFilters">
+        <div className="leaderboardFilterGroup">
+          <label htmlFor="leaderboardFilter">Choose Leaderboard</label>{" "}
+          {/* adds a label for the leaderboard dropdown */}
+          <select
+            id="leaderboardFilter"
+            value={selectedLeaderboard}
+            onChange={(event) => setSelectedLeaderboard(event.target.value as LeaderboardFilter)}
+          >
+            <option value="global">Global</option>
 
-        {/* creates dropdown for each game */}
-        {Object.entries(gameNames).map(([gameKey, gameName]) => (
-          <option key={gameKey} value={gameKey}>
-            {gameName}
-          </option>
-        ))}
-      </select>
-      {/* adds a dropdown for different time ranges */}
-      <label htmlFor="dateFilter">Time Range</label>{" "}
-      <select
-        id="dateFilter"
-        value={selectedDateShow}
-        onChange={(event) => setSelectedDateShow(event.target.value as DateShow)}
-      >
-        <option value="all">All Time</option>
-        <option value="weekly">Weekly</option>
-        <option value="daily">Daily</option>
-      </select>
-      {/* adds a drop down for what to sort by */}
-      <label htmlFor="winRateSort">Sort</label>{" "}
-      <select
-        id="winRateSort"
-        value={winRateSort}
-        onChange={(event) => setWinRateSort(event.target.value as WinRateSort)}
-      >
-        <option value="rank">Rank</option>
-        <option value="winRateDescending">Win Rate High to Low</option>
-        <option value="winRateAscending">Win Rate Low to High</option>
-      </select>
-      {/* adds a drop down for whether to sort by friends or not */}
-      <label htmlFor="friendFilter">Show</label>
-      <select
-        id="friendFilter"
-        value={friendFilter}
-        onChange={(event) => setFriendFilter(event.target.value as FriendFilter)}
-      >
-        <option value="all">Everyone</option>
-        <option value="friends">Friends Only</option>
-      </select>
+            {/* creates dropdown for each game */}
+            {Object.entries(gameNames).map(([gameKey, gameName]) => (
+              <option key={gameKey} value={gameKey}>
+                {gameName}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="leaderboardFilterGroup">
+          {/* adds a dropdown for different time ranges */}
+          <label htmlFor="dateFilter">Time Range</label>{" "}
+          <select
+            id="dateFilter"
+            value={selectedDateShow}
+            onChange={(event) => setSelectedDateShow(event.target.value as DateShow)}
+          >
+            <option value="all">All Time</option>
+            <option value="weekly">Weekly</option>
+            <option value="daily">Daily</option>
+          </select>
+        </div>
+
+        <div className="leaderboardFilterGroup">
+          {/* adds a drop down for what to sort by */}
+          <label htmlFor="winRateSort">Sort</label>{" "}
+          <select
+            id="winRateSort"
+            value={winRateSort}
+            onChange={(event) => setWinRateSort(event.target.value as WinRateSort)}
+          >
+            <option value="rank">Rank</option>
+            <option value="winRateDescending">Win Rate High to Low</option>
+            <option value="winRateAscending">Win Rate Low to High</option>
+          </select>
+        </div>
+
+        <div className="leaderboardFilterGroup">
+          {/* adds a drop down for whether to sort by friends or not */}
+          <label htmlFor="friendFilter">Show</label>
+          <select
+            id="friendFilter"
+            value={friendFilter}
+            onChange={(event) => setFriendFilter(event.target.value as FriendFilter)}
+          >
+            <option value="all">Everyone</option>
+            <option value="friends">Friends Only</option>
+          </select>
+        </div>
+      </div>
+
       <LeaderboardTable
         title={leaderboardTitle}
         rows={visibleLeaderboardRows}
