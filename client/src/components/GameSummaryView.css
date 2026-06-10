@@ -2,21 +2,114 @@
   display: flex;
   flex-direction: row;
   align-items: center;
-  border-top: 1px dashed black;
+  gap: 0.75rem;
+  padding: 0.65rem 0.75rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s ease;
   color: var(--gray-foreground);
 }
 
-.gameSummary div {
+.gameSummary:hover {
+  background: var(--hover-background, rgba(255, 255, 255, 0.06));
+  cursor: pointer;
+}
+
+.gameSummary + .gameSummary {
+  border-top: 1px solid var(--border, rgba(255, 255, 255, 0.08));
+}
+
+/* Game type icon circle */
+.gameIcon {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background: var(--gray-background, #2b2d31);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+/* Main text block */
+.gameMain {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.gameTitle {
+  font-weight: 600;
+  color: var(--foreground, #2c1b44);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.gameMeta {
+  font-size: 0.78rem;
+  color: var(--gray-foreground, #80848e);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Friends-only badge — sits between main content and right status */
+.friendOnlyBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  background: var(--primary-muted, rgba(79, 110, 247, 0.18));
+  color: var(--primary, #5865f2);
+  white-space: nowrap;
+  flex-shrink: 0;
+  margin-left: auto;
+  margin-right: 0.5rem;
+}
+
+/* Right side: status + player count — pushed to the far right */
+.gameRight {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.2rem;
+  flex-shrink: 0;
+}
+
+.gameStatus {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
   white-space: nowrap;
 }
 
-.gameSummary .mid {
-  flex-grow: 1;
-  color: cornflowerblue;
+.status-waiting {
+  background: rgba(250, 168, 26, 0.15);
+  color: #faa81a;
 }
 
-.gameSummary .stats {
-  text-align: center;
-  width: 10rem;
-  flex-shrink: 0;
+.status-active {
+  background: rgba(35, 165, 90, 0.15);
+  color: #23a55a;
+}
+
+.status-done {
+  background: rgba(128, 132, 142, 0.15);
+  color: #80848e;
+}
+
+.playerCount {
+  font-size: 0.75rem;
+  color: var(--gray-foreground, #80848e);
+  white-space: nowrap;
 }

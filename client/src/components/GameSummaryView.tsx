@@ -46,18 +46,18 @@ export default function GameSummaryView({
 
       {/* Main info */}
       <div className="gameMain">
-        <div className="gameTitle">
-          {gameNames[type]}
-          {friendOnly && (
-            <span className="friendOnlyBadge" title="Friends only">
-              🔒 Friends Only
-            </span>
-          )}
-        </div>
+        <div className="gameTitle">{gameNames[type]}</div>
         <div className="gameMeta">
           <DisplayName user={createdBy} /> · {timeSince(createdAt)}
         </div>
       </div>
+
+      {/* Friends only badge */}
+      {friendOnly && (
+        <span className="friendOnlyBadge" title="Friends only">
+          🔒 Friends Only
+        </span>
+      )}
 
       {/* Right side: status + player count */}
       <div className="gameRight">
