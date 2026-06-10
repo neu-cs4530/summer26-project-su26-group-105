@@ -55,5 +55,6 @@ export interface ServerToClientEvents {
   gamePlayersUpdated: (payload: SafeUserInfo[]) => void;
   gameStateUpdated: (payload: TaggedGameView & { forPlayer: boolean }) => void;
   gameWatched: (payload: GamePlayInfo) => void;
+  gameWatchError: (payload: { error: string }) => void;
   leaderboardUpdated: (payload: { gameType: GameKey }) => void;
 }

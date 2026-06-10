@@ -20,7 +20,9 @@ import { checkAuth, enforceAuth } from "../services/auth.service.ts";
  * starts with one player, the user who made the POST request.
  */
 export const postCreate: RestAPI<GameInfo> = async (req, res) => {
-  const body = withAuth(zGameKey).safeParse(req.body);
+  const body = withAuth(
+    z.object({ gameKey: zGameKey, friendOnly: z.boolean().default(false) }),
+  ).safeParse(req.body);
   if (body.error) {
     res.status(400).send({ error: "Poorly-formed request" });
     return;
@@ -32,7 +34,12 @@ export const postCreate: RestAPI<GameInfo> = async (req, res) => {
     return;
   }
 
-  const game = await createGame(user, body.data.payload, new Date());
+  const game = await createGame(
+    user,
+    body.data.payload.gameKey,
+    new Date(),
+    body.data.payload.friendOnly,
+  );
   res.send(game);
 };
 
@@ -86,6 +93,9 @@ export const socketWatch: SocketAPI = (socket) => async (body) => {
     await socket.join(roomsToJoin);
     socket.emit("gameWatched", { gameId, view, players });
   } catch (err) {
+    socket.emit("gameWatchError", {
+      error: err instanceof Error ? err.message : "Unable to view game",
+    });
     logSocketError(socket, err);
   }
 };
