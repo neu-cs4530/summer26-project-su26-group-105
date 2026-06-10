@@ -1,4 +1,10 @@
-import type { GameKey, LeaderboardPlayer, SafeUserInfo } from "@gamenite/shared";
+import type {
+  GameKey,
+  LeaderboardPlayer,
+  SafeUserInfo,
+  DateShow,
+  LeaderboardServerFilters,
+} from "@gamenite/shared";
 import { GameRepo } from "../repository.ts";
 import { populateSafeUserInfo } from "./user.service.ts";
 
@@ -55,12 +61,47 @@ function getOrCreatePlayerStats(
 }
 
 /**
+ * Checks if a finished game should be shown for the selected data filter
+ * @param endedAt the time the game ended or undefined if it hasn't
+ * @param dateShow the selected date filter (all, daily, weekly)
+ * @returns true if the game matches the selected date filter
+ */
+function isGameInDateFilter(endedAt: string | undefined, dateShow: DateShow) {
+  //show everything when all time
+  if (dateShow === "all") {
+    return true;
+  }
+
+  //do not include unfinished games on leaderboard
+  if (endedAt === undefined) {
+    return false;
+  }
+
+  //converts end time into object so it can be compared
+  const endedDate = new Date(endedAt);
+  const now = new Date();
+
+  //if daily, then show only games finished today
+  if (dateShow === "daily") {
+    return endedDate.toDateString() === now.toDateString();
+  }
+
+  //move date back 7 days
+  const oneWeekAgo = new Date();
+  oneWeekAgo.setDate(now.getDate() - 7);
+
+  return endedDate >= oneWeekAgo;
+}
+
+/**
  * Gets the leaderboard rows by calculating the player's stat for a game
  * For global, all games are shown. For a game specific, only those finished games will show
  * @param type the selected leaderboard
  * @returns the leaderboard rows sorted by the total wins
  */
-export async function getLeaderboard(type: "global" | GameKey): Promise<LeaderboardPlayer[]> {
+export async function getLeaderboard(
+  filters: LeaderboardServerFilters,
+): Promise<LeaderboardPlayer[]> {
   //gets every game id from the database
   const gameIds = await GameRepo.getAllKeys();
   const stats = new Map<string, LeaderboardStats>();
@@ -72,8 +113,12 @@ export async function getLeaderboard(type: "global" | GameKey): Promise<Leaderbo
       continue;
     }
 
+    if (!isGameInDateFilter(game.endedAt, filters.dateShow)) {
+      continue;
+    }
+
     //if this is a game specific leaderboard and the game is not the selected game, skip it
-    if (type !== "global" && game.type !== type) {
+    if (filters.leaderboard !== "global" && game.type !== filters.leaderboard) {
       continue;
     }
 

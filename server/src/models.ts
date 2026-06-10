@@ -57,6 +57,7 @@ export interface CommentRecord {
  * - `players`: active players for the game
  * - `createdAt`: when the game was created
  * - `createdBy`: user id of the person who created the game
+ * - `endedAt`: when the game ended
  */
 export interface GameRecord {
   type: GameKey;
@@ -67,6 +68,7 @@ export interface GameRecord {
   createdAt: DateISO;
   createdBy: RecordId; // References User records
   winner?: RecordId;
+  endedAt?: DateISO;
 }
 
 /**

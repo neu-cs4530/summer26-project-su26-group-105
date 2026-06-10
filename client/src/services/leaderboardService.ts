@@ -1,19 +1,19 @@
 import { api } from "./api.ts";
-import type { ErrorMsg, GameKey, LeaderboardPlayer } from "@gamenite/shared";
+import type { ErrorMsg, LeaderboardPlayer, LeaderboardServerFilters } from "@gamenite/shared";
 
 const LEADERBOARD_API_URL = `/api/leaderboard`;
 
 /**
  * Sends a GET request to get leaderboard rows
- * @param type the selected leaderboard, either global or a game type
+ * @param filters the selected leaderboard type and time range
  * @returns the leaderboard rows for the selected leaderboard
  */
 export const getLeaderboardList = async (
-  type: "global" | GameKey,
+  filters: LeaderboardServerFilters,
 ): Promise<LeaderboardPlayer[]> => {
-  // sends the selected leaderboard type as a query parameter
+  // sends the selected leaderboard type and time as a query parameter
   const res = await api.get<LeaderboardPlayer[] | ErrorMsg>(`${LEADERBOARD_API_URL}/list`, {
-    params: { type },
+    params: { type: filters.leaderboard, dateShow: filters.dateShow },
   });
 
   if ("error" in res.data) {

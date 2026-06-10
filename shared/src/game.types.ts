@@ -12,6 +12,7 @@ import { type SafeUserInfo } from "./user.types.ts";
  * - `createdBy`: username of the person who created the game
  * - `minPlayers`: the minimum number of players required to start the game
  * - `winner`: the winner of the game
+ * - `endedAt`: when the game finished (for leaderboard)
  */
 export interface GameInfo {
   gameId: string;
@@ -23,6 +24,7 @@ export interface GameInfo {
   createdBy: SafeUserInfo;
   minPlayers: number;
   winner?: string;
+  endedAt?: Date;
 }
 
 /**
