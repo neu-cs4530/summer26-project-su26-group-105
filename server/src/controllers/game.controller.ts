@@ -150,6 +150,9 @@ export const socketStart: SocketAPI = (socket, io) => async (body) => {
 /**
  * Handle a request to make a move in a game.
  */
+/**
+ * Handle a request to make a move in a game.
+ */
 export const socketMakeMove: SocketAPI = (socket, io) => async (body) => {
   try {
     const {
@@ -164,6 +167,7 @@ export const socketMakeMove: SocketAPI = (socket, io) => async (body) => {
       io.emit("leaderboardUpdated", {
         gameType: updatedGame.type,
       });
+    }
     const game = await GameRepo.find(gameId);
     if (game) {
       checkAndRunBotTurn(io, gameId, game.players);
