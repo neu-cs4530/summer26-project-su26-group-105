@@ -24,11 +24,8 @@ export interface GameInfo {
   createdBy: SafeUserInfo;
   minPlayers: number;
   winner?: string;
-<<<<<<< HEAD
   friendOnly?: boolean;
-=======
   endedAt?: Date;
->>>>>>> origin/main
 }
 
 /**
