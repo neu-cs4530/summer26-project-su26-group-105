@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 /**
- * Represents a "safe" user object that excludes sensitive information like
+ * Represents a public "safe" user object that excludes sensitive information like
  * the password, suitable for exposing to clients,
  * - `username`: unique username of the user
  * - `display`: A display name
@@ -13,11 +13,20 @@ export interface SafeUserInfo {
   image: string | null;
   bio: string;
   socialMedias: SocialMedia[];
+  createdAt: Date;
+}
+
+/**
+ * Represents a safe user object for the currently logged in user.
+ * This includes private settings that should only be visible to the user themself.
+ */
+export interface SafeSelfUserInfo extends SafeUserInfo {
   settings: {
     receivesFriendRequestNotifications: boolean;
-    receivesFriendGameNotifications: boolean;
+    receivesFriendAcceptedNotifications: boolean;
+    receivesGameInviteNotifications: boolean;
+    receivesFriendGameActivityNotifications: boolean;
   };
-  createdAt: Date;
 }
 
 /*** TYPES USED IN THE USER API ***/
@@ -63,7 +72,9 @@ export const zUserUpdateRequest = z.object({
   settings: z
     .object({
       receivesFriendRequestNotifications: z.boolean().optional(),
-      receivesFriendGameNotifications: z.boolean().optional(),
+      receivesFriendAcceptedNotifications: z.boolean().optional(),
+      receivesGameInviteNotifications: z.boolean().optional(),
+      receivesFriendGameActivityNotifications: z.boolean().optional(),
     })
     .optional(),
 });

@@ -2,7 +2,7 @@ import { type ChangeEvent, type SubmitEvent, useState } from "react";
 import { loginUser, signupUser, updateUser } from "../services/userService.ts";
 import type { AuthContext } from "../contexts/LoginContext.ts";
 import { useNavigate } from "react-router-dom";
-import type { SafeUserInfo } from "@gamenite/shared";
+import type { SafeSelfUserInfo } from "@gamenite/shared";
 
 /**
  * Custom hook to manage login page logic.
@@ -81,7 +81,7 @@ export default function useLoginForm(
     }
 
     try {
-      let user: SafeUserInfo;
+      let user: SafeSelfUserInfo;
       if (mode === "signup") {
         user = await signupUser({ username, password });
       } else {

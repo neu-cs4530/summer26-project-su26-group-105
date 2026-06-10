@@ -1,4 +1,4 @@
-import type { SafeUserInfo, UserUpdateRequest } from "@gamenite/shared";
+import type { SafeSelfUserInfo, UserUpdateRequest } from "@gamenite/shared";
 import { createContext } from "react";
 import type { GameSocket } from "../util/types.ts";
 
@@ -11,10 +11,10 @@ import type { GameSocket } from "../util/types.ts";
  * - update - a callback that updates the user's information, returning the new user info
  */
 export interface AuthContext {
-  user: SafeUserInfo;
+  user: SafeSelfUserInfo;
   pass: string;
   reset: () => void;
-  update: (info: UserUpdateRequest) => Promise<SafeUserInfo>;
+  update: (info: UserUpdateRequest) => Promise<SafeSelfUserInfo>;
 }
 
 /**

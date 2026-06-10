@@ -1,10 +1,15 @@
-import { type SafeUserInfo, type UserUpdateRequest } from "@gamenite/shared";
+import { type SafeUserInfo, type UserUpdateRequest, type SafeSelfUserInfo } from "@gamenite/shared";
 import { getUserByUsername, updateAuth } from "./auth.service.ts";
 import { UserRepo } from "../repository.ts";
 import type { UserRecord } from "../models.ts";
 
 const disallowedUsernames = new Set(["login", "signup", "list"]);
 
+/**
+ * Gets a user databased record into public safe user information
+ * @param record the user database record to convert
+ * @returns public safe user info without private settings
+ */
 function recordToSafeUserInfo(record: UserRecord): SafeUserInfo {
   return {
     username: record.username,
@@ -13,9 +18,23 @@ function recordToSafeUserInfo(record: UserRecord): SafeUserInfo {
     bio: record.bio,
     image: record.image,
     socialMedias: record.socialMedias,
+  };
+}
+
+/**
+ * Gets a user database record into safe user information for the logged in user
+ * @param record the user database record to convert
+ * @returns the safe user info with the user's private settings
+ */
+function recordToSafeSelfUserInfo(record: UserRecord): SafeSelfUserInfo {
+  return {
+    ...recordToSafeUserInfo(record),
     settings: {
-      receivesFriendGameNotifications: record.settings.receivesFriendGameNotifications,
       receivesFriendRequestNotifications: record.settings.receivesFriendRequestNotifications,
+      receivesFriendAcceptedNotifications: record.settings.receivesFriendAcceptedNotifications,
+      receivesGameInviteNotifications: record.settings.receivesGameInviteNotifications,
+      receivesFriendGameActivityNotifications:
+        record.settings.receivesFriendGameActivityNotifications,
     },
   };
 }
@@ -39,14 +58,21 @@ export async function populateSafeUserInfo(userId: string): Promise<SafeUserInfo
       image: null,
       bio: `Hi, I'm ${displayName}!`,
       socialMedias: [],
-      settings: {
-        receivesFriendGameNotifications: false,
-        receivesFriendRequestNotifications: false,
-      },
     };
   }
   const record = await UserRepo.get(userId);
   return recordToSafeUserInfo(record);
+}
+
+/**
+ * Retrieves the current user's safe private user information from the database.
+ *
+ * @param userId - Valid user id.
+ * @returns the found user object with private settings but without the password.
+ */
+export async function populateSafeSelfUserInfo(userId: string): Promise<SafeSelfUserInfo> {
+  const record = await UserRepo.get(userId);
+  return recordToSafeSelfUserInfo(record);
 }
 
 /**
@@ -59,7 +85,7 @@ export async function createUser(
   username: string,
   password: string,
   createdAt: Date,
-): Promise<SafeUserInfo | { error: string }> {
+): Promise<SafeSelfUserInfo | { error: string }> {
   if ((await getUserByUsername(username)) !== null) {
     return { error: "User already exists" };
   }
@@ -74,13 +100,15 @@ export async function createUser(
     image: null,
     socialMedias: [],
     settings: {
-      receivesFriendGameNotifications: true,
       receivesFriendRequestNotifications: true,
+      receivesFriendAcceptedNotifications: true,
+      receivesGameInviteNotifications: true,
+      receivesFriendGameActivityNotifications: true,
     },
   };
   const id = await UserRepo.add(record);
   await updateAuth(username, password, id);
-  return recordToSafeUserInfo(record);
+  return recordToSafeSelfUserInfo(record);
 }
 
 /**
@@ -113,22 +141,40 @@ export async function getUsersByUsername(usernames: string[]): Promise<SafeUserI
 export async function updateUser(
   username: string,
   { display, password, bio, image, socialMedias, settings }: UserUpdateRequest,
-): Promise<SafeUserInfo> {
+): Promise<SafeSelfUserInfo> {
   const user = await getUserByUsername(username);
   if (!user) throw new Error(`No user ${username}`);
   if (password !== undefined) await updateAuth(username, password, user.userId);
   const newUser = await UserRepo.get(user.userId);
+  newUser.settings = {
+    receivesFriendRequestNotifications: newUser.settings.receivesFriendRequestNotifications ?? true,
+    receivesFriendAcceptedNotifications:
+      newUser.settings.receivesFriendAcceptedNotifications ?? true,
+    receivesGameInviteNotifications: newUser.settings.receivesGameInviteNotifications ?? true,
+    receivesFriendGameActivityNotifications:
+      newUser.settings.receivesFriendGameActivityNotifications ?? true,
+  };
   if (display !== undefined) newUser.display = display;
   if (bio !== undefined) newUser.bio = bio;
   if (image !== undefined) newUser.image = image;
   if (socialMedias !== undefined) newUser.socialMedias = socialMedias;
   if (settings) {
-    const { receivesFriendGameNotifications, receivesFriendRequestNotifications } = settings;
-    if (receivesFriendGameNotifications !== undefined)
-      newUser.settings.receivesFriendGameNotifications = receivesFriendGameNotifications;
+    const {
+      receivesFriendRequestNotifications,
+      receivesFriendAcceptedNotifications,
+      receivesGameInviteNotifications,
+      receivesFriendGameActivityNotifications,
+    } = settings;
     if (receivesFriendRequestNotifications !== undefined)
       newUser.settings.receivesFriendRequestNotifications = receivesFriendRequestNotifications;
+    if (receivesFriendAcceptedNotifications !== undefined)
+      newUser.settings.receivesFriendAcceptedNotifications = receivesFriendAcceptedNotifications;
+    if (receivesGameInviteNotifications !== undefined)
+      newUser.settings.receivesGameInviteNotifications = receivesGameInviteNotifications;
+    if (receivesFriendGameActivityNotifications !== undefined)
+      newUser.settings.receivesFriendGameActivityNotifications =
+        receivesFriendGameActivityNotifications;
   }
   await UserRepo.set(user.userId, newUser);
-  return populateSafeUserInfo(user.userId);
+  return populateSafeSelfUserInfo(user.userId);
 }

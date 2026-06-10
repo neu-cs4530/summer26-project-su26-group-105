@@ -10,7 +10,7 @@ type LeaderboardTableProps = {
 };
 
 /**
- * loads in the UI for the leaderboard with the given title, rows, and username
+ * loads in the data for the leaderboard with the given title, rows, and username
  * @param title the title shown above the leaderboard table
  * @param rows the leaderboard rows to display
  * @param currentUsername the signed in user's username, used to show (you) next to their row
@@ -30,6 +30,7 @@ export default function LeaderboardTable({ title, rows, currentUsername }: Leade
             <th>User</th>
             <th>Total Games</th>
             <th>Total Wins</th>
+            <th>Win Rate</th>
           </tr>
         </thead>
 
@@ -44,6 +45,11 @@ export default function LeaderboardTable({ title, rows, currentUsername }: Leade
               </td>
               <td>{player.totalGames}</td>
               <td>{player.totalWins}</td>
+              <td>
+                {player.totalGames === 0
+                  ? "0%"
+                  : `${Math.round((player.totalWins / player.totalGames) * 100)}%`}
+              </td>
             </tr>
           ))}
         </tbody>
