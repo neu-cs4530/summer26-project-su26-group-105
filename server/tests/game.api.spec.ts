@@ -11,8 +11,10 @@ const baseUser = {
   image: null,
   socialMedias: [],
   settings: {
-    receivesFriendGameNotifications: true,
     receivesFriendRequestNotifications: true,
+    receivesFriendAcceptedNotifications: true,
+    receivesGameInviteNotifications: true,
+    receivesFriendGameActivityNotifications: true,
   },
 };
 const auth3 = { username: "user3", password: "pwd3333" };
