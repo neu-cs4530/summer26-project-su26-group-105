@@ -30,6 +30,7 @@ export default function LeaderboardTable({ title, rows, currentUsername }: Leade
             <th>User</th>
             <th>Total Games</th>
             <th>Total Wins</th>
+            <th>Win Rate</th>
           </tr>
         </thead>
 
@@ -44,6 +45,11 @@ export default function LeaderboardTable({ title, rows, currentUsername }: Leade
               </td>
               <td>{player.totalGames}</td>
               <td>{player.totalWins}</td>
+              <td>
+                {player.totalGames === 0
+                  ? "0%"
+                  : `${Math.round((player.totalWins / player.totalGames) * 100)}%`}
+              </td>
             </tr>
           ))}
         </tbody>
