@@ -34,27 +34,26 @@ export default function GamePanel({
       <div className="gameRoster">
         <h2>{gameNames[type]}</h2>
         <div className="smallAndGray">Game room created {timeSince(createdAt)}</div>
-        {!view ||
-          (showPlayers && (
-            <div className="dottedList">
-              {players.map((player, index) => (
-                <div
-                  className="dottedListItem"
-                  role="listitem"
-                  key={player.username}
-                  style={{ gap: "1ch", alignItems: "center" }}
-                >
-                  {player.username === user.username ? (
-                    `you are player #${index + 1}`
-                  ) : (
-                    <>
-                      Player #{index + 1} is <DisplayName user={player} />
-                    </>
-                  )}
-                </div>
-              ))}
-            </div>
-          ))}
+        {(!view || showPlayers) && (
+          <div className="dottedList">
+            {players.map((player, index) => (
+              <div
+                className="dottedListItem"
+                role="listitem"
+                key={player.username}
+                style={{ gap: "1ch", alignItems: "center" }}
+              >
+                {player.username === user.username ? (
+                  `you are player #${index + 1}`
+                ) : (
+                  <>
+                    Player #{index + 1} is <DisplayName user={player} />
+                  </>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
         <div className="buttons">
           {
             // If the game hasn't started and user hasn't joined, they can join

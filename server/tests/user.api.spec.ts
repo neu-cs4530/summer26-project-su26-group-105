@@ -17,6 +17,7 @@ const selfUserSettings = {
     receivesGameInviteNotifications: true,
     receivesFriendGameActivityNotifications: true,
   },
+  isBot: false,
 };
 const auth1 = { username: "user1", password: "pwd1111" };
 const user1 = {

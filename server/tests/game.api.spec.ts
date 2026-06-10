@@ -10,6 +10,7 @@ const baseUser = {
   createdAt: expect.any(String),
   image: null,
   socialMedias: [],
+  isBot: false,
 };
 const auth3 = { username: "user3", password: "pwd3333" };
 const authBad = { username: "user3", password: "user3" };
@@ -57,6 +58,7 @@ describe("POST /api/game/create", () => {
       createdBy: user3,
       createdAt: expect.anything(),
       minPlayers: 2,
+      maxPlayers: 2,
       players: [user3],
     });
   });
