@@ -3,7 +3,7 @@ import EditableProfile from "../components/profile/EditableProfile.tsx";
 import useLoginContext from "../hooks/useLoginContext.ts";
 import ViewableProfile from "../components/profile/ViewableProfile.tsx";
 import { useState } from "react";
-import FriendNotificationSettings from "../components/FriendNotificationSettings.tsx";
+import Settings from "../components/Settings.tsx";
 import "./Profile.css";
 
 /**
@@ -48,15 +48,7 @@ export default function Profile() {
       {activeTab === "profile" && <EditableProfile />}
 
       {/* Shows the settings page when settings tab is selected */}
-      {activeTab === "settings" && (
-        <div className="profile-settings">
-          <h1>App Settings</h1>
-
-          <h1>Notification Settings</h1>
-          <h2>Friend Notifications</h2>
-          <FriendNotificationSettings />
-        </div>
-      )}
+      {activeTab === "settings" && <Settings />}
     </div>
   );
 }

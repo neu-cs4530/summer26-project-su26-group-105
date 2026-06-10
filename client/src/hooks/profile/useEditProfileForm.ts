@@ -28,7 +28,7 @@ type UpdateForm = z.infer<typeof zUpdateForm>;
  *  - Social media modifiers `addSocialMedia`, `removeSocialMedia`
  *  - Possibly-null error message `err`
  *  - Possibly-null validation errors `validationErrors`
- *  - Submission handler `handleSubmit`
+ *  - Submission handlers `handleProfileSubmit` and `handlePasswordSubmit`
  */
 export default function useEditProfileForm() {
   const { user, update: updateUser } = useLoginContext();
@@ -40,33 +40,29 @@ export default function useEditProfileForm() {
   const [err, setErr] = useState<null | string>(null);
 
   /**
-   * Handles submission of the form
+   * Clears old saved messages and validation errors before submitting a form
    */
-  const handleSubmit = async (e: SubmitEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
+  function resetSubmissionState() {
     setValidationError(null);
     setErr(null);
+
     if (savedTextTimeout.current) {
       clearTimeout(savedTextTimeout.current);
       savedTextTimeout.current = null;
     }
+
     setIsSaved(false);
+  }
 
-    if (Object.keys(updatedForm).length === 0) {
-      setErr("No changes to submit");
-      return;
-    }
-
-    const valid = zUpdateForm.safeParse(updatedForm);
-    if (!valid.success) {
-      setValidationError(valid.error);
-      return;
-    }
-
+  /**
+   * Saves the valid user update and shows saved text temporarily
+   * @param validForm the user fields that should be updated
+   */
+  async function submitValidForm(validForm: UpdateForm) {
     setIsLoading(true);
+
     try {
-      await updateUser(valid.data);
+      await updateUser(validForm);
       setUpdatedForm({});
       setIsSaved(true);
       savedTextTimeout.current = setTimeout(() => {
@@ -78,6 +74,64 @@ export default function useEditProfileForm() {
     } finally {
       setIsLoading(false);
     }
+  }
+
+  /**
+   * Handles submission of only the public profile form
+   */
+  const handleProfileSubmit = async (e: SubmitEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    resetSubmissionState();
+
+    const profileForm = {
+      display: updatedForm.display,
+      bio: updatedForm.bio,
+      socialMedias: updatedForm.socialMedias,
+      image: updatedForm.image,
+    };
+
+    const changedProfileForm = Object.fromEntries(
+      Object.entries(profileForm).filter((entry) => entry[1] !== undefined),
+    );
+
+    if (Object.keys(changedProfileForm).length === 0) {
+      setErr("No profile changes to submit");
+      return;
+    }
+
+    const valid = zUpdateForm.safeParse(changedProfileForm);
+    if (!valid.success) {
+      setValidationError(valid.error);
+      return;
+    }
+
+    await submitValidForm(valid.data);
+  };
+
+  /**
+   * Handles submission of only the password form
+   */
+  const handlePasswordSubmit = async (e: SubmitEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    resetSubmissionState();
+
+    const passwordForm = {
+      password: updatedForm.password,
+      confirm: updatedForm.confirm,
+    };
+
+    if (!passwordForm.password && !passwordForm.confirm) {
+      setErr("No password changes to submit");
+      return;
+    }
+
+    const valid = zUpdateForm.safeParse(passwordForm);
+    if (!valid.success) {
+      setValidationError(valid.error);
+      return;
+    }
+
+    await submitValidForm(valid.data);
   };
 
   const updateValue = <K extends keyof UpdateForm>(
@@ -116,6 +170,7 @@ export default function useEditProfileForm() {
     isSaved,
     err,
     validationErrors: validationErrors,
-    handleSubmit,
+    handleProfileSubmit,
+    handlePasswordSubmit,
   };
 }
