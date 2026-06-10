@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import useAuth from "./useAuth";
 import useLoginContext from "./useLoginContext";
-import type { FriendEntry, SearchResult } from "@gamenite/shared/src/friend.types";
+import type { ActivityStatus, FriendEntry, SearchResult } from "@gamenite/shared/src/friend.types";
 
 /**
  * Custom hook to manage socket connection for friends page.
@@ -44,13 +44,25 @@ export default function useSocketsForFriends() {
     const handleSearchResults = (payload: { results: SearchResult[] }) => {
       setSearchResults(payload.results);
     };
+
+    // when a friend's status changes, update them in the friends list
+    const handleStatusUpdated = (payload: { userId: string; status: ActivityStatus }) => {
+      setFriends((prev) =>
+        prev.map((f) =>
+          f.userId === payload.userId ? { ...f, activityStatus: payload.status } : f,
+        ),
+      );
+    };
+
     socket.on("friendListUpdated", handleFriendListUpdated);
     socket.on("friendSearchResults", handleSearchResults);
+    socket.on("friendStatusUpdated", handleStatusUpdated);
     socket.emit("friendList", { auth, payload: {} });
 
     return () => {
       socket.off("friendListUpdated", handleFriendListUpdated);
       socket.off("friendSearchResults", handleSearchResults);
+      socket.off("friendStatusUpdated", handleStatusUpdated);
     };
   }, [socket, auth]);
 

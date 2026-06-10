@@ -1,6 +1,8 @@
 import { randomUUID } from "node:crypto";
 import { FriendRepo, UserRepo } from "../repository.ts";
 import type { FriendsRecord, RecordId } from "../models.ts";
+import { getStatus } from "./activityStatus.service.ts";
+import type { FriendEntry } from "@gamenite/shared/src/friend.types.ts";
 
 /** Returns all id, FriendsRecord pairs in the data store */
 async function getAllFriendRecords(): Promise<[string, FriendsRecord][]> {
@@ -189,14 +191,6 @@ export async function unblockUser(
   return { success: true };
 }
 
-export interface FriendEntry {
-  friendId: string;
-  userId: RecordId;
-  username: string;
-  display: string;
-  requestDirection: "incoming" | "outgoing" | "mutual";
-}
-
 /** Gets all accepted friends for a user with their profile info */
 export async function getFriends(userId: RecordId): Promise<FriendEntry[]> {
   const all = await getAllFriendRecords();
@@ -218,7 +212,9 @@ export async function getFriends(userId: RecordId): Promise<FriendEntry[]> {
       userId: otherUserId,
       username: otherUser.username,
       display: otherUser.display,
+      image: otherUser.image,
       requestDirection: "mutual",
+      activityStatus: getStatus(otherUserId),
     });
   }
   return results;
@@ -239,7 +235,9 @@ export async function getIncomingRequests(userId: RecordId): Promise<FriendEntry
       userId: record.fromUserId,
       username: sender.username,
       display: sender.display,
+      image: sender.image,
       requestDirection: "incoming",
+      activityStatus: getStatus(record.fromUserId),
     });
   }
   return results;
@@ -260,7 +258,9 @@ export async function getOutgoingRequests(userId: RecordId): Promise<FriendEntry
       userId: record.toUserId,
       username: requested.username,
       display: requested.display,
+      image: requested.image,
       requestDirection: "outgoing",
+      activityStatus: getStatus(record.toUserId),
     });
   }
   return results;
@@ -281,7 +281,9 @@ export async function getBlockedUsers(userId: RecordId): Promise<FriendEntry[]> 
       userId: record.toUserId,
       username: blocked.username,
       display: blocked.display,
+      image: blocked.image,
       requestDirection: "outgoing",
+      activityStatus: getStatus(record.toUserId),
     });
   }
   return results;

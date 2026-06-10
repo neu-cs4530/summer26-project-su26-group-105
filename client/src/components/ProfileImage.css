@@ -1,23 +1,96 @@
-.profile-image {
+.profile-image-wrapper {
   display: inline-block;
+  position: relative;
   vertical-align: middle;
+  flex-shrink: 0;
+
+  &.small {
+    width: 2rem;
+    height: 2rem;
+  }
+  &.medium {
+    width: 5rem;
+    height: 5rem;
+  }
+  &.large {
+    width: 10rem;
+    height: 10rem;
+  }
+}
+
+.profile-image {
+  display: block;
+  width: 100%;
+  height: 100%;
   border-radius: 50%;
   border: solid black;
   aspect-ratio: 1;
   object-fit: cover;
 
   &.small {
-    width: 2rem;
     border-width: 1px;
   }
-
   &.medium {
-    width: 5rem;
     border-width: 2px;
   }
-
   &.large {
-    width: 10rem;
     border-width: 3px;
+  }
+}
+
+/* activity status dot base */
+.status-dot {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  border-radius: 50%;
+  border: 2px solid var(--gray-background, #1e1f22);
+  box-sizing: content-box;
+}
+
+.status-dot--small {
+  width: 0.5rem;
+  height: 0.5rem;
+}
+.status-dot--medium {
+  width: 0.85rem;
+  height: 0.85rem;
+}
+.status-dot--large {
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+/* online: solid green */
+.status-dot--online {
+  background: #23a55a;
+}
+
+/* offline: solid dark gray */
+.status-dot--offline {
+  background: #80848e;
+}
+
+/* idle/away: yellow crescent using box-shadow */
+.status-dot--idle {
+  background: transparent;
+  box-shadow: inset 3px -2px 0 1px #f0b232;
+}
+
+/* do not disturb: red with black horizontal line */
+.status-dot--dnd {
+  background: #f23f43;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &::after {
+    content: "";
+    display: block;
+    width: 60%;
+    height: 22%;
+    min-height: 2px;
+    background: var(--gray-background, #1e1f22);
+    border-radius: 999px;
   }
 }

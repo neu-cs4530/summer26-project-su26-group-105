@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import useSocketsForFriends from "../hooks/useSocketsForFriends";
 import type { FriendEntry, SearchResult } from "@gamenite/shared/src/friend.types";
-import { createPortal } from "react-dom";
 import Modal from "../components/Modal";
+import ProfileImage from "../components/ProfileImage";
 
 type Tab = "friends" | "pending" | "search" | "blocked";
 
@@ -240,10 +241,11 @@ export default function Friends() {
                   style={{
                     display: "flex",
                     alignItems: "center",
-                    gap: "0.5rem",
+                    gap: "0.75rem",
                     marginBottom: "0.5rem",
                   }}
                 >
+                  <ProfileImage src={f.image} size="small" activityStatus={f.activityStatus} />
                   <span style={{ flex: 1 }}>
                     {f.display} <span className="smallAndGray">@{f.username}</span>
                   </span>

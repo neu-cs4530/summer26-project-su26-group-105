@@ -17,7 +17,9 @@ export type RestAPI<R = unknown, P = { [key: string]: string }> = (
 ) => Promise<void>;
 
 export type GameServer = Server<ClientToServerEvents, ServerToClientEvents>;
-export type GameServerSocket = Socket<ClientToServerEvents, ServerToClientEvents>;
+export type GameServerSocket = Socket<ClientToServerEvents, ServerToClientEvents> & {
+  userId?: string;
+};
 
 export interface GameViewUpdates {
   watchers: TaggedGameView;
