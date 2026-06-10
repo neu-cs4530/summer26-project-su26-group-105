@@ -15,7 +15,9 @@ export interface SafeUserInfo {
   socialMedias: SocialMedia[];
   settings: {
     receivesFriendRequestNotifications: boolean;
-    receivesFriendGameNotifications: boolean;
+    receivesFriendAcceptedNotifications: boolean;
+    receivesGameInviteNotifications: boolean;
+    receivesFriendGameActivityNotifications: boolean;
   };
   createdAt: Date;
 }
@@ -63,7 +65,9 @@ export const zUserUpdateRequest = z.object({
   settings: z
     .object({
       receivesFriendRequestNotifications: z.boolean().optional(),
-      receivesFriendGameNotifications: z.boolean().optional(),
+      receivesFriendAcceptedNotifications: z.boolean().optional(),
+      receivesGameInviteNotifications: z.boolean().optional(),
+      receivesFriendGameActivityNotifications: z.boolean().optional(),
     })
     .optional(),
 });

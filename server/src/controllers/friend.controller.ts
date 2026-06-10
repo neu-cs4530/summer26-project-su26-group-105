@@ -9,7 +9,6 @@ import {
   getFriends,
   getIncomingRequests,
   getOutgoingRequests,
-  removeFriend,
   searchUsers,
   sendFriendRequest,
   unblockUser,
@@ -70,6 +69,19 @@ export const socketRequest: SocketAPI = (socket, io) => async (body) => {
     const result = await sendFriendRequest(user.userId, requested.userId);
     if ("error" in result) throw new Error(result.error);
 
+    //finds an incoming request so notification can show sender information
+    const incomingRequest = (await getIncomingRequests(requested.userId)).find(
+      (request) => request.friendId === result.friendId,
+    );
+
+    //if there is one, send popup notification to requested user
+    if (incomingRequest) {
+      io.to(userRoom(requested.userId)).emit("notificationPopup", {
+        type: "friendRequestReceived",
+        message: `${incomingRequest.display} sent you a friend request.`,
+      });
+    }
+
     await Promise.all([pushFriendList(io, user.userId), pushFriendList(io, requested.userId)]);
   } catch (err) {
     logSocketError(socket, err);
@@ -92,6 +104,22 @@ export const socketAccept: SocketAPI = (socket, io) => async (body) => {
 
     const result = await acceptFriendRequest(requestId, user.userId);
     if ("error" in result) throw new Error(result.error);
+
+    //notify the user who sent it
+    if (record) {
+      //finds the accepted friendship from sender's friend list
+      const acceptedRequest = (await getFriends(record.fromUserId)).find(
+        (friend) => friend.friendId === requestId,
+      );
+
+      //send a popup notification to original sender if accept request was fuond
+      if (acceptedRequest) {
+        io.to(userRoom(record.fromUserId)).emit("notificationPopup", {
+          type: "friendRequestAccepted",
+          message: `${acceptedRequest.display} accepted your friend request.`,
+        });
+      }
+    }
 
     await pushFriendList(io, user.userId);
     if (record) await pushFriendList(io, record.fromUserId);
@@ -130,18 +158,32 @@ export const socketDecline: SocketAPI = (socket, io) => async (body) => {
  */
 export const socketRemove: SocketAPI = (socket, io) => async (body) => {
   try {
+    //parses socket request and gets id of friendship being removed
     const {
       auth,
-      payload: { username },
-    } = withAuth(z.object({ username: z.string() })).parse(body);
+      payload: { requestId },
+    } = withAuth(z.object({ requestId: z.string() })).parse(body);
     const user = await enforceAuth(auth);
-    const other = await getUserByUsername(username);
-    if (!other) throw new Error(`User not found: ${username}`);
 
-    const result = await removeFriend(user.userId, other.userId);
-    if ("error" in result) throw new Error(result.error);
+    //finds friendship record that should be removed
+    const record = await FriendRepo.find(requestId);
+    if (!record) throw new Error(`Friend record not found: ${requestId}`);
 
-    await Promise.all([pushFriendList(io, user.userId), pushFriendList(io, other.userId)]);
+    //prevents users from removing friendships that dont exist
+    if (record.fromUserId !== user.userId && record.toUserId !== user.userId) {
+      throw new Error("You cannot remove a friendship you are not part of.");
+    }
+
+    const otherUserId = record.fromUserId === user.userId ? record.toUserId : record.fromUserId;
+
+    //marks friendship as removed instead of completely deleting it
+    await FriendRepo.set(requestId, {
+      ...record,
+      status: "removed",
+      updatedAt: new Date().toISOString(),
+    });
+
+    await Promise.all([pushFriendList(io, user.userId), pushFriendList(io, otherUserId)]);
   } catch (err) {
     logSocketError(socket, err);
   }

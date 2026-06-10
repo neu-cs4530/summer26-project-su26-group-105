@@ -14,8 +14,11 @@ function recordToSafeUserInfo(record: UserRecord): SafeUserInfo {
     image: record.image,
     socialMedias: record.socialMedias,
     settings: {
-      receivesFriendGameNotifications: record.settings.receivesFriendGameNotifications,
       receivesFriendRequestNotifications: record.settings.receivesFriendRequestNotifications,
+      receivesFriendAcceptedNotifications: record.settings.receivesFriendAcceptedNotifications,
+      receivesGameInviteNotifications: record.settings.receivesGameInviteNotifications,
+      receivesFriendGameActivityNotifications:
+        record.settings.receivesFriendGameActivityNotifications,
     },
   };
 }
@@ -56,8 +59,10 @@ export async function createUser(
     image: null,
     socialMedias: [],
     settings: {
-      receivesFriendGameNotifications: true,
       receivesFriendRequestNotifications: true,
+      receivesFriendAcceptedNotifications: true,
+      receivesGameInviteNotifications: true,
+      receivesFriendGameActivityNotifications: true,
     },
   };
   const id = await UserRepo.add(record);
@@ -100,16 +105,34 @@ export async function updateUser(
   if (!user) throw new Error(`No user ${username}`);
   if (password !== undefined) await updateAuth(username, password, user.userId);
   const newUser = await UserRepo.get(user.userId);
+  newUser.settings = {
+    receivesFriendRequestNotifications: newUser.settings.receivesFriendRequestNotifications ?? true,
+    receivesFriendAcceptedNotifications:
+      newUser.settings.receivesFriendAcceptedNotifications ?? true,
+    receivesGameInviteNotifications: newUser.settings.receivesGameInviteNotifications ?? true,
+    receivesFriendGameActivityNotifications:
+      newUser.settings.receivesFriendGameActivityNotifications ?? true,
+  };
   if (display !== undefined) newUser.display = display;
   if (bio !== undefined) newUser.bio = bio;
   if (image !== undefined) newUser.image = image;
   if (socialMedias !== undefined) newUser.socialMedias = socialMedias;
   if (settings) {
-    const { receivesFriendGameNotifications, receivesFriendRequestNotifications } = settings;
-    if (receivesFriendGameNotifications !== undefined)
-      newUser.settings.receivesFriendGameNotifications = receivesFriendGameNotifications;
+    const {
+      receivesFriendRequestNotifications,
+      receivesFriendAcceptedNotifications,
+      receivesGameInviteNotifications,
+      receivesFriendGameActivityNotifications,
+    } = settings;
     if (receivesFriendRequestNotifications !== undefined)
       newUser.settings.receivesFriendRequestNotifications = receivesFriendRequestNotifications;
+    if (receivesFriendAcceptedNotifications !== undefined)
+      newUser.settings.receivesFriendAcceptedNotifications = receivesFriendAcceptedNotifications;
+    if (receivesGameInviteNotifications !== undefined)
+      newUser.settings.receivesGameInviteNotifications = receivesGameInviteNotifications;
+    if (receivesFriendGameActivityNotifications !== undefined)
+      newUser.settings.receivesFriendGameActivityNotifications =
+        receivesFriendGameActivityNotifications;
   }
   await UserRepo.set(user.userId, newUser);
   return populateSafeUserInfo(user.userId);

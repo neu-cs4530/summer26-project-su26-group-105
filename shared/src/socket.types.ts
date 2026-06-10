@@ -21,7 +21,7 @@ export interface ClientToServerEvents {
   friendBlock: (payload: WithAuth<{ username: string }>) => void;
   friendDecline: (payload: WithAuth<{ requestId: string }>) => void;
   friendList: (payload: WithAuth<Record<string, never>>) => void;
-  friendRemove: (payload: WithAuth<{ username: string }>) => void;
+  friendRemove: (payload: WithAuth<{ requestId: string }>) => void;
   friendRequest: (payload: WithAuth<{ username: string }>) => void;
   friendUnblock: (payload: WithAuth<{ username: string }>) => void;
   friendSearch: (payload: WithAuth<{ query: string }>) => void;
@@ -29,6 +29,7 @@ export interface ClientToServerEvents {
   gameMakeMove: (payload: WithAuth<GameMakeMovePayload>) => void;
   gameStart: (payload: WithAuth<string>) => void;
   gameWatch: (payload: WithAuth<string>) => void;
+  friendGameCreated: (payload: WithAuth<string>) => void;
 }
 
 /**
@@ -39,6 +40,10 @@ export interface ServerToClientEvents {
   chatNewMessage: (payload: ChatNewMessagePayload) => void;
   chatUserJoined: (payload: ChatUserJoinedPayload) => void;
   chatUserLeft: (payload: ChatUserLeftPayload) => void;
+  notificationPopup: (payload: {
+    type: "friendRequestReceived" | "friendRequestAccepted" | "gameInvite" | "friendGameActivity";
+    message: string;
+  }) => void;
   friendListUpdated: (payload: {
     friends: FriendEntry[];
     incoming: FriendEntry[];

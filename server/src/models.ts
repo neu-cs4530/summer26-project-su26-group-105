@@ -114,7 +114,9 @@ export interface UserRecord {
   }[];
   settings: {
     receivesFriendRequestNotifications: boolean;
-    receivesFriendGameNotifications: boolean;
+    receivesFriendAcceptedNotifications: boolean;
+    receivesGameInviteNotifications: boolean;
+    receivesFriendGameActivityNotifications: boolean;
   };
   createdAt: DateISO;
 }
