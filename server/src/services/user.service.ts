@@ -43,8 +43,10 @@ export async function populateSafeUserInfo(userId: string): Promise<SafeUserInfo
       bio: `Hi, I'm ${displayName}!`,
       socialMedias: [],
       settings: {
-        receivesFriendGameNotifications: false,
         receivesFriendRequestNotifications: false,
+        receivesFriendAcceptedNotifications: false,
+        receivesGameInviteNotifications: false,
+        receivesFriendGameActivityNotifications: false,
       },
     };
   }
