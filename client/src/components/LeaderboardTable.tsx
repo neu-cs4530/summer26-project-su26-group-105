@@ -10,7 +10,7 @@ type LeaderboardTableProps = {
 };
 
 /**
- * loads in the UI for the leaderboard with the given title, rows, and username
+ * loads in the data for the leaderboard with the given title, rows, and username
  * @param title the title shown above the leaderboard table
  * @param rows the leaderboard rows to display
  * @param currentUsername the signed in user's username, used to show (you) next to their row

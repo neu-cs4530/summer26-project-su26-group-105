@@ -1,14 +1,17 @@
 import { useState, useEffect } from "react";
-import type { GameKey, LeaderboardPlayer } from "@gamenite/shared";
+import type { GameKey, DateShow, LeaderboardFilter, LeaderboardPlayer } from "@gamenite/shared";
 import { gameNames } from "../util/consts";
 import LeaderboardTable from "../components/LeaderboardTable";
 import { getLeaderboardList } from "../services/leaderboardService";
 import useLoginContext from "../hooks/useLoginContext";
 
-//leaderboard can either be global or for a specific game id
-type LeaderboardFilter = "global" | GameKey;
-
+/**
+ * The leaderboard page where users can see global and game specific leaderboard,
+ * and filter based on various things
+ * @returns The UI for the leaderboard
+ */
 export default function Leaderboard() {
+  const [selectedDateShow, setSelectedDateShow] = useState<DateShow>("all");
   //keeps track of which leaderboard was selected
   const [selectedLeaderboard, setSelectedLeaderboard] = useState<LeaderboardFilter>("global");
   const [leaderboardRows, setLeaderboardRows] = useState<LeaderboardPlayer[]>([]);
@@ -27,7 +30,10 @@ export default function Leaderboard() {
     let ignore = false;
 
     //runs once immediately when the page loads or the selected leaderboard changes
-    void getLeaderboardList(selectedLeaderboard) // gets leaderboard rows directly in the effect
+    void getLeaderboardList({
+      leaderboard: selectedLeaderboard,
+      dateShow: selectedDateShow,
+    }) // gets leaderboard rows directly in the effect
       .then((rows) => {
         if (!ignore) {
           // only updates state if this effect is still current
@@ -45,14 +51,17 @@ export default function Leaderboard() {
       // marks old request results as ignored when selectedLeaderboard changes
       ignore = true;
     };
-  }, [selectedLeaderboard]); // refetches rows when the dropdown selection changes
+  }, [selectedLeaderboard, selectedDateShow]); // refetches rows when the dropdown selection changes
 
   useEffect(() => {
     function handleLeaderboardUpdated(payload: { gameType: GameKey }) {
       // handles leaderboard update socket events
       if (selectedLeaderboard === "global" || selectedLeaderboard === payload.gameType) {
         // refetches the leaderboard when a matching game ends
-        void getLeaderboardList(selectedLeaderboard)
+        void getLeaderboardList({
+          leaderboard: selectedLeaderboard,
+          dateShow: selectedDateShow,
+        })
           .then((rows) => {
             // updates the table with the newest leaderboard rows from the server
             setLeaderboardRows(rows);
@@ -70,7 +79,7 @@ export default function Leaderboard() {
     return () => {
       socket.off("leaderboardUpdated", handleLeaderboardUpdated);
     };
-  }, [socket, selectedLeaderboard]);
+  }, [socket, selectedLeaderboard, selectedDateShow]);
 
   return (
     <div>
@@ -89,6 +98,16 @@ export default function Leaderboard() {
             {gameName}
           </option>
         ))}
+      </select>
+      <label htmlFor="dateFilter">Time Range</label>{" "}
+      <select
+        id="dateFilter"
+        value={selectedDateShow}
+        onChange={(event) => setSelectedDateShow(event.target.value as DateShow)}
+      >
+        <option value="all">All Time</option>
+        <option value="weekly">Weekly</option>
+        <option value="daily">Daily</option>
       </select>
       <LeaderboardTable
         title={leaderboardTitle}
