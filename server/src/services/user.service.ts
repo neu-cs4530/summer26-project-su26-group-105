@@ -1,6 +1,11 @@
-import { type SafeUserInfo, type UserUpdateRequest, type SafeSelfUserInfo } from "@gamenite/shared";
+import {
+  type SafeUserInfo,
+  type UserUpdateRequest,
+  type SafeSelfUserInfo,
+  type RecentlyPlayedEntry,
+} from "@gamenite/shared";
 import { getUserByUsername, updateAuth } from "./auth.service.ts";
-import { UserRepo } from "../repository.ts";
+import { GameRepo, UserRepo } from "../repository.ts";
 import type { UserRecord } from "../models.ts";
 
 const disallowedUsernames = new Set(["login", "signup", "list"]);
@@ -75,6 +80,24 @@ export async function populateSafeUserInfo(userId: string): Promise<SafeUserInfo
 export async function populateSafeSelfUserInfo(userId: string): Promise<SafeSelfUserInfo> {
   const record = await UserRepo.get(userId);
   return recordToSafeSelfUserInfo(record);
+}
+
+export async function populateRecentlyPlayedGames(userId: string): Promise<RecentlyPlayedEntry[]> {
+  const gameKeys = await GameRepo.getAllKeys();
+  const games = (await GameRepo.getMany(gameKeys)).map((game, i) => [gameKeys[i], game] as const);
+  const recentlyPlayed: RecentlyPlayedEntry[] = [];
+  for (const [id, game] of games) {
+    if (game.endedAt)
+      if (game.players.some((p) => p === userId)) {
+        recentlyPlayed.push({
+          gameId: id,
+          gameType: game.type,
+          datePlayed: new Date(game.endedAt),
+        });
+      }
+  }
+
+  return recentlyPlayed.sort((a, b) => +b.datePlayed - +a.datePlayed).slice(0, 3);
 }
 
 /**

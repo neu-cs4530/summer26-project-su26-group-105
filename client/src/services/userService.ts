@@ -5,6 +5,7 @@ import type {
   SafeUserInfo,
   UserAuth,
   UserUpdateRequest,
+  RecentlyPlayedEntry,
 } from "@gamenite/shared";
 
 const USER_API_URL = `/api/user`;
@@ -53,6 +54,14 @@ export const signupUser = async (user: UserAuth): Promise<SafeSelfUserInfo> => {
  */
 export const getUserById = async (username: string): Promise<SafeUserInfo> => {
   const res = await api.get<SafeUserInfo | ErrorMsg>(`${USER_API_URL}/${username}`);
+  if ("error" in res.data) throw new Error(res.data.error);
+  return res.data;
+};
+
+export const getRecentlyPlayed = async (username: string): Promise<RecentlyPlayedEntry[]> => {
+  const res = await api.get<RecentlyPlayedEntry[] | ErrorMsg>(
+    `${USER_API_URL}/${username}/recently-played`,
+  );
   if ("error" in res.data) throw new Error(res.data.error);
   return res.data;
 };
