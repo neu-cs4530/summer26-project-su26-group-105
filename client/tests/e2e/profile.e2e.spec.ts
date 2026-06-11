@@ -44,7 +44,7 @@ test.describe("Edit profile page", () => {
     // Confirm social media does now appear outside of modal
     await expect(page1.getByRole("link", { name: "@new_social" })).toBeVisible();
 
-    await page1.getByRole("button", { name: "Save All Changes" }).click();
+    await page1.getByRole("button", { name: "Save Profile Changes" }).click();
 
     // Confirm it's now displayed in header
     await expect(page1.getByText("New Display Name")).toBeVisible();
@@ -54,7 +54,7 @@ test.describe("Edit profile page", () => {
     await page1.getByRole("link", { name: "Profile" }).click();
 
     await page1.getByLabel("Display Name").fill("   ");
-    await page1.getByRole("button", { name: "Save All Changes" }).click();
+    await page1.getByRole("button", { name: "Save Profile Changes" }).click();
 
     await expect(page1.getByText("Display names can't begin or end with whitespace")).toBeVisible();
   });
@@ -81,7 +81,7 @@ test.describe("Viewing other users' profiles", () => {
     await page.getByLabel("Image URL").fill("https://example.com/new_image.jpg");
     await page.getByRole("button", { name: "Confirm" }).click();
 
-    await page1.getByRole("button", { name: "Save All Changes" }).click();
+    await page1.getByRole("button", { name: "Save Profile Changes" }).click();
 
     await page1.getByRole("link", { name: "Home" }).click();
   }

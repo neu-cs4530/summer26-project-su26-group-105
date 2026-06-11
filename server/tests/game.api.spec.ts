@@ -10,12 +10,6 @@ const baseUser = {
   createdAt: expect.any(String),
   image: null,
   socialMedias: [],
-  settings: {
-    receivesFriendRequestNotifications: true,
-    receivesFriendAcceptedNotifications: true,
-    receivesGameInviteNotifications: true,
-    receivesFriendGameActivityNotifications: true,
-  },
 };
 const auth3 = { username: "user3", password: "pwd3333" };
 const authBad = { username: "user3", password: "user3" };
