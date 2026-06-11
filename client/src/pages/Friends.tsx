@@ -154,7 +154,7 @@ export default function Friends() {
       message: `Warning! You are about to remove ${f.display} (@${f.username}) as a friend.
                     To befriend them again, a new request would be necessary. Click OK if you wish to proceed.`,
       onConfirm: () => {
-        removeFriend(f.username);
+        removeFriend(f.friendId);
         setModal(null);
       },
     });

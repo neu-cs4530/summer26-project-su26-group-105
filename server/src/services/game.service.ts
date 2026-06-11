@@ -1,4 +1,4 @@
-import { type GameInfo, type GameKey, type TaggedGameView } from "@gamenite/shared";
+import { type GameInfo, type GameKey, type OneState, type TaggedGameView } from "@gamenite/shared";
 import { createChat } from "./chat.service.ts";
 import { populateSafeUserInfo } from "./user.service.ts";
 import { type GameServicer } from "../games/gameServiceManager.ts";
@@ -37,6 +37,7 @@ async function populateGameInfo(gameId: string): Promise<GameInfo> {
     type: game.type,
     status: !game.state ? "waiting" : game.done ? "done" : "active",
     minPlayers: gameServices[game.type].minPlayers,
+    maxPlayers: gameServices[game.type].maxPlayers ?? undefined,
     friendOnly: game.friendOnly ?? false,
   };
 }
@@ -109,6 +110,10 @@ function getGuessWinnerIndex(state: object): number | undefined {
   return winnerIndex;
 }
 
+function getOneWinnerIndex(state: OneState): number | undefined {
+  return state.playerHands.findIndex((hand) => hand.length === 0);
+}
+
 //gets the winner index for a finished game
 function getWinnerIndex(type: GameKey, state: unknown): number | undefined {
   //checks if state is an object
@@ -130,7 +135,11 @@ function getWinnerIndex(type: GameKey, state: unknown): number | undefined {
     return getGuessWinnerIndex(state);
   }
 
-  //returns if there is no supported winner logic
+  if (type === "one") {
+    return getOneWinnerIndex(state as OneState);
+  }
+
+  // returns if there is no supported winner logic
   return undefined;
 }
 

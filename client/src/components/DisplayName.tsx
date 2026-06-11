@@ -37,6 +37,19 @@ export default function DisplayName({ user, showFullInfo }: DisplayNameProps) {
     stopDisplaying(anchorName);
   };
 
+  if (user.isBot) {
+    return (
+      <div
+        className="display-name"
+        style={{ anchorName }}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+      >
+        <ProfileImage src={user.image} size="small" /> {user.display}
+      </div>
+    );
+  }
+
   return (
     <Link
       to={`/profile/${user.username}`}
