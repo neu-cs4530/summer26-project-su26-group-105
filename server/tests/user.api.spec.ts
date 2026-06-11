@@ -9,6 +9,7 @@ const baseUser = {
   createdAt: expect.any(String),
   image: null,
   socialMedias: [],
+  isBot: false,
 };
 const selfUserSettings = {
   settings: {
@@ -17,7 +18,6 @@ const selfUserSettings = {
     receivesGameInviteNotifications: true,
     receivesFriendGameActivityNotifications: true,
   },
-  isBot: false,
 };
 const auth1 = { username: "user1", password: "pwd1111" };
 const user1 = {
