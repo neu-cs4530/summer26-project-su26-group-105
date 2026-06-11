@@ -395,6 +395,7 @@ export default function Friends() {
                     marginBottom: "0.5rem",
                   }}
                 >
+                  <ProfileImage src={null} size="small" blocked />
                   <span style={{ flex: 1 }} className="smallAndGray">
                     @{f.username}
                   </span>

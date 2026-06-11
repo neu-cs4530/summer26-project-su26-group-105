@@ -7,6 +7,7 @@ type ProfileImageProps = {
   src: string | null;
   size: "small" | "medium" | "large";
   activityStatus?: ActivityStatus;
+  blocked?: boolean;
 };
 
 /**
@@ -14,11 +15,16 @@ type ProfileImageProps = {
  * @param src The source URL of the image
  * @param size The size to display the image
  * @param activityStatus If provided, renders a status dot in the bottom-right corner
+ * @param blocked If user is blocked, profile image is not available
  */
-export default function ProfileImage({ src, size, activityStatus }: ProfileImageProps) {
+export default function ProfileImage({ src, size, activityStatus, blocked }: ProfileImageProps) {
   return (
     <span className={`profile-image-wrapper ${size}`}>
-      <FallbackImage src={src} fallback={Avatar} className={`profile-image ${size}`} />
+      {blocked ? (
+        <span className={`profile-image ${size} profile-image--blocked`} />
+      ) : (
+        <FallbackImage src={src} fallback={Avatar} className={`profile-image ${size}`} />
+      )}
       {activityStatus && (
         <span
           className={`status-dot status-dot--${size} status-dot--${activityStatus}`}

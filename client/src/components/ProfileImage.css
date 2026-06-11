@@ -38,6 +38,19 @@
   }
 }
 
+/* profile image when user is blocked */
+.profile-image--blocked {
+  background: var(--gray-background, #2b2d31);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+
+  &::after {
+    content: "🚫";
+  }
+}
+
 /* activity status dot base */
 .status-dot {
   position: absolute;
