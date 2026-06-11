@@ -1,0 +1,28 @@
+.profile-page {
+  padding-left: 32px;
+  padding-top: 24px;
+}
+
+.profile-tabs {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.profile-tabs button {
+  padding: 10px 18px;
+  border: 1px solid #ccc;
+  background-color: white;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.profile-tabs .active-tab {
+  background-color: #222;
+  color: white;
+  border-color: #222;
+}
+
+.profile-settings {
+  max-width: 700px;
+}

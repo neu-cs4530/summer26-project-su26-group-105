@@ -78,6 +78,9 @@ io.on("connection", (socket) => {
   socket.on("gameMakeMove", game.socketMakeMove(socket, io));
   socket.on("gameStart", game.socketStart(socket, io));
   socket.on("gameWatch", game.socketWatch(socket, io));
+  socket.on("friendGameCreated", game.socketFriendGameCreated(socket, io));
+
+  socket.on("gameAddBot", game.socketAddBot(socket, io));
 
   socket.on("gameAddBot", game.socketAddBot(socket, io));
 

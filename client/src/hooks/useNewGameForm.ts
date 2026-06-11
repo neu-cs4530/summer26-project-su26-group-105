@@ -3,6 +3,7 @@ import { type ChangeEvent, type FormEvent, useState } from "react";
 import useAuth from "./useAuth.ts";
 import { useNavigate } from "react-router-dom";
 import { createGame } from "../services/gameService.ts";
+import useLoginContext from "./useLoginContext.ts";
 
 /**
  * Custom hook to manage game creation form logic
@@ -18,6 +19,7 @@ export default function useNewGameForm() {
   const [friendOnly, setFriendOnly] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const auth = useAuth();
+  const { socket } = useLoginContext();
   const navigate = useNavigate();
 
   const handleInputChange = (e: ChangeEvent<HTMLSelectElement>) => {
@@ -42,6 +44,10 @@ export default function useNewGameForm() {
     setErr(null);
     try {
       const game = await createGame(auth, gameKey, friendOnly);
+<<<<<<< HEAD
+=======
+      socket.emit("friendGameCreated", { auth, payload: game.gameId });
+>>>>>>> origin/main
       await navigate(`/game/${game.gameId}`);
     } catch (err) {
       setErr(`${err}`);

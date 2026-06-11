@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import { FriendRepo, UserRepo } from "../repository.ts";
 import type { FriendsRecord, RecordId } from "../models.ts";
 import { getStatus } from "./activityStatus.service.ts";
-import type { FriendEntry } from "@gamenite/shared/src/friend.types.ts";
+import type { FriendEntry, SearchResult } from "@gamenite/shared/src/friend.types.ts";
 
 /** Returns all id, FriendsRecord pairs in the data store */
 async function getAllFriendRecords(): Promise<[string, FriendsRecord][]> {
@@ -289,16 +289,34 @@ export async function getBlockedUsers(userId: RecordId): Promise<FriendEntry[]> 
   return results;
 }
 
-export interface SearchResult {
-  userId: string;
-  username: string;
-  display: string;
-  relationship: "friend" | "incoming" | "outgoing" | "none";
-}
-
-export async function searchUsers(currentUserId: RecordId, query: string): Promise<SearchResult[]> {
+async function searchFriends(
+  currentUserId: RecordId,
+  query: string,
+): Promise<SearchResult<true>[]> {
   const q = query.toLowerCase().trim();
   if (!q) return [];
+
+  const friends = await getFriends(currentUserId);
+  return friends
+    .filter((u) => u.username.toLowerCase().includes(q) || u.display.toLowerCase().includes(q))
+    .map((u) => ({
+      userId: u.userId,
+      username: u.username,
+      display: u.display,
+      relationship: "friend",
+      friendId: u.friendId,
+    }));
+}
+
+export async function searchUsers(
+  currentUserId: RecordId,
+  query: string,
+  type: "existing" | "all",
+): Promise<SearchResult<boolean>[]> {
+  const q = query.toLowerCase().trim();
+  if (!q) return [];
+
+  if (type === "existing") return await searchFriends(currentUserId, query);
 
   const [friends, incoming, outgoing, blocked] = await Promise.all([
     getFriends(currentUserId),
@@ -332,7 +350,13 @@ export async function searchUsers(currentUserId: RecordId, query: string): Promi
     else if (incomingUserIds.has(id)) relationship = "incoming";
     else if (outgoingUserIds.has(id)) relationship = "outgoing";
 
-    results.push({ userId: id, username: u.username, display: u.display, relationship });
+    results.push({
+      userId: id,
+      username: u.username,
+      display: u.display,
+      relationship,
+      friendId: undefined,
+    });
   }
   return results;
 }

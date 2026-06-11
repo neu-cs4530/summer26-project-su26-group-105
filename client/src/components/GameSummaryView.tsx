@@ -47,6 +47,7 @@ export default function GameSummaryView({
       {/* Main info */}
       <div className="gameMain">
         <div className="gameTitle">
+<<<<<<< HEAD
           {gameNames[type]}
           {friendOnly && (
             <span className="friendOnlyBadge" title="Friends only">
@@ -60,6 +61,29 @@ export default function GameSummaryView({
       </div>
 
       {/* Right side: status + player count */}
+=======
+          <NavLink to={`/game/${gameId}`} onClick={(e) => e.stopPropagation()}>
+            A game of {gameNames[type]}
+          </NavLink>
+        </div>
+        <div className="gameMeta">
+          <span onClick={(e) => e.stopPropagation()}>
+            <DisplayName user={createdBy} />
+          </span>
+          {" · "}
+          {timeSince(createdAt)}
+        </div>
+      </div>
+
+      {/* Friends only badge */}
+      {friendOnly && (
+        <span className="friendOnlyBadge" title="Friends only">
+          🔒 Friends Only
+        </span>
+      )}
+
+      {/* Right side: status pill + player count */}
+>>>>>>> origin/main
       <div className="gameRight">
         <span className={`gameStatus ${className}`}>{label}</span>
         {status !== "done" && (

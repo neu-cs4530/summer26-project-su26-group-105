@@ -31,6 +31,8 @@ async function populateGameInfo(gameId: string): Promise<GameInfo> {
     createdBy: await populateSafeUserInfo(game.createdBy),
     chat: game.chat,
     createdAt: new Date(game.createdAt),
+    endedAt: game.endedAt ? new Date(game.endedAt) : undefined,
+    winner: game.winner,
     players: await Promise.all(game.players.map(populateSafeUserInfo)),
     type: game.type,
     status: !game.state ? "waiting" : game.done ? "done" : "active",
@@ -275,10 +277,12 @@ export async function updateGame(gameId: string, user: UserWithId, move: unknown
   if (!result) throw new Error(`user ${user.username} made an invalid move in ${game.type}`);
 
   game.state = result.state;
+  const wasAlreadyDone = game.done;
   game.done = game.done || result.done;
 
   //if game is done, then set the winner
-  if (result.done) {
+  if (result.done && !wasAlreadyDone) {
+    game.endedAt = new Date().toISOString();
     const winnerIndex = getWinnerIndex(game.type, result.state);
 
     if (winnerIndex !== undefined) {

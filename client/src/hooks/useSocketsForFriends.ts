@@ -26,7 +26,7 @@ export default function useSocketsForFriends() {
   const [incoming, setIncoming] = useState<FriendEntry[]>([]);
   const [outgoing, setOutgoing] = useState<FriendEntry[]>([]);
   const [blocked, setBlocked] = useState<FriendEntry[]>([]);
-  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
+  const [searchResults, setSearchResults] = useState<SearchResult<boolean>[]>([]);
 
   useEffect(() => {
     const handleFriendListUpdated = (payload: {
@@ -78,8 +78,8 @@ export default function useSocketsForFriends() {
     socket.emit("friendDecline", { auth, payload: { requestId } });
   }
 
-  function removeFriend(username: string) {
-    socket.emit("friendRemove", { auth, payload: { username } });
+  function removeFriend(requestId: string) {
+    socket.emit("friendRemove", { auth, payload: { requestId } });
   }
 
   function blockUser(username: string) {
@@ -91,8 +91,8 @@ export default function useSocketsForFriends() {
   }
 
   const searchUsers = useCallback(
-    (query: string) => {
-      socket.emit("friendSearch", { auth, payload: { query } });
+    (query: string, type: "existing" | "all") => {
+      socket.emit("friendSearch", { auth, payload: { query, type } });
     },
     [socket, auth],
   );

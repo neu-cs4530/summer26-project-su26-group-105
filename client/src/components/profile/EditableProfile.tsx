@@ -17,7 +17,6 @@ import Loading from "../Loading";
 export default function EditableProfile() {
   const { user } = useLoginContext();
   const timeSince = useTimeSince();
-  const [showPass, setShowPass] = useState(false);
   const [showSocialMediaModal, setShowSocialMediaModal] = useState(false);
   const [showImageModal, setShowImageModal] = useState(false);
   const {
@@ -28,21 +27,17 @@ export default function EditableProfile() {
     socialMedias,
     addSocialMedia,
     removeSocialMedia,
-    password,
-    setPassword,
-    confirm,
-    setConfirm,
     image,
     setImage,
     isLoading,
     isSaved,
     err,
     validationErrors,
-    handleSubmit,
+    handleProfileSubmit,
   } = useEditProfileForm();
 
   return (
-    <form className="content spacedSection" onSubmit={handleSubmit}>
+    <form className="content spacedSection" onSubmit={handleProfileSubmit}>
       <h2 style={{ textAlign: "center" }}>Public Profile</h2>
       <div className="profile-container">
         <div className="pfp">
@@ -105,54 +100,6 @@ export default function EditableProfile() {
           />
         </div>
       </div>
-      <hr />
-      <h2 style={{ textAlign: "center" }}>Account Settings</h2>
-      <div className="account-settings">
-        <TextInput
-          label="New Password"
-          type={showPass ? "input" : "password"}
-          placeholder="New password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="widefill notTooWide"
-          containerClassName="setting"
-          error={validationErrors?.properties?.password?.errors?.[0]}
-          buttons={
-            <>
-              <button
-                className="secondary small"
-                type="button"
-                onClick={() => {
-                  setPassword("");
-                  setConfirm("");
-                }}
-              >
-                Reset
-              </button>
-              <button
-                className="secondary small"
-                aria-label="Toggle show password"
-                type="button"
-                onClick={() => {
-                  setShowPass((v) => !v);
-                }}
-              >
-                {showPass ? "Hide" : "Reveal"}
-              </button>
-            </>
-          }
-        />
-        <TextInput
-          label="Confirm New Password"
-          type={showPass ? "input" : "password"}
-          placeholder="Confirm new password"
-          value={confirm}
-          onChange={(e) => setConfirm(e.target.value)}
-          className="widefill notTooWide"
-          containerClassName="setting"
-          error={validationErrors?.properties?.confirm?.errors?.[0]}
-        />
-      </div>
       {err && <p className="error-message">{err}</p>}
       <div
         style={{ display: "flex", justifyContent: "center", position: "sticky", bottom: "1rem" }}
@@ -163,7 +110,7 @@ export default function EditableProfile() {
           disabled={isLoading}
         >
           {isLoading && <Loading />}
-          {isSaved ? "Saved Successfully" : "Save All Changes"}
+          {isSaved ? "Profile Saved Successfully" : "Save Profile Changes"}
         </button>
       </div>
       {showSocialMediaModal && (
