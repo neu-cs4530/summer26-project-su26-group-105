@@ -1,6 +1,8 @@
 import type { ErrorMsg, GameInfo } from "@gamenite/shared";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { gameList } from "../services/gameService.ts";
+import useLoginContext from "./useLoginContext.ts";
+import { FriendStatusContext } from "../contexts/FriendStatusContext.ts";
 
 /**
  * Custom hook to get the list of all thread summaries and decide on an
@@ -10,6 +12,8 @@ import { gameList } from "../services/gameService.ts";
  */
 export default function useGameList(maxGames?: number): { message: string } | GameInfo[] {
   const [games, setGames] = useState<GameInfo[] | ErrorMsg | null>(null);
+  const { user } = useLoginContext();
+  const statusMap = useContext(FriendStatusContext);
 
   useEffect(() => {
     gameList()
@@ -21,7 +25,14 @@ export default function useGameList(maxGames?: number): { message: string } | Ga
 
   if (!games) return { message: "Loading..." };
   if ("error" in games) return { message: `Error: ${games.error}` };
-  if (games.length === 0) return { message: "No games found..." };
-  if (maxGames) return games.slice(0, maxGames);
-  return games;
+
+  const visible = games.filter((game) => {
+    if (!game.friendOnly) return true;
+    if (game.createdBy.username === user.username) return true;
+    return statusMap.has(game.createdBy.username);
+  });
+
+  if (visible.length === 0) return { message: "No games found..." };
+  if (maxGames) return visible.slice(0, maxGames);
+  return visible;
 }

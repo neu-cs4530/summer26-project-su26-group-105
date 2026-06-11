@@ -10,7 +10,8 @@ import * as game from "./controllers/game.controller.ts";
 import * as user from "./controllers/user.controller.ts";
 import * as thread from "./controllers/thread.controller.ts";
 import * as leaderboard from "./controllers/leaderboard.controller.ts";
-import { type GameServer } from "./types.ts";
+import { type GameServer, type GameServerSocket } from "./types.ts";
+import { clearStatus } from "./services/activityStatus.service.ts";
 
 export const app = express();
 export const httpServer = http.createServer(app);
@@ -70,6 +71,8 @@ io.on("connection", (socket) => {
   socket.on("friendBlock", friend.socketBlock(socket, io));
   socket.on("friendUnblock", friend.socketUnblock(socket, io));
   socket.on("friendSearch", friend.socketSearch(socket, io));
+  socket.on("setStatus", friend.socketSetStatus(socket, io));
+  socket.on("userConnect", friend.socketUserConnect(socket, io));
 
   socket.on("gameJoinAsPlayer", game.socketJoinAsPlayer(socket, io));
   socket.on("gameMakeMove", game.socketMakeMove(socket, io));
@@ -95,5 +98,12 @@ io.on("connection", (socket) => {
   });
   socket.onAnyOutgoing((name) => {
     console.log(`SEND [${socketId}] gets ${name}`);
+  });
+  socket.on("disconnect", async () => {
+    console.log(`CONN [${socketId}] disconnected`);
+    const userId = (socket as GameServerSocket).userId;
+    if (userId) {
+      await clearStatus(io, userId);
+    }
   });
 });

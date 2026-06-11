@@ -13,6 +13,7 @@ import {
   sendFriendRequest,
   unblockUser,
 } from "../services/friend.service.ts";
+import { setStatus } from "../services/activityStatus.service.ts";
 import { FriendRepo } from "../repository.ts";
 import { type SocketAPI, type GameServer } from "../types.ts";
 import { logSocketError } from "./socket.controller.ts";
@@ -45,6 +46,9 @@ export const socketList: SocketAPI = (socket, io) => async (body) => {
     const { auth } = withAuth(z.object({})).parse(body);
     const user = await enforceAuth(auth);
     await socket.join(userRoom(user.userId));
+    // store userId on socket for disconnect cleanup
+    socket.userId = user.userId;
+    await setStatus(io, user.userId, "online");
     await pushFriendList(io, user.userId);
   } catch (err) {
     logSocketError(socket, err);
@@ -250,6 +254,42 @@ export const socketSearch: SocketAPI = (socket) => async (body) => {
     const user = await enforceAuth(auth);
     const results = await searchUsers(user.userId, query, type);
     socket.emit("friendSearchResults", { results });
+  } catch (err) {
+    logSocketError(socket, err);
+  }
+};
+
+/**
+ * Handles `setStatus` which allows a user to manually set their activity status.
+ * Pushes the update to all online friends, not everyone.
+ */
+export const socketSetStatus: SocketAPI = (socket, io) => async (body) => {
+  try {
+    const {
+      auth,
+      payload: { status },
+    } = withAuth(z.object({ status: z.enum(["online", "idle", "dnd", "offline"]) })).parse(body);
+    const user = await enforceAuth(auth);
+    await setStatus(io, user.userId, status);
+  } catch (err) {
+    logSocketError(socket, err);
+  }
+};
+
+/**
+ * Handles `userConnect`, which is fired immediately when a user logs in on any page.
+ * Joins their personal friend room and sets them online globally.
+ * This ensures status is tracked even if the user never visits the friends page,
+ * and that the disconnect handler can always find their userId.
+ */
+export const socketUserConnect: SocketAPI = (socket, io) => async (body) => {
+  try {
+    const { auth } = withAuth(z.object({})).parse(body);
+    const user = await enforceAuth(auth);
+    // store userId on socket so disconnect handler can clear status
+    socket.userId = user.userId;
+    await socket.join(`friend-${user.userId}`);
+    await setStatus(io, user.userId, "online");
   } catch (err) {
     logSocketError(socket, err);
   }

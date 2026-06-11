@@ -23,8 +23,12 @@ import { populateSafeUserInfo } from "../services/user.service.ts";
  */
 export const postCreate: RestAPI<GameInfo> = async (req, res) => {
   const body = withAuth(
-    z.object({ gameKey: zGameKey, friendOnly: z.boolean().default(false) }),
+    z.union([
+      z.object({ gameKey: zGameKey, friendOnly: z.boolean().default(false) }),
+      zGameKey.transform((key) => ({ gameKey: key, friendOnly: false })),
+    ]),
   ).safeParse(req.body);
+
   if (body.error) {
     res.status(400).send({ error: "Poorly-formed request" });
     return;
