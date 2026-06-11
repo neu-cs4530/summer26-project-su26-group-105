@@ -44,10 +44,7 @@ export default function useNewGameForm() {
     setErr(null);
     try {
       const game = await createGame(auth, gameKey, friendOnly);
-<<<<<<< HEAD
-=======
       socket.emit("friendGameCreated", { auth, payload: game.gameId });
->>>>>>> origin/main
       await navigate(`/game/${game.gameId}`);
     } catch (err) {
       setErr(`${err}`);

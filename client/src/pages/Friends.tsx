@@ -256,8 +256,13 @@ export default function Friends() {
                       marginBottom: "0.5rem",
                     }}
                   >
+                    <ProfileImage
+                      src={"image" in f ? f.image : null}
+                      size="small"
+                      activityStatus={"activityStatus" in f ? f.activityStatus : undefined}
+                    />
                     <span style={{ flex: 1 }}>
-                      {f.display} <span className="smallAndGray" activityStatus={f.activityStatus}>@{f.username}</span>
+                      {f.display} <span className="smallAndGray">@{f.username}</span>
                     </span>
                     <ThreeDotMenu
                       onRemove={() => confirmRemove(f)}

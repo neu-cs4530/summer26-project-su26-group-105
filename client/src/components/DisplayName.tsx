@@ -45,7 +45,7 @@ export default function DisplayName({ user, showFullInfo }: DisplayNameProps) {
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      <ProfileImage src={user.image} size="small" activityStatus={activityStatus} />
+      <ProfileImage src={user.image} size="small" activityStatus={activityStatus} /> {user.display}
     </Link>
   );
 }
