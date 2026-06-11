@@ -5,7 +5,9 @@
   width: 200px;
   gap: 1rem;
   padding-block: 1rem;
-  background-color: var(--gray-background);
+  background-color: var(--card-background);
+  border-right: 1px solid var(--border-color);
+  box-shadow: 2px 0 12px var(--shadow-color);
   grid-area: sidebar;
 }
 
@@ -15,11 +17,18 @@
   align-items: center;
   min-height: 2.5rem;
   width: 100%;
-  border-radius: 0.5rem;
-  color: cornflowerblue;
+  border-radius: 999px;
+  color: var(--text-color);
+  background-color: transparent;
+  font-weight: 700;
   text-decoration: none;
 }
 
+.menu_button:hover {
+  background-color: var(--cloud-two);
+}
+
 .menu_selected {
-  background: #cccccc;
+  color: var(--button-text);
+  background: var(--primary-button);
 }
