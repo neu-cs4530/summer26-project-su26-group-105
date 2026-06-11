@@ -73,7 +73,7 @@ export default function Login({ setAuth }: LoginProps) {
         </button>
       </form>
       <div className="smallAndGray" style={{ marginTop: "1rem" }}>
-        GameNite stores passwords in cleartext; reusing passwords here is a catastrophically bad
+        LazyNite stores passwords in cleartext; reusing passwords here is a catastrophically bad
         idea
       </div>
     </div>
