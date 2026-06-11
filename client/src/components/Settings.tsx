@@ -6,6 +6,8 @@ import Loading from "./Loading";
 import "../pages/Profile.css";
 import "./profile/EditableProfile.css";
 
+export type ThemeMode = "light" | "dark";
+
 /**
  * Shows private account settings for the current user.
  * This includes password settings and notification settings.
@@ -13,6 +15,20 @@ import "./profile/EditableProfile.css";
  */
 export default function Settings() {
   const [showPass, setShowPass] = useState(false);
+  //keeps track of current theme
+  const [theme, setTheme] = useState<ThemeMode>(() => {
+    //gets the saved theme from browser to keep it regardless
+    //if page is refreshed
+    const savedTheme = localStorage.getItem("theme");
+
+    //if theme is valid, then use it
+    if (savedTheme === "light" || savedTheme === "dark") {
+      return savedTheme;
+    }
+
+    //default to light
+    return "light";
+  });
 
   const {
     password,
@@ -26,9 +42,40 @@ export default function Settings() {
     handlePasswordSubmit,
   } = useEditProfileForm();
 
+  //updates the theme when the user clicks one of the theme buttons
+  const handleThemeChange = (newTheme: ThemeMode) => {
+    //update react and save theme to browser
+    setTheme(newTheme);
+    localStorage.setItem("theme", newTheme);
+    document.documentElement.dataset.theme = newTheme;
+  };
+
   return (
     <div className="profile-settings">
       <h1>App Settings</h1>
+      <hr />
+      <div className="content spacedSection">
+        <h2 style={{ textAlign: "center" }}>Theme Settings</h2>
+
+        {/* light and dark mode */}
+        <div className="theme-toggle-row">
+          <button
+            className={theme === "light" ? "primary narrow" : "secondary narrow"}
+            type="button"
+            onClick={() => handleThemeChange("light")}
+          >
+            Light Mode
+          </button>
+
+          <button
+            className={theme === "dark" ? "primary narrow" : "secondary narrow"}
+            type="button"
+            onClick={() => handleThemeChange("dark")}
+          >
+            Dark Mode
+          </button>
+        </div>
+      </div>
       <hr />
       <div className="content spacedSection">
         <h2 style={{ textAlign: "center" }}>Notification Settings</h2>

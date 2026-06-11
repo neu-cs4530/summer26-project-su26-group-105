@@ -1,7 +1,7 @@
 /* eslint no-console: "off" */
 
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Login from "./pages/Login.tsx";
 import type { AuthContext } from "./contexts/LoginContext.ts";
 import Layout from "./components/Layout.tsx";
@@ -21,6 +21,7 @@ import NewThread from "./pages/NewThread.tsx";
 import TimeContextKeeper from "./components/UpdatingTimeContext.tsx";
 import Leaderboard from "./pages/Leaderboard.tsx";
 import Friends from "./pages/Friends.tsx";
+import type { ThemeMode } from "./components/Settings.tsx";
 
 /** If `true`, all incoming socket messages will be logged */
 const DEBUG_SOCKETS = false;
@@ -47,6 +48,24 @@ function NoSuchRoute() {
 
 export default function App() {
   const [auth, setAuth] = useState<AuthContext | null>(null);
+  useEffect(() => {
+    // local storage saves the theme even if the page is refreshed
+    //avoided adding this as a useState for this reason
+    const savedTheme = localStorage.getItem("theme");
+    //checks if its a valid theme
+    const isThemeMode = (theme: string | null): theme is ThemeMode => {
+      return theme === "light" || theme === "dark";
+    };
+
+    //if the saved theme is valid, then apply it to HTML
+    if (isThemeMode(savedTheme)) {
+      document.documentElement.dataset.theme = savedTheme;
+    } else {
+      //if not valid, default to light
+      document.documentElement.dataset.theme = "light";
+      localStorage.setItem("theme", "light");
+    }
+  }, []);
   return (
     socket && (
       <BrowserRouter>
