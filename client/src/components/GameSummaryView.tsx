@@ -44,7 +44,7 @@ export default function GameSummaryView({
         {gameIcons[type] ?? "🎮"}
       </div>
 
-      {/* Main info: title + meta */}
+      {/* Main info */}
       <div className="gameMain">
         <div className="gameTitle">
           <NavLink to={`/game/${gameId}`} onClick={(e) => e.stopPropagation()}>
@@ -52,7 +52,11 @@ export default function GameSummaryView({
           </NavLink>
         </div>
         <div className="gameMeta">
-          <DisplayName user={createdBy} /> · {timeSince(createdAt)}
+          <span onClick={(e) => e.stopPropagation()}>
+            <DisplayName user={createdBy} />
+          </span>
+          {" · "}
+          {timeSince(createdAt)}
         </div>
       </div>
 
