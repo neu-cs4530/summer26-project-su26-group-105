@@ -5,8 +5,27 @@
   grid-template-areas: "header header" "sidebar main";
   min-height: 100vh;
   --content-vh: calc(100vh - 3rem);
+  color: var(--text-color);
+  /* create the stars in the background */
+  background:
+    radial-gradient(circle at 8% 12%, var(--star-color) 0 2px, transparent 3px),
+    radial-gradient(circle at 18% 28%, var(--star-color) 0 1.5px, transparent 2.5px),
+    radial-gradient(circle at 30% 10%, var(--star-color) 0 2px, transparent 3px),
+    radial-gradient(circle at 42% 22%, var(--star-color) 0 1.5px, transparent 2.5px),
+    radial-gradient(circle at 58% 14%, var(--star-color) 0 2px, transparent 3px),
+    radial-gradient(circle at 72% 26%, var(--star-color) 0 1.5px, transparent 2.5px),
+    radial-gradient(circle at 84% 12%, var(--star-color) 0 2px, transparent 3px),
+    radial-gradient(circle at 92% 30%, var(--star-color) 0 1.5px, transparent 2.5px),
+    radial-gradient(circle at 12% 48%, var(--star-color) 0 1.5px, transparent 2.5px),
+    radial-gradient(circle at 26% 62%, var(--star-color) 0 2px, transparent 3px),
+    radial-gradient(circle at 48% 55%, var(--star-color) 0 1.5px, transparent 2.5px),
+    radial-gradient(circle at 66% 68%, var(--star-color) 0 2px, transparent 3px),
+    radial-gradient(circle at 82% 58%, var(--star-color) 0 1.5px, transparent 2.5px),
+    radial-gradient(circle at 90% 78%, var(--star-color) 0 2px, transparent 3px),
+    linear-gradient(135deg, var(--page-background), var(--page-background-alt));
 }
 
 .right_main {
   grid-area: main;
+  padding: 1.5rem;
 }
