@@ -6,10 +6,14 @@ const GAME_API_URL = `/api/game`;
 /**
  * Sends a POST request to create a game
  */
-export const createGame = async (auth: UserAuth, gameKey: GameKey): Promise<GameInfo> => {
+export const createGame = async (
+  auth: UserAuth,
+  gameKey: GameKey,
+  friendOnly: boolean,
+): Promise<GameInfo> => {
   const res = await api.post<GameInfo | ErrorMsg>(`${GAME_API_URL}/create`, {
     auth,
-    payload: gameKey,
+    payload: { gameKey, friendOnly },
   });
   if ("error" in res.data) throw new Error(res.data.error);
   return res.data;

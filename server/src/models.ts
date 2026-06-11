@@ -69,6 +69,7 @@ export interface GameRecord {
   createdBy: RecordId; // References User records
   winner?: RecordId;
   endedAt?: DateISO;
+  friendOnly?: boolean; // friends only gameplay
 }
 
 /**

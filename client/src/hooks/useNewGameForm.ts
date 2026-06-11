@@ -1,5 +1,5 @@
 import type { GameKey } from "@gamenite/shared";
-import { type ChangeEvent, type SubmitEvent, useState } from "react";
+import { type ChangeEvent, type FormEvent, useState } from "react";
 import useAuth from "./useAuth.ts";
 import { useNavigate } from "react-router-dom";
 import { createGame } from "../services/gameService.ts";
@@ -10,11 +10,13 @@ import useLoginContext from "./useLoginContext.ts";
  * @throws if outside a LoginContext
  * @returns an object containing
  *  - Form value `gameKey`
+ *  - Form value `friendOnly`
  *  - Possibly-null error message `err`
- *  - Form handlers `handleInputChange` and `handleSubmit`
+ *  - Form handlers `handleInputChange`, `toggleFriendOnly`, and `handleSubmit`
  */
 export default function useNewGameForm() {
   const [gameKey, setGameKey] = useState<GameKey | "">("");
+  const [friendOnly, setFriendOnly] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const auth = useAuth();
   const { socket } = useLoginContext();
@@ -28,7 +30,11 @@ export default function useNewGameForm() {
     setGameKey(e.target.value as GameKey | "");
   };
 
-  const handleSubmit = async (event: SubmitEvent<HTMLFormElement>) => {
+  const toggleFriendOnly = () => {
+    setFriendOnly((v) => !v);
+  };
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     if (gameKey === "") {
@@ -37,7 +43,7 @@ export default function useNewGameForm() {
     }
     setErr(null);
     try {
-      const game = await createGame(auth, gameKey);
+      const game = await createGame(auth, gameKey, friendOnly);
       socket.emit("friendGameCreated", { auth, payload: game.gameId });
       await navigate(`/game/${game.gameId}`);
     } catch (err) {
@@ -47,8 +53,10 @@ export default function useNewGameForm() {
 
   return {
     gameKey,
+    friendOnly,
     err,
     handleInputChange,
+    toggleFriendOnly,
     handleSubmit,
   };
 }

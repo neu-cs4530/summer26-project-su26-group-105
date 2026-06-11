@@ -7,6 +7,8 @@ import { guessGameService } from "../games/guess.ts";
 import { oneGameService } from "../games/one.ts";
 import { type GameViewUpdates, type UserWithId } from "../types.ts";
 import { GameRepo } from "../repository.ts";
+import { getFriends } from "./friend.service.ts";
+
 /**
  * The service interface for individual games
  */
@@ -35,7 +37,14 @@ async function populateGameInfo(gameId: string): Promise<GameInfo> {
     type: game.type,
     status: !game.state ? "waiting" : game.done ? "done" : "active",
     minPlayers: gameServices[game.type].minPlayers,
+    friendOnly: game.friendOnly ?? false,
   };
+}
+
+/** Returns true if userId is a friend of the game creator. */
+async function isCreatorFriend(creatorId: string, userId: string): Promise<boolean> {
+  const friends = await getFriends(creatorId);
+  return friends.some((f) => f.userId === userId);
 }
 
 //gets the winner index if the game already stores a winner field
@@ -137,6 +146,7 @@ export async function createGame(
   user: UserWithId,
   type: GameKey,
   createdAt: Date,
+  friendOnly: boolean = false,
 ): Promise<GameInfo> {
   const chat = await createChat(createdAt);
   const gameId = await GameRepo.add({
@@ -146,6 +156,7 @@ export async function createGame(
     createdAt: createdAt.toISOString(),
     createdBy: user.userId,
     players: [user.userId],
+    friendOnly,
   });
   return populateGameInfo(gameId);
 }
@@ -183,6 +194,14 @@ export async function joinGame(gameId: string, user: UserWithId): Promise<GameIn
   }
   if (game.players.length === gameServices[game.type].maxPlayers) {
     throw new Error(`user ${user.username} joining full`);
+  }
+
+  // friends-only check, creator is always allowed, others must be friends with creator of game
+  if (game.friendOnly && game.createdBy !== user.userId) {
+    const isFriend = await isCreatorFriend(game.createdBy, user.userId);
+    if (!isFriend) {
+      throw new Error(`This is a friends-only game`);
+    }
   }
 
   game.players = [...game.players, user.userId];
@@ -284,6 +303,16 @@ export async function updateGame(gameId: string, user: UserWithId, move: unknown
 export async function viewGame(gameId: string, user: UserWithId) {
   const game = await GameRepo.find(gameId);
   if (!game) throw new Error(`user ${user.username} viewed an invalid game id`);
+
+  // friends-only check for spectating game, only friends with creator players are allowed in
+  const isPlayer = game.players.some((userId) => userId === user.userId);
+  if (game.friendOnly && !isPlayer && game.createdBy !== user.userId) {
+    const isFriend = await isCreatorFriend(game.createdBy, user.userId);
+    if (!isFriend) {
+      throw new Error(`This is a friends-only game`);
+    }
+  }
+
   const playerIndex = game.players.findIndex((userId) => userId === user.userId);
   let view: TaggedGameView | null = null;
   if (game.state) {
