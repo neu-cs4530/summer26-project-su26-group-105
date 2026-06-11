@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import useSocketsForFriends from "../hooks/useSocketsForFriends";
 import type { FriendEntry, SearchResult } from "@gamenite/shared/src/friend.types";
-import { createPortal } from "react-dom";
 import Modal from "../components/Modal";
+import ProfileImage from "../components/ProfileImage";
 
 type Tab = "friends" | "pending" | "search" | "blocked";
 
@@ -77,13 +78,13 @@ function ThreeDotMenu({ onRemove, onBlock }: ThreeDotMenuProps) {
             style={{
               display: "flex",
               alignItems: "center",
-              gap: "0.5rem",
               width: "100%",
               padding: "0.6rem 1rem",
               background: "none",
               border: "none",
               cursor: "pointer",
               textAlign: "left",
+              whiteSpace: "nowrap",
             }}
             onClick={() => {
               setOpen(false);
@@ -255,6 +256,11 @@ export default function Friends() {
                       marginBottom: "0.5rem",
                     }}
                   >
+                    <ProfileImage
+                      src={"image" in f ? f.image : null}
+                      size="small"
+                      activityStatus={"activityStatus" in f ? f.activityStatus : undefined}
+                    />
                     <span style={{ flex: 1 }}>
                       {f.display} <span className="smallAndGray">@{f.username}</span>
                     </span>
@@ -389,6 +395,7 @@ export default function Friends() {
                     marginBottom: "0.5rem",
                   }}
                 >
+                  <ProfileImage src={null} size="small" blocked />
                   <span style={{ flex: 1 }} className="smallAndGray">
                     @{f.username}
                   </span>

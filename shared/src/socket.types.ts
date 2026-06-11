@@ -13,7 +13,7 @@ import {
   type TaggedGameView,
 } from "./game.types.ts";
 import { type SafeUserInfo } from "./user.types.ts";
-import { type FriendEntry, type SearchResult } from "./friend.types.ts";
+import { type ActivityStatus, type FriendEntry, type SearchResult } from "./friend.types.ts";
 
 /**
  * The Socket.io interface for client to server communication
@@ -36,6 +36,8 @@ export interface ClientToServerEvents {
   gameWatch: (payload: WithAuth<string>) => void;
   friendGameCreated: (payload: WithAuth<string>) => void;
   gameAddBot: (payload: WithAuth<string>) => void; // string represents the gameId
+  setStatus: (payload: WithAuth<{ status: ActivityStatus }>) => void;
+  userConnect: (payload: WithAuth<Record<string, never>>) => void;
 }
 
 /**
@@ -57,6 +59,11 @@ export interface ServerToClientEvents {
     blocked: FriendEntry[];
   }) => void;
   friendSearchResults: (payload: { results: SearchResult[] }) => void;
+  friendStatusUpdated: (payload: {
+    userId: string;
+    username: string | null;
+    status: ActivityStatus;
+  }) => void;
   gamePlayersUpdated: (payload: SafeUserInfo[]) => void;
   gameStateUpdated: (payload: TaggedGameView & { forPlayer: boolean }) => void;
   gameWatched: (payload: GamePlayInfo) => void;
