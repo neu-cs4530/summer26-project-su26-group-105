@@ -13,9 +13,10 @@ export interface FriendEntry {
  * Represents a user search result, based on their relationship to the
  * user that is searching.
  */
-export interface SearchResult {
+export interface SearchResult<FriendOnly = false> {
   userId: string;
   username: string;
   display: string;
   relationship: "friend" | "incoming" | "outgoing" | "none";
+  friendId: FriendOnly extends true ? string : undefined; // included if friend-only search
 }

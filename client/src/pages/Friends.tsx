@@ -139,14 +139,15 @@ export default function Friends() {
   const [searchInput, setSearchInput] = useState("");
 
   useEffect(() => {
-    if (tab !== "search") return;
+    if (!["search", "friends"].includes(tab)) return;
+    const searchType = tab === "search" ? ("all" as const) : ("existing" as const);
     const timer = setTimeout(() => {
-      searchUsers(searchInput);
+      searchUsers(searchInput, searchType);
     }, 300);
     return () => clearTimeout(timer);
   }, [searchInput, tab, searchUsers]);
 
-  function confirmRemove(f: FriendEntry) {
+  function confirmRemove(f: { display: string; username: string; friendId: string }) {
     setModal({
       message: `Warning! You are about to remove ${f.display} (@${f.username}) as a friend.
                     To befriend them again, a new request would be necessary. Click OK if you wish to proceed.`,
@@ -157,9 +158,9 @@ export default function Friends() {
     });
   }
 
-  function confirmBlock(f: FriendEntry) {
+  function confirmBlock(f: { display: string; username: string }) {
     setModal({
-      message: `Warning! Blocking ${f.display} (@${f.username}) means you can no longer view 
+      message: `Warning! Blocking ${f.display} (@${f.username}) means you can no longer view
                     each other's profiles or play together. Click OK if you wish to proceed.`,
       onConfirm: () => {
         blockUser(f.username);
@@ -170,7 +171,7 @@ export default function Friends() {
 
   function confirmUnblock(f: FriendEntry) {
     setModal({
-      message: `Are you sure you want to unblock ${f.display} (@${f.username})? They will be 
+      message: `Are you sure you want to unblock ${f.display} (@${f.username})? They will be
                     able to find you and send you a friend request again.`,
       onConfirm: () => {
         unblockUser(f.username);
@@ -186,6 +187,8 @@ export default function Friends() {
     if (relationship === "outgoing") return <span className="smallAndGray"> · Request sent</span>;
     return null;
   }
+
+  const friendsTabFriends = searchInput.length ? searchResults : friends;
 
   return (
     <div className="content spacedSection">
@@ -230,27 +233,39 @@ export default function Friends() {
 
       {tab === "friends" && (
         <div className="spacedSection">
-          {friends.length === 0 ? (
+          <input
+            className="widefill notTooWide"
+            placeholder="Search by username or display name..."
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            autoFocus
+          />
+          {friendsTabFriends.length === 0 ? (
             <p className="smallAndGray">No friends yet. Use the Add Friend tab to get started!</p>
           ) : (
-            <ul style={{ listStyle: "none", padding: 0 }}>
-              {friends.map((f: FriendEntry) => (
-                <li
-                  key={f.friendId}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "0.5rem",
-                    marginBottom: "0.5rem",
-                  }}
-                >
-                  <span style={{ flex: 1 }}>
-                    {f.display} <span className="smallAndGray">@{f.username}</span>
-                  </span>
-                  <ThreeDotMenu onRemove={() => confirmRemove(f)} onBlock={() => confirmBlock(f)} />
-                </li>
-              ))}
-            </ul>
+            <>
+              <ul style={{ listStyle: "none", padding: 0 }}>
+                {friendsTabFriends.map((f: FriendEntry | SearchResult<true>) => (
+                  <li
+                    key={f.userId}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "0.5rem",
+                      marginBottom: "0.5rem",
+                    }}
+                  >
+                    <span style={{ flex: 1 }}>
+                      {f.display} <span className="smallAndGray">@{f.username}</span>
+                    </span>
+                    <ThreeDotMenu
+                      onRemove={() => confirmRemove(f)}
+                      onBlock={() => confirmBlock(f)}
+                    />
+                  </li>
+                ))}
+              </ul>
+            </>
           )}
         </div>
       )}
