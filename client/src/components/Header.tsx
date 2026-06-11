@@ -12,7 +12,7 @@ export default function Header() {
 
   return (
     <div id="header" className="header">
-      <div className="title">GameNite!</div>
+      <div className="title">LazyNite💤</div>
       <span>
         signed in as <ProfileImage src={user.image} size="small" /> {user.display}
       </span>
