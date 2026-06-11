@@ -49,6 +49,11 @@
   text-overflow: ellipsis;
 }
 
+.gameTitle a {
+  color: var(--text-color);
+  text-decoration-color: var(--text-color);
+}
+
 .gameMeta {
   font-size: 0.78rem;
   color: var(--gray-foreground, #80848e);

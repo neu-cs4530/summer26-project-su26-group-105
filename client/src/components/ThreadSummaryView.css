@@ -19,5 +19,6 @@
 
 .threadSummary .mid {
   flex-grow: 1;
-  color: cornflowerblue;
+  color: var(--text-color);
+  text-decoration-color: var(--text-color);
 }
