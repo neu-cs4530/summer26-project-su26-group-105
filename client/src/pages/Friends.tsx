@@ -78,13 +78,13 @@ function ThreeDotMenu({ onRemove, onBlock }: ThreeDotMenuProps) {
             style={{
               display: "flex",
               alignItems: "center",
-              gap: "0.5rem",
               width: "100%",
               padding: "0.6rem 1rem",
               background: "none",
               border: "none",
               cursor: "pointer",
               textAlign: "left",
+              whiteSpace: "nowrap",
             }}
             onClick={() => {
               setOpen(false);
