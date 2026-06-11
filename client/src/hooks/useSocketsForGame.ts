@@ -63,6 +63,10 @@ export default function useSocketsForGame(gameId: string, initialPlayers: SafeUs
     socket.emit("gameStart", { auth, payload: gameId });
   }
 
+  function addBot() {
+    socket.emit("gameAddBot", { auth, payload: gameId });
+  }
+
   return {
     hasWatched,
     players,
@@ -70,5 +74,6 @@ export default function useSocketsForGame(gameId: string, initialPlayers: SafeUs
     view,
     joinGame,
     startGame,
+    addBot,
   };
 }

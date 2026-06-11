@@ -23,6 +23,7 @@ export interface GameInfo {
   createdAt: Date;
   createdBy: SafeUserInfo;
   minPlayers: number;
+  maxPlayers?: number;
   winner?: string;
   friendOnly?: boolean;
   endedAt?: Date;

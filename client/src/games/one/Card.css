@@ -1,0 +1,46 @@
+.one-card {
+  position: absolute;
+  aspect-ratio: 1/1.55;
+  width: 10%;
+  border-radius: 5px;
+
+  border: 4px solid white;
+
+  --card-color: black;
+  --text-color: white;
+  background-color: var(--card-color);
+  color: var(--text-color);
+
+  translate: -50% -50%;
+
+  transition:
+    left 0.3s ease,
+    top 0.3s ease,
+    rotate 0.3s ease;
+
+  &[data-color="red"] {
+    --card-color: red;
+    --text-color: white;
+  }
+
+  &[data-color="blue"] {
+    --card-color: blue;
+    --text-color: white;
+  }
+
+  &[data-color="green"] {
+    --card-color: green;
+    --text-color: white;
+  }
+
+  &[data-color="yellow"] {
+    --card-color: yellow;
+    --text-color: black;
+  }
+
+  &[data-back="true"] {
+    background:
+      url("../../assets/one.png") center/contain no-repeat,
+      #333;
+  }
+}

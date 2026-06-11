@@ -37,6 +37,7 @@ async function populateGameInfo(gameId: string): Promise<GameInfo> {
     type: game.type,
     status: !game.state ? "waiting" : game.done ? "done" : "active",
     minPlayers: gameServices[game.type].minPlayers,
+    maxPlayers: gameServices[game.type].maxPlayers ?? undefined,
     friendOnly: game.friendOnly ?? false,
   };
 }

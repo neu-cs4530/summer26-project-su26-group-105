@@ -1,0 +1,111 @@
+.one-game {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+
+  background: radial-gradient(circle at 50% 50%, red, black, red);
+  background-size: 100% 100%;
+  background-position: center;
+  animation: growing-background 100s ease-out infinite alternate;
+
+  .color-picker {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(1px);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    .color-options {
+      display: flex;
+    }
+  }
+
+  .skip-button {
+    position: absolute;
+    bottom: 10%;
+    right: 10%;
+
+    border: 0;
+    outline: 0;
+    color: yellow;
+    background: red;
+    rotate: -10deg;
+    font-size: 1.5vw;
+    border-radius: 1000px;
+  }
+
+  .players {
+    color: white;
+    &.players-left {
+      position: absolute;
+      top: 12.5%;
+      height: 75%;
+      left: 2rem;
+      display: flex;
+      flex-direction: column-reverse;
+      justify-content: space-evenly;
+    }
+    &.players-top {
+      position: absolute;
+      display: flex;
+      width: 75%;
+      left: 12.5%;
+      top: 2rem;
+      justify-content: space-evenly;
+    }
+    &.players-right {
+      position: absolute;
+      top: 12.5%;
+      height: 75%;
+      right: 2rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-evenly;
+    }
+  }
+
+  .direction-indicator {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    translate: -50% -50%;
+    width: 50%;
+    aspect-ratio: 1;
+    background: conic-gradient(from 0deg at 50% 50%, red, yellow, green, blue, red);
+    mask: radial-gradient(circle, transparent 45%, white 45% 49%, transparent 49%);
+    border-radius: 50%;
+    rotate: 0deg;
+    &[data-direction="clockwise"] {
+      animation: spin 4s linear infinite;
+    }
+    &[data-direction="counterclockwise"] {
+      animation: spin 4s linear infinite reverse;
+    }
+  }
+}
+
+@keyframes spin {
+  from {
+    rotate: 0deg;
+  }
+  to {
+    rotate: 360deg;
+  }
+}
+
+@keyframes growing-background {
+  0% {
+    background-size: 100% 100%;
+  }
+  50% {
+    background-size: 200% 200%;
+  }
+  100% {
+    background-size: 100% 100%;
+  }
+}

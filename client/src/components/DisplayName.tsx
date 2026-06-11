@@ -4,6 +4,7 @@ import type { SafeUserInfo } from "@gamenite/shared";
 import ProfileImage from "./ProfileImage";
 import "./DisplayName.css";
 import { useId } from "react";
+import type { ReactNode } from "react";
 import useUserCard from "../hooks/useUserCard";
 import { useFriendStatus } from "../contexts/FriendStatusContext";
 
@@ -36,6 +37,19 @@ export default function DisplayName({ user, showFullInfo }: DisplayNameProps) {
   const handleMouseLeave = () => {
     stopDisplaying(anchorName);
   };
+
+  if (user.isBot) {
+    return (
+      <div
+        className="display-name"
+        style={{ anchorName }}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+      >
+        <ProfileImage src={user.image} size="small" /> {user.display}
+      </div>
+    );
+  }
 
   return (
     <Link

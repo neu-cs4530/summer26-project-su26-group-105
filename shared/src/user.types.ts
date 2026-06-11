@@ -14,6 +14,7 @@ export interface SafeUserInfo {
   bio: string;
   socialMedias: SocialMedia[];
   createdAt: Date;
+  isBot: boolean;
 }
 
 /**
