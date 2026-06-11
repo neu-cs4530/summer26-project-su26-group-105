@@ -26,7 +26,7 @@ export default function useSocketsForFriends() {
   const [incoming, setIncoming] = useState<FriendEntry[]>([]);
   const [outgoing, setOutgoing] = useState<FriendEntry[]>([]);
   const [blocked, setBlocked] = useState<FriendEntry[]>([]);
-  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
+  const [searchResults, setSearchResults] = useState<SearchResult<boolean>[]>([]);
 
   useEffect(() => {
     const handleFriendListUpdated = (payload: {

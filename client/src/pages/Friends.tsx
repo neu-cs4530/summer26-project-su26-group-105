@@ -147,7 +147,7 @@ export default function Friends() {
     return () => clearTimeout(timer);
   }, [searchInput, tab, searchUsers]);
 
-  function confirmRemove(f: { display: string; username: string }) {
+  function confirmRemove(f: { display: string; username: string; friendId: string }) {
     setModal({
       message: `Warning! You are about to remove ${f.display} (@${f.username}) as a friend.
                     To befriend them again, a new request would be necessary. Click OK if you wish to proceed.`,
@@ -245,7 +245,7 @@ export default function Friends() {
           ) : (
             <>
               <ul style={{ listStyle: "none", padding: 0 }}>
-                {friendsTabFriends.map((f: FriendEntry | SearchResult) => (
+                {friendsTabFriends.map((f: FriendEntry | SearchResult<true>) => (
                   <li
                     key={f.userId}
                     style={{
