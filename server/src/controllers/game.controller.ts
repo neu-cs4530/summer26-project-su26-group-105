@@ -310,7 +310,7 @@ export const socketAddBot: SocketAPI = (socket, io) => async (body) => {
  * using the registered bot brain for that specific game type.
  */
 function checkAndRunBotTurn(io: GameServer, gameId: string, currentPlayers: string[]) {
-  // 1-second pause for UI readability
+  // 2-second pause for UI readability
   setTimeout(async () => {
     const game = await GameRepo.find(gameId);
     if (!game || !game.state || game.done) return;
@@ -344,5 +344,5 @@ function checkAndRunBotTurn(io: GameServer, gameId: string, currentPlayers: stri
       // Recursively trigger the check for back-to-back bot sequences
       checkAndRunBotTurn(io, gameId, currentPlayers);
     }
-  }, 1000);
+  }, 2000);
 }
