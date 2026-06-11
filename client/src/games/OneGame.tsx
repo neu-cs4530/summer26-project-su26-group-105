@@ -4,6 +4,7 @@ import Card from "./one/Card.tsx";
 import { useState, type MouseEvent } from "react";
 import "./OneGame.css";
 import Player from "./one/Player.tsx";
+import DisplayName from "../components/DisplayName.tsx";
 
 export default function OneGame({
   view,
@@ -79,6 +80,8 @@ export default function OneGame({
       ? { ...view.discardTop, color: view.activeColor }
       : view.discardTop;
 
+  const winnerIdx = view.playerHandCounts.findIndex((count) => count === 0);
+
   return (
     <div onMouseMove={handleMouseMove} className="one-game">
       <div
@@ -112,7 +115,7 @@ export default function OneGame({
           />
         ))}
       </div>
-      <Card card={null} location={{ x: 10, y: 15 }} onClick={drawFunction} />
+      <Card card={null} location={{ x: 10, y: 15 }} onClick={drawFunction} isButton />
       <Card card={discardCard} location={{ x: 50, y: 50 }} />
       {view.yourHand.map((c, i) => {
         const loc = getHandCardCoordinates(i);
@@ -121,6 +124,7 @@ export default function OneGame({
           <Card
             card={c}
             key={c.id}
+            isButton
             onClick={moveFunction(c)}
             onHover={() => setHoveredCardIdx(i)}
             location={{ x: loc.x, y: loc.y }}
@@ -151,6 +155,13 @@ export default function OneGame({
               </button>
             ))}
           </div>
+        </div>
+      )}
+      {winnerIdx !== -1 && (
+        <div className="winner-overlay">
+          <h2>
+            <DisplayName user={players[winnerIdx]} showFullInfo /> wins!
+          </h2>
         </div>
       )}
     </div>
