@@ -2,6 +2,7 @@ import useLoginForm from "../hooks/useLoginForm.ts";
 import "./Login.css";
 import { useState } from "react";
 import type { AuthContext } from "../contexts/LoginContext.ts";
+import { WEBSITE_NAME } from "../util/consts.ts";
 
 interface LoginProps {
   setAuth: React.Dispatch<React.SetStateAction<AuthContext | null>>;
@@ -18,9 +19,9 @@ export default function Login({ setAuth }: LoginProps) {
 
   return (
     <div className="container">
-      <h1>GameNite</h1>
+      <h1>{WEBSITE_NAME}</h1>
       <form className="login" onSubmit={(e) => handleSubmit(e)}>
-        <h2>Log into GameNite</h2>
+        <h2 style={{ textAlign: "center" }}>Log In</h2>
         <input
           type="text"
           value={username}

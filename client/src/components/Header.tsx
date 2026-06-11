@@ -2,6 +2,7 @@ import useLoginContext from "../hooks/useLoginContext.ts";
 import "./Header.css";
 import { useNavigate } from "react-router-dom";
 import ProfileImage from "./ProfileImage.tsx";
+import { WEBSITE_NAME } from "../util/consts.ts";
 
 /**
  * Header component that renders the main title.
@@ -12,7 +13,7 @@ export default function Header() {
 
   return (
     <div id="header" className="header">
-      <div className="title">LazyNite💤</div>
+      <div className="title">{WEBSITE_NAME}💤</div>
       <span>
         signed in as <ProfileImage src={user.image} size="small" /> {user.display}
       </span>

@@ -5,3 +5,5 @@ export const gameNames: { [key in GameKey]: string } = {
   guess: "Number Guesser",
   one: "One",
 };
+
+export const WEBSITE_NAME = "LazyNite";
