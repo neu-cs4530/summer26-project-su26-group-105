@@ -13,7 +13,9 @@ import {
 } from "../services/game.service.ts";
 import { z } from "zod";
 import { logSocketError } from "./socket.controller.ts";
-import { checkAuth, enforceAuth } from "../services/auth.service.ts";
+import { checkAuth, enforceAuth, getUserByUsername } from "../services/auth.service.ts";
+import { getFriends } from "../services/friend.service.ts";
+import { populateSafeUserInfo } from "../services/user.service.ts";
 
 /**
  * Handle POST requests to `/api/game/create` by creating a game. The game
@@ -72,6 +74,15 @@ function userRoom(gameId: string, user: string) {
 }
 
 /**
+ * Creates socket room name for sending friend notifications
+ * @param userId the id of user who should get friend notification
+ * @returns socket room for that user's friend notification
+ */
+function friendNotificationRoom(userId: string) {
+  return `friend-${userId}`;
+}
+
+/**
  * Handle the socket request sent by a user when they load to a game page. The
  * server's job is to respond with full information about the game's current
  * players and the appropriate view of the game's state. The server also needs
@@ -108,6 +119,22 @@ export const socketJoinAsPlayer: SocketAPI = (socket, io) => async (body) => {
     const { auth, payload: gameId } = withAuth(z.string()).parse(body);
     const user = await enforceAuth(auth);
     const game = await joinGame(gameId, user);
+    const joiner = await populateSafeUserInfo(user.userId);
+    const friends = await getFriends(user.userId);
+
+    //sends game activity popup to each friend of user who joined
+    await Promise.all(
+      friends.map(async (friend) => {
+        const friendUser = await getUserByUsername(friend.username);
+        if (!friendUser) return;
+
+        //sends popup only to the friend's notification room
+        io.to(friendNotificationRoom(friendUser.userId)).emit("notificationPopup", {
+          type: "friendGameActivity",
+          message: `${joiner.display} joined a game.`,
+        });
+      }),
+    );
 
     // Let everyone know the user joined (`io` instead of `socket` includes
     // the joiner)
@@ -137,11 +164,52 @@ export const socketStart: SocketAPI = (socket, io) => async (body) => {
   try {
     const { auth, payload: gameId } = withAuth(z.string()).parse(body);
     const user = await enforceAuth(auth);
+    const starter = await populateSafeUserInfo(user.userId);
+    const friends = await getFriends(user.userId);
+
+    //sends game activity popup to each friend of the user who started a game
+    await Promise.all(
+      friends.map(async (friend) => {
+        const friendUser = await getUserByUsername(friend.username);
+        if (!friendUser) return;
+
+        //sends popup only to the friend's notification room
+        io.to(friendNotificationRoom(friendUser.userId)).emit("notificationPopup", {
+          type: "friendGameActivity",
+          message: `${starter.display} started a game.`,
+        });
+      }),
+    );
     sendViewUpdates(io, gameId, await startGame(gameId, user));
     const game = await GameRepo.find(gameId);
     if (game) {
       checkAndRunBotTurn(io, gameId, game.players);
     }
+  } catch (err) {
+    logSocketError(socket, err);
+  }
+};
+
+export const socketFriendGameCreated: SocketAPI = (socket, io) => async (body) => {
+  try {
+    const { auth } = withAuth(z.string()).parse(body);
+    const user = await enforceAuth(auth);
+
+    const creator = await populateSafeUserInfo(user.userId);
+    const friends = await getFriends(user.userId);
+
+    //sends game activity popup to each friend of user who created game
+    await Promise.all(
+      friends.map(async (friend) => {
+        const friendUser = await getUserByUsername(friend.username);
+        if (!friendUser) return;
+        //sends popup only to the friend's notification room
+        io.to(friendNotificationRoom(friendUser.userId)).emit("notificationPopup", {
+          type: "friendGameActivity",
+          message: `${creator.display} created a game.`,
+        });
+      }),
+    );
   } catch (err) {
     logSocketError(socket, err);
   }

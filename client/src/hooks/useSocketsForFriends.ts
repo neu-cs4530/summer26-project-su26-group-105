@@ -66,8 +66,8 @@ export default function useSocketsForFriends() {
     socket.emit("friendDecline", { auth, payload: { requestId } });
   }
 
-  function removeFriend(username: string) {
-    socket.emit("friendRemove", { auth, payload: { username } });
+  function removeFriend(requestId: string) {
+    socket.emit("friendRemove", { auth, payload: { requestId } });
   }
 
   function blockUser(username: string) {

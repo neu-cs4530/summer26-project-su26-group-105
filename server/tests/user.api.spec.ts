@@ -9,9 +9,13 @@ const baseUser = {
   createdAt: expect.any(String),
   image: null,
   socialMedias: [],
+};
+const selfUserSettings = {
   settings: {
-    receivesFriendGameNotifications: true,
     receivesFriendRequestNotifications: true,
+    receivesFriendAcceptedNotifications: true,
+    receivesGameInviteNotifications: true,
+    receivesFriendGameActivityNotifications: true,
   },
 };
 const auth1 = { username: "user1", password: "pwd1111" };
@@ -74,7 +78,10 @@ describe("POST /api/user/login", () => {
   it("should accept a correct username/password combination", async () => {
     response = await supertest(app).post("/api/user/login").send(auth1);
     expect(response.status).toBe(200);
-    expect(response.body).toStrictEqual(user1);
+    expect(response.body).toStrictEqual({
+      ...user1,
+      ...selfUserSettings,
+    });
   });
 });
 
@@ -106,6 +113,7 @@ describe("POST/api/user/:username", () => {
     expect(response.status).toBe(200);
     expect(response.body).toStrictEqual({
       ...user1,
+      ...selfUserSettings,
       display: "New User 1 Display",
     });
 
@@ -124,6 +132,7 @@ describe("POST/api/user/:username", () => {
     expect(response.status).toBe(200);
     expect(response.body).toStrictEqual({
       ...user1,
+      ...selfUserSettings,
       display: "New User 1 Display",
     });
 
@@ -143,6 +152,7 @@ describe("POST/api/user/:username", () => {
     expect(response.status).toBe(200);
     expect(response.body).toStrictEqual({
       ...user1,
+      ...selfUserSettings,
       display: "Newer User 1 Display",
     });
   });
@@ -158,6 +168,7 @@ describe("POST /api/user/signup", () => {
     expect(response.headers["content-type"]).toMatch(/^application.json/);
     expect(response.body).toStrictEqual({
       ...baseUser,
+      ...selfUserSettings,
       username,
       display: username,
     });

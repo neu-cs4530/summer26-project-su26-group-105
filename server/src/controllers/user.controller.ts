@@ -1,9 +1,16 @@
-import { type SafeUserInfo, withAuth, zUserAuth, zUserUpdateRequest } from "@gamenite/shared";
+import {
+  type SafeUserInfo,
+  withAuth,
+  zUserAuth,
+  zUserUpdateRequest,
+  type SafeSelfUserInfo,
+} from "@gamenite/shared";
 import {
   createUser,
   getUsersByUsername,
   populateSafeUserInfo,
   updateUser,
+  populateSafeSelfUserInfo,
 } from "../services/user.service.ts";
 import { type RestAPI } from "../types.ts";
 import { z } from "zod";
@@ -14,7 +21,7 @@ import { checkAuth, getUserByUsername } from "../services/auth.service.ts";
  * @param req The request containing username and password in the body.
  * @param res The response, either returning the user or an error.
  */
-export const postLogin: RestAPI<SafeUserInfo> = async (req, res) => {
+export const postLogin: RestAPI<SafeSelfUserInfo> = async (req, res) => {
   const userAuth = zUserAuth.safeParse(req.body);
   if (!userAuth.success) {
     res.status(400).send({ error: "Poorly-formed request" });
@@ -27,7 +34,7 @@ export const postLogin: RestAPI<SafeUserInfo> = async (req, res) => {
     return;
   }
 
-  res.send(await populateSafeUserInfo(user.userId));
+  res.send(await populateSafeSelfUserInfo(user.userId));
 };
 
 /**
@@ -35,7 +42,7 @@ export const postLogin: RestAPI<SafeUserInfo> = async (req, res) => {
  * @param req A request containing a new password
  * @param res The response, either returning the updated user or an error
  */
-export const postByUsername: RestAPI<SafeUserInfo, { username: string }> = async (req, res) => {
+export const postByUsername: RestAPI<SafeSelfUserInfo, { username: string }> = async (req, res) => {
   const body = withAuth(zUserUpdateRequest).safeParse(req.body);
   if (!body.success) {
     res.status(400).send({ error: "Poorly-formed request" });
@@ -57,7 +64,7 @@ export const postByUsername: RestAPI<SafeUserInfo, { username: string }> = async
  * @param res The response, either returning the created user or an error.
  * @returns A promise resolving to void.
  */
-export const postSignup: RestAPI<SafeUserInfo> = async (req, res) => {
+export const postSignup: RestAPI<SafeSelfUserInfo> = async (req, res) => {
   const userAuth = zUserAuth.safeParse(req.body);
   if (!userAuth.success) {
     res.status(400).send({ error: "Poorly-formed request" });
