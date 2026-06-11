@@ -58,6 +58,11 @@ export const getUserById = async (username: string): Promise<SafeUserInfo> => {
   return res.data;
 };
 
+/**
+ * Send a GET request for a user's recently played games
+ * @param username - The username
+ * @returns  - An array of the users recently played games, or an error message.
+ */
 export const getRecentlyPlayed = async (username: string): Promise<RecentlyPlayedEntry[]> => {
   const res = await api.get<RecentlyPlayedEntry[] | ErrorMsg>(
     `${USER_API_URL}/${username}/recently-played`,

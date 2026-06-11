@@ -90,6 +90,11 @@ export const getByUsername: RestAPI<SafeUserInfo, { username: string }> = async 
   res.send(await populateSafeUserInfo(user.userId));
 };
 
+/**
+ * Retrieves a list of recently played games for a user.
+ * @param req The request containing the username as a route parameter.
+ * @param res The response, either returning the list of recently played games (200) or an error.
+ */
 export const getRecentlyPlayed: RestAPI<RecentlyPlayedEntry[], { username: string }> = async (
   req,
   res,

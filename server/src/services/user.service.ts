@@ -82,6 +82,11 @@ export async function populateSafeSelfUserInfo(userId: string): Promise<SafeSelf
   return recordToSafeSelfUserInfo(record);
 }
 
+/**
+ * Retrieves a list of recently played games for a user, sorted by most recent.
+ * @param userId - Valid user id.
+ * @returns a list of the 3 most recently played games, sorted by most recent
+ */
 export async function populateRecentlyPlayedGames(userId: string): Promise<RecentlyPlayedEntry[]> {
   const gameKeys = await GameRepo.getAllKeys();
   const games = (await GameRepo.getMany(gameKeys)).map((game, i) => [gameKeys[i], game] as const);
