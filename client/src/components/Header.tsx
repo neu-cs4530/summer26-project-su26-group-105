@@ -4,6 +4,7 @@ import "./Header.css";
 import { useNavigate } from "react-router-dom";
 import ProfileImage from "./ProfileImage.tsx";
 import type { ActivityStatus } from "@gamenite/shared/src/friend.types.ts";
+import { WEBSITE_NAME } from "../util/consts.ts";
 
 // activity status icons
 const STATUS_OPTIONS: { value: ActivityStatus; label: string; description: string }[] = [
@@ -45,7 +46,8 @@ export default function Header() {
 
   return (
     <div id="header" className="header">
-      <div className="title">GameNite!</div>
+      <div className="title">{WEBSITE_NAME}💤</div>
+
       <span className="header-user">
         signed in as {/* Clickable avatar with status dot, opens activity status picker */}
         <div ref={menuRef} className="header-avatar-wrapper">

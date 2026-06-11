@@ -6,13 +6,17 @@
   padding-inline: 1rem;
   grid-template-columns: 1fr repeat(3, max-content);
   width: 100%;
-  background: var(--gray-background);
+  color: var(--text-color);
+  background: var(--card-background);
+  border-bottom: 1px solid var(--border-color);
+  box-shadow: 0 2px 12px var(--shadow-color);
   grid-area: header;
 }
 
 .title {
   font-size: 1.5rem;
   font-weight: 800;
+  color: var(--text-color);
 }
 
 .header-user {

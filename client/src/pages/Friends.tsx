@@ -4,6 +4,7 @@ import useSocketsForFriends from "../hooks/useSocketsForFriends";
 import type { FriendEntry, SearchResult } from "@gamenite/shared/src/friend.types";
 import Modal from "../components/Modal";
 import ProfileImage from "../components/ProfileImage";
+import "./Friends.css";
 
 type Tab = "friends" | "pending" | "search" | "blocked";
 
@@ -203,7 +204,7 @@ export default function Friends() {
 
       <h2>Friends</h2>
 
-      <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1rem" }}>
+      <div className="friendsTabBar">
         <button
           className={tab === "friends" ? "primary narrow" : "secondary narrow"}
           onClick={() => setTab("friends")}
