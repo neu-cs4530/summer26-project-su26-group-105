@@ -161,7 +161,7 @@ export default function OneGame({
       {isUserTurn &&
         view.yourHand.length > 0 &&
         view.yourHand.every((c) => !isValidMove(c)) &&
-        !view.hasDrawnThisTurn && <div className="no-valid">No valid moves - draw a card!</div>}
+        !view.hasDrawnThisTurn && <div className="no-valid">no cards to play, draw one!</div>}
       {winnerIdx !== -1 && (
         <div className="winner-overlay">
           <h2>
