@@ -22,6 +22,13 @@
     align-items: center;
     .color-options {
       display: flex;
+      gap: 1em;
+      button {
+        outline: none;
+        border: 0;
+        border-radius: 5px;
+        padding: 0.5em 1em;
+      }
     }
   }
 
@@ -102,6 +109,16 @@
       align-items: center;
       gap: 1ch;
     }
+  }
+
+  .no-valid {
+    position: absolute;
+    color: white;
+    filter: drop-shadow(0 0 5px black);
+    top: 80%;
+    left: 50%;
+    translate: -50% -50%;
+    pointer-events: none;
   }
 }
 

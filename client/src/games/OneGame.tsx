@@ -112,6 +112,7 @@ export default function OneGame({
             user={p}
             numCards={view.playerHandCounts[players.indexOf(p)]}
             isTurn={players.indexOf(p) === view.nextPlayer}
+            key={p.username}
           />
         ))}
       </div>
@@ -145,7 +146,7 @@ export default function OneGame({
               <button
                 key={color}
                 className="color-button"
-                style={{ backgroundColor: color }}
+                style={{ backgroundColor: color, color: color === "yellow" ? "black" : "white" }}
                 onClick={() => {
                   makeMove({ type: "play", cardId: wildCardId, chosenColor: color });
                   setWildCardId(null);
@@ -157,6 +158,10 @@ export default function OneGame({
           </div>
         </div>
       )}
+      {isUserTurn &&
+        view.yourHand.length > 0 &&
+        view.yourHand.every((c) => !isValidMove(c)) &&
+        !view.hasDrawnThisTurn && <div className="no-valid">No valid moves - draw a card!</div>}
       {winnerIdx !== -1 && (
         <div className="winner-overlay">
           <h2>
