@@ -13,9 +13,10 @@
   .modal {
     min-width: max(300px, 25vw);
     min-height: 150px;
-    background: var(--gray-background);
+    background: var(--card-background-solid);
+    border: 1px solid var(--border-color);
     border-radius: 10px;
-    box-shadow: 0 10px 10px 1px gray;
+    box-shadow: 0 0 18px var(--shadow-color);
     padding: 1rem;
     display: flex;
     flex-direction: column;

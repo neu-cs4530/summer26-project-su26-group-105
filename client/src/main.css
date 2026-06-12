@@ -3,19 +3,82 @@
 /** Core fonts **/
 * {
   font-family: Arial, Helvetica, sans-serif;
-  --gray-background: #f7f7f7;
-  --gray-foreground: #555;
+  box-sizing: border-box;
 }
 
+:root {
+  --star-color: rgba(122, 78, 190, 0.45);
+  --gray-background: #f4edff;
+  --gray-foreground: #665772;
+
+  /* main page */
+  --page-background: #f4edff;
+  --page-background-alt: #dfccff;
+  --cloud-one: #ffffffcc;
+  --cloud-two: #cbb6ff99;
+
+  /* card and text colors */
+  --card-background: #ffffffdd;
+  --card-background-solid: #faf7f7;
+  --text-color: #261334;
+  --muted-text: #6d5b78;
+  --border-color: #d6c3ea;
+
+  /* button */
+  --primary-button: #7b4fd6;
+  --primary-button-hover: #653ec0;
+  --secondary-button: #a984e8;
+  --secondary-button-hover: #8c68d1;
+  --cancel-button: #c05273;
+  --button-text: #faf7f7;
+
+  --shadow-color: #2b163f33;
+}
+
+/* when has theme dark, change all of these to dark mode colors */
+:root[data-theme="dark"] {
+  --star-color: rgba(255, 255, 255, 0.7);
+  --gray-background: #201329;
+  --gray-foreground: #d7c6e8;
+
+  /* main page */
+  --page-background: #160d20;
+  --page-background-alt: #29163d;
+  --cloud-one: #5a3d7a66;
+  --cloud-two: #9d7bdd55;
+
+  /* card and text colors */
+  --card-background: #2b1a3add;
+  --card-background-solid: #2b1a3a;
+  --text-color: #f8f0ff;
+  --muted-text: #d8c7e8;
+  --border-color: #4b315f;
+
+  /* button */
+  --primary-button: #9d7bdd;
+  --primary-button-hover: #b89af0;
+  --secondary-button: #6f4caf;
+  --secondary-button-hover: #8560c7;
+  --cancel-button: #b84d6b;
+  --button-text: #faf7f7;
+
+  --shadow-color: #00000066;
+}
+
+body {
+  margin: 0;
+  background-color: var(--page-background);
+  color: var(--text-color);
+}
 /** Buttons **/
 button {
   cursor: pointer;
 }
 
 button.widefill {
-  color: #fff;
-  background-color: oklch(0.45 0.1 260);
-  border-radius: 0.5rem;
+  color: var(--button-text);
+  background-color: var(--primary-button);
+  border-radius: 0.75rem;
   width: 100%;
   border: none;
   font-weight: 600;
@@ -23,7 +86,7 @@ button.widefill {
 }
 
 button.narrowcenter {
-  border-radius: 0.5rem;
+  border-radius: 0.75rem;
   padding-inline: 1rem;
   margin-inline: auto;
   border: none;
@@ -41,7 +104,7 @@ button.narrow {
 
 button.small {
   font-size: 0.8em;
-  border-radius: 0.5rem;
+  border-radius: 0.75rem;
   padding: 0.25em 0.75em;
   border: none;
   font-weight: 600;
@@ -49,45 +112,51 @@ button.small {
 }
 
 button.primary {
-  color: #fff;
-  background-color: oklch(0.55 0.1 260);
+  color: var(--button-text);
+  background-color: var(--primary-button);
 }
 
 button.primary:hover {
-  background-color: oklch(0.45 0.1 260);
+  background-color: var(--primary-button-hover);
 }
 
 button.secondary {
-  color: #fff;
-  background-color: oklch(0.55 0.1 140);
+  color: var(--button-text);
+  background-color: var(--secondary-button);
 }
 
 button.cancel {
-  color: #fff;
-  background-color: oklch(0.55 0.1 0);
+  color: var(--button-text);
+  background-color: var(--cancel-button);
 }
 
 button.secondary:hover {
-  background-color: oklch(0.45 0.1 140);
+  background-color: var(--secondary-button-hover);
 }
 
 button.secondary:disabled {
-  background-color: oklch(0.75 0 0);
-  color: oklch(0.9 0 0);
+  background-color: var(--border-color);
+  color: var(--muted-text);
 }
 
 /** Input fields **/
+input,
+textarea {
+  color: var(--text-color);
+  background-color: var(--card-background-solid);
+}
+
 textarea {
   resize: block;
-  border-radius: 0.5rem;
+  border-radius: 0.75rem;
   padding: 0.5rem;
-  border: 1px solid var(--gray-foreground);
+  border: 1px solid var(--border-color);
   min-height: 2.5rem;
 }
 
 .widefill {
-  border-radius: 0.5rem;
-  border: 1px solid var(--gray-foreground);
+  border-radius: 0.75rem;
+  border: 1px solid var(--border-color);
   width: 100%;
   min-height: 2.5rem;
   padding-inline: 0.5rem;
@@ -96,14 +165,14 @@ textarea {
 /** Other UI defaults **/
 hr {
   border: 0;
-  border-top: 1px dashed black;
+  border-top: 1px dashed var(--border-color);
   margin-top: 0.5rem;
   margin-bottom: 0.5rem;
 }
 
 /** Error reporting **/
 .error-message {
-  color: red;
+  color: #ff5c8a;
   font-size: 14px;
 }
 
@@ -147,11 +216,11 @@ hr {
 .dottedListItem {
   display: flex;
   flex-direction: row;
-  border-top: #000000 1px dashed;
+  border-top: var(--border-color) 1px dashed;
 }
 
 .dottedList {
-  border-bottom: #000000 1px dashed;
+  border-bottom: var(--border-color) 1px dashed;
 }
 
 .notTooWide {
@@ -160,5 +229,11 @@ hr {
 
 .smallAndGray {
   font-size: 0.75rem;
-  color: var(--gray-foreground);
+  color: var(--muted-text);
+}
+
+.theme-toggle-row {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
 }

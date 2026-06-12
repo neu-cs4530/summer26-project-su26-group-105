@@ -4,6 +4,7 @@ import GuessGame from "./GuessGame.tsx";
 import type { JSX } from "react";
 import useLoginContext from "../hooks/useLoginContext.ts";
 import useAuth from "../hooks/useAuth.ts";
+import OneGame from "./OneGame.tsx";
 
 interface GameDispatchProps {
   userPlayerIndex: number;
@@ -32,7 +33,6 @@ export default function GameDispatch({
     case "guess":
       return <GuessGame {...{ ...childProps, view: view.view }} />;
     case "one":
-      // Temporary placeholder until frontend exists
-      return <div>Playing One! UI Coming Soon.</div>;
+      return <OneGame {...{ ...childProps, view: view.view }} />;
   }
 }

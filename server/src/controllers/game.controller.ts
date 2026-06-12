@@ -23,8 +23,17 @@ import { populateSafeUserInfo } from "../services/user.service.ts";
  */
 export const postCreate: RestAPI<GameInfo> = async (req, res) => {
   const body = withAuth(
+<<<<<<< HEAD
     z.object({ gameKey: zGameKey, friendOnly: z.boolean().default(false) }),
   ).safeParse(req.body);
+=======
+    z.union([
+      z.object({ gameKey: zGameKey, friendOnly: z.boolean().default(false) }),
+      zGameKey.transform((key) => ({ gameKey: key, friendOnly: false })),
+    ]),
+  ).safeParse(req.body);
+
+>>>>>>> origin/main
   if (body.error) {
     res.status(400).send({ error: "Poorly-formed request" });
     return;
@@ -306,7 +315,7 @@ export const socketAddBot: SocketAPI = (socket, io) => async (body) => {
  * using the registered bot brain for that specific game type.
  */
 function checkAndRunBotTurn(io: GameServer, gameId: string, currentPlayers: string[]) {
-  // 1-second pause for UI readability
+  // 2-second pause for UI readability
   setTimeout(async () => {
     const game = await GameRepo.find(gameId);
     if (!game || !game.state || game.done) return;
@@ -340,5 +349,5 @@ function checkAndRunBotTurn(io: GameServer, gameId: string, currentPlayers: stri
       // Recursively trigger the check for back-to-back bot sequences
       checkAndRunBotTurn(io, gameId, currentPlayers);
     }
-  }, 1000);
+  }, 2000);
 }

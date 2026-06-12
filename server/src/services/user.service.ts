@@ -18,6 +18,7 @@ function recordToSafeUserInfo(record: UserRecord): SafeUserInfo {
     bio: record.bio,
     image: record.image,
     socialMedias: record.socialMedias,
+    isBot: false,
   };
 }
 
@@ -58,6 +59,7 @@ export async function populateSafeUserInfo(userId: string): Promise<SafeUserInfo
       image: null,
       bio: `Hi, I'm ${displayName}!`,
       socialMedias: [],
+      isBot: true,
     };
   }
   const record = await UserRepo.get(userId);

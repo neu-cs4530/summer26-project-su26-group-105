@@ -20,7 +20,8 @@ test.afterEach(async () => {
 
 test.describe("The game selection infrastructure", () => {
   test("should support creating a new Nim game and having a second user join it", async () => {
-    await createAndLoadGame(page1, page2, "nim", true, true);
+    // Don't do assess, since the second player joining automatically starts, which hides the players
+    await createAndLoadGame(page1, page2, "nim", true, false);
   });
 });
 

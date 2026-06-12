@@ -1,0 +1,91 @@
+.one-card {
+  overflow: hidden;
+  position: absolute;
+  aspect-ratio: 1/1.55;
+  width: 10%;
+  border-radius: 5px;
+
+  border: 4px solid white;
+
+  --card-color: black;
+  --text-color: white;
+  background-color: var(--card-color);
+  color: var(--text-color);
+
+  translate: -50% -50%;
+
+  transition:
+    left 0.3s ease,
+    top 0.3s ease,
+    rotate 0.3s ease;
+
+  span {
+    text-shadow:
+      -1px -1px 0 var(--card-color),
+      1px -1px 0 var(--card-color),
+      -1px 1px 0 var(--card-color),
+      1px 1px 0 var(--card-color);
+  }
+
+  &[data-color="red"] {
+    --card-color: red;
+    --text-color: white;
+  }
+
+  &[data-color="blue"] {
+    --card-color: blue;
+    --text-color: white;
+  }
+
+  &[data-color="green"] {
+    --card-color: green;
+    --text-color: white;
+  }
+
+  &[data-color="yellow"] {
+    --card-color: yellow;
+    --text-color: black;
+  }
+
+  &[data-back="true"] {
+    background:
+      url("../../assets/one.png") center/contain no-repeat,
+      #333;
+  }
+
+  &[data-back="false"]::before {
+    content: "";
+    position: absolute;
+    height: 200%;
+    width: 50%;
+    background: white;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%) rotate(45deg);
+  }
+
+  &[data-inactive="true"] {
+    filter: brightness(0.5);
+  }
+
+  .one-card-top {
+    position: absolute;
+    top: 1ch;
+    left: 1ch;
+  }
+
+  .one-card-middle {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    font-size: 2em;
+    translate: -50% -50%;
+  }
+
+  .one-card-bottom {
+    position: absolute;
+    bottom: 1ch;
+    right: 1ch;
+    rotate: 180deg;
+  }
+}

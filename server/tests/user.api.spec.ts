@@ -9,6 +9,7 @@ const baseUser = {
   createdAt: expect.any(String),
   image: null,
   socialMedias: [],
+  isBot: false,
 };
 const selfUserSettings = {
   settings: {

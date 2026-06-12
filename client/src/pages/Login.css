@@ -4,7 +4,21 @@
   flex-direction: column;
   align-items: center;
   min-height: 100vh;
-  background-color: var(--gray-background);
+  color: var(--text-color);
+  /* Creates the "stars" in the background */
+  background:
+    radial-gradient(circle at 10% 14%, var(--star-color) 0 2px, transparent 3px),
+    radial-gradient(circle at 22% 24%, var(--star-color) 0 1.5px, transparent 2.5px),
+    radial-gradient(circle at 36% 12%, var(--star-color) 0 2px, transparent 3px),
+    radial-gradient(circle at 54% 22%, var(--star-color) 0 1.5px, transparent 2.5px),
+    radial-gradient(circle at 68% 16%, var(--star-color) 0 2px, transparent 3px),
+    radial-gradient(circle at 82% 26%, var(--star-color) 0 1.5px, transparent 2.5px),
+    radial-gradient(circle at 92% 12%, var(--star-color) 0 2px, transparent 3px),
+    radial-gradient(circle at 16% 54%, var(--star-color) 0 1.5px, transparent 2.5px),
+    radial-gradient(circle at 34% 68%, var(--star-color) 0 2px, transparent 3px),
+    radial-gradient(circle at 58% 60%, var(--star-color) 0 1.5px, transparent 2.5px),
+    radial-gradient(circle at 78% 72%, var(--star-color) 0 2px, transparent 3px),
+    linear-gradient(135deg, var(--page-background), var(--page-background-alt));
   padding: 20px;
   padding-top: 6rem;
 }
@@ -13,17 +27,18 @@ form.login {
   width: 300px;
   padding: 1rem;
   border-radius: 1.5rem;
-  background-color: #fff;
+  background-color: var(--card-background);
   display: flex;
   flex-direction: column;
   gap: 10px;
-  box-shadow: 0 0 5px #000;
+  box-shadow: 0 0 18px var(--shadow-color);
+  border: 1px solid var(--border-color);
 }
 
 form.login .intertext {
   text-align: center;
   font-size: 0.8rem;
-  color: #888;
+  color: var(--muted-text);
 }
 
 form.login .labeled-section {

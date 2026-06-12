@@ -1,6 +1,7 @@
 .leaderboardContainer {
   width: 100%;
   padding: 24px;
+  color: var(--text-color);
 }
 
 .leaderboardTitle {
@@ -10,13 +11,17 @@
 .leaderboardTable {
   width: 100%;
   border-collapse: collapse;
+  overflow: hidden;
+  border-radius: 1rem;
+  background-color: var(--card-background);
+  box-shadow: 0 0 18px var(--shadow-color);
 }
 
 .leaderboardTable th,
 .leaderboardTable td {
   padding: 12px;
   text-align: center;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid var(--border-color);
 }
 
 /* Set the display name column to adjust left */
@@ -27,6 +32,13 @@
 
 .leaderboardTable th {
   font-weight: bold;
+  color: var(--text-color);
+  background-color: var(--cloud-two);
+}
+
+.leaderboardTable td {
+  color: var(--text-color);
+  background-color: var(--card-background-solid);
 }
 
 /* Dropdown filter styling */
@@ -38,9 +50,10 @@
   align-items: flex-end;
   margin: 24px;
   padding: 18px;
-  border-radius: 14px;
-  background-color: #dadde2;
-  border: 1px solid #525b69;
+  border-radius: 1.25rem;
+  background-color: var(--card-background);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 0 18px var(--shadow-color);
 }
 
 /* Keeps dropdown label above its select box */
@@ -55,32 +68,32 @@
 .leaderboardFilterGroup label {
   font-size: 0.85rem;
   font-weight: 600;
-  color: #5e636c;
+  color: var(--muted-text);
 }
 
 /* Styles each dropdown */
 .leaderboardFilterGroup select {
   height: 40px;
   padding: 0 12px;
-  border-radius: 10px;
-  border: 1px solid #cfd4dc;
-  background-color: white;
-  color: #111827;
+  border-radius: 999px;
+  border: 1px solid var(--border-color);
+  background-color: var(--card-background-solid);
+  color: var(--text-color);
   font-size: 0.95rem;
   cursor: pointer;
 }
 
 /* highights border change when hovering */
 .leaderboardFilterGroup select:hover {
-  border-color: #8a909b;
-  background-color: #fbfbfc;
+  border-color: var(--primary-button);
+  background-color: var(--cloud-one);
 }
 
 /* when dropdown is selected */
 .leaderboardFilterGroup select:focus {
   outline: none;
-  border-color: #304db8;
-  box-shadow: 0 0 0 3px rgba(52, 107, 190, 0.18);
+  border-color: var(--primary-button);
+  box-shadow: 0 0 0 3px var(--cloud-two);
 }
 
 /* stacks the dropdowns vertically when making screen smaller */
