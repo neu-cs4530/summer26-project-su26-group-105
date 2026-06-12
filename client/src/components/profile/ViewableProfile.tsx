@@ -3,6 +3,13 @@ import ProfileImage from "../ProfileImage";
 import SocialMedia from "../SocialMedia";
 import useUser from "../../hooks/useUser";
 import useTimeSince from "../../hooks/useTimeSince";
+import useRecentlyPlayedGames from "../../hooks/useRecentlyPlayedGames";
+import { Link } from "react-router-dom";
+import type { GameKey } from "@gamenite/shared";
+import { gameNames } from "../../util/consts";
+import Nim from "../../assets/nim.png";
+import One from "../../assets/one.png";
+import Guess from "../../assets/numberguesser.png";
 
 type ViewableProfileProps = {
   username: string;
@@ -14,6 +21,7 @@ type ViewableProfileProps = {
  */
 export default function ViewableProfile({ username }: ViewableProfileProps) {
   const user = useUser(username);
+  const recentlyPlayedGames = useRecentlyPlayedGames(username);
   const timeSince = useTimeSince();
 
   if ("message" in user) {
@@ -39,6 +47,38 @@ export default function ViewableProfile({ username }: ViewableProfileProps) {
         ))}
       </div>
       <p className="bio">{user.bio}</p>
+      {recentlyPlayedGames.length > 0 && (
+        <div className="games">
+          <h3>Recently Played Games</h3>
+
+          {recentlyPlayedGames.map((entry) => (
+            <Link key={entry.gameId} className="game-entry" to={`/game/${entry.gameId}`}>
+              <GameImage game={entry.gameType} />
+              <span className="game-type">{gameNames[entry.gameType]}</span> -{" "}
+              <span className="date-played">{timeSince(entry.datePlayed)}</span>
+            </Link>
+          ))}
+        </div>
+      )}
     </div>
   );
+}
+
+function GameImage({ game }: { game: GameKey }) {
+  let gameSrc: string;
+  switch (game) {
+    case "guess":
+      gameSrc = Guess;
+      break;
+    case "nim":
+      gameSrc = Nim;
+      break;
+    case "one":
+      gameSrc = One;
+      break;
+    default:
+      return null;
+  }
+
+  return <img src={gameSrc} alt={`${gameNames[game]} Game`} className="game-image" />;
 }

@@ -1,4 +1,17 @@
 import { z } from "zod";
+import type { GameKey } from "./game.types.ts";
+
+/**
+ * Represents an entry for a game that a user has recently played.
+ * - `gameId`: the unique identifier of the game played
+ * - `gameType`: the type of the game played (e.g. chess, checkers)
+ * - `datePlayed`: when the game was played
+ */
+export type RecentlyPlayedEntry = {
+  gameId: string;
+  gameType: GameKey;
+  datePlayed: Date;
+};
 
 /**
  * Represents a public "safe" user object that excludes sensitive information like

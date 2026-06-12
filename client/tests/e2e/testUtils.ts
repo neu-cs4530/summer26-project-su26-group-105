@@ -128,3 +128,35 @@ export async function createAndLoadGame(
 
   return username1;
 }
+
+/**
+ * Makes 2 already logged in users create and start a game, then makes them both play to finish the game.
+ * @param page1
+ * @param page2
+ * @param username1 the username of the user on page1
+ */
+export async function createAndFinishGuessGame(page1: Page, page2: Page, username1: string) {
+  await page1.getByRole("link", { name: "Games", exact: true }).click();
+  await page1.getByRole("button", { name: "Create New Game" }).click();
+  await page1.waitForURL("/game/new");
+  await page1.getByLabel("Game selection").selectOption("guess");
+  await page1.getByRole("button", { name: "Create New Game" }).click();
+
+  // Refresh games page if already on it, to trigger the new game to appear
+  await page2.getByRole("link", { name: "Home", exact: true }).click();
+  await page2.getByRole("link", { name: "Games", exact: true }).click();
+
+  await page2
+    .getByRole("listitem")
+    .filter({ hasText: username1 })
+    .getByRole("link", { name: "A game of Number Guesser" })
+    .first()
+    .click();
+
+  await page2.getByRole("button", { name: "Join Game" }).click();
+
+  await page1.getByRole("button", { name: "Start Game" }).click();
+
+  await page1.getByRole("button", { name: "Submit Guess", exact: true }).click();
+  await page2.getByRole("button", { name: "Submit Guess", exact: true }).click();
+}
