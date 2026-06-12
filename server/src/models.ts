@@ -1,4 +1,5 @@
 import type { GameKey } from "@gamenite/shared";
+import { type MessageChannel, type ChatMessage } from "../../shared/src/dms.types.ts";
 
 /**
  * Record identifiers used to look up records in a database. This type
@@ -139,3 +140,9 @@ export interface FriendsRecord {
   createdAt: DateISO;
   updatedAt: DateISO;
 }
+
+/**
+ * Friend messaging and groupchats
+ */
+export type ChannelRecord = MessageChannel;
+export type DirectMessageRecord = ChatMessage;

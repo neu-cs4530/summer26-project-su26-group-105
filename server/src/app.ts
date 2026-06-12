@@ -12,6 +12,12 @@ import * as thread from "./controllers/thread.controller.ts";
 import * as leaderboard from "./controllers/leaderboard.controller.ts";
 import { type GameServer, type GameServerSocket } from "./types.ts";
 import { clearStatus } from "./services/activityStatus.service.ts";
+import {
+  socketOpenDirectChat,
+  socketCreateGroupChat,
+  socketSendChatMessage,
+  socketRegisterUserSession,
+} from "./controllers/dms.controller.ts";
 
 export const app = express();
 export const httpServer = http.createServer(app);
@@ -83,6 +89,23 @@ io.on("connection", (socket) => {
   socket.on("gameAddBot", game.socketAddBot(socket, io));
 
   socket.on("gameAddBot", game.socketAddBot(socket, io));
+
+  // Inside your main io.on("connection", (socket) => { ... }) loop:
+  socket.on("registerUserSession", (userId) => {
+    socketRegisterUserSession(socket)(userId);
+  });
+
+  socket.on("openDirectChat", (body) => {
+    socketOpenDirectChat(socket, io)(body);
+  });
+
+  socket.on("createGroupChat", (body) => {
+    socketCreateGroupChat(socket, io)(body);
+  });
+
+  socket.on("sendChatMessage", (body) => {
+    socketSendChatMessage(socket, io)(body);
+  });
 
   socket.onAny((name, payload) => {
     const zPayload = z.object({ auth: z.object({ username: z.string() }), payload: z.any() });

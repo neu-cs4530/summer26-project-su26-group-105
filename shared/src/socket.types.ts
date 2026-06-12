@@ -69,4 +69,10 @@ export interface ServerToClientEvents {
   gameWatched: (payload: GamePlayInfo) => void;
   gameWatchError: (payload: { error: string }) => void;
   leaderboardUpdated: (payload: { gameType: GameKey }) => void;
+
+  //DMS
+  globalChatJoined: (data: { channelId: string; messages: any[] }) => void;
+  globalChatCreated: (channel: any) => void;
+  globalChatMessageReceived: (message: any) => void;
+  globalChatActionError: (data: { action: string; error: string }) => void;
 }
