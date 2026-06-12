@@ -1,7 +1,8 @@
 import { randomUUID } from "node:crypto";
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import supertest, { type Response } from "supertest";
 import { app } from "../src/app.ts";
+import { GameRepo } from "../src/repository.ts";
 
 let response: Response;
 const baseUser = {
@@ -32,6 +33,10 @@ const user2 = {
   ...baseUser,
 };
 
+beforeEach(async () => {
+  await GameRepo.clear();
+});
+
 describe("GET /api/user/:id", () => {
   it("should 404 for nonexistent users", async () => {
     response = await supertest(app).get(`/api/user/${randomUUID().toString()}`);
@@ -48,6 +53,22 @@ describe("GET /api/user/:id", () => {
     expect(response.status).toBe(200);
     expect(response.body).toStrictEqual(user2);
   });
+});
+
+describe("GET /api/user/:username/recently-played", () => {
+  it("should 404 for nonexistent users", async () => {
+    response = await supertest(app).get(`/api/user/${randomUUID().toString()}/recently-played`);
+    expect(response.status).toBe(404);
+    expect(response.body).toStrictEqual({ error: "User not found" });
+  });
+
+  it("should return an empty list for users with no recently played games", async () => {
+    response = await supertest(app).get(`/api/user/user1/recently-played`);
+    expect(response.status).toBe(200);
+    expect(response.body).toStrictEqual([]);
+  });
+
+  // Returning actual recently played games is tested in E2E tests
 });
 
 describe("POST /api/user/login", () => {

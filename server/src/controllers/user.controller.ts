@@ -4,6 +4,7 @@ import {
   zUserAuth,
   zUserUpdateRequest,
   type SafeSelfUserInfo,
+  type RecentlyPlayedEntry,
 } from "@gamenite/shared";
 import {
   createUser,
@@ -11,6 +12,7 @@ import {
   populateSafeUserInfo,
   updateUser,
   populateSafeSelfUserInfo,
+  populateRecentlyPlayedGames,
 } from "../services/user.service.ts";
 import { type RestAPI } from "../types.ts";
 import { z } from "zod";
@@ -86,6 +88,24 @@ export const getByUsername: RestAPI<SafeUserInfo, { username: string }> = async 
     return;
   }
   res.send(await populateSafeUserInfo(user.userId));
+};
+
+/**
+ * Retrieves a list of recently played games for a user.
+ * @param req The request containing the username as a route parameter.
+ * @param res The response, either returning the list of recently played games (200) or an error.
+ */
+export const getRecentlyPlayed: RestAPI<RecentlyPlayedEntry[], { username: string }> = async (
+  req,
+  res,
+) => {
+  const user = await getUserByUsername(req.params.username);
+  if (!user) {
+    res.status(404).send({ error: "User not found" });
+    return;
+  }
+
+  res.send(await populateRecentlyPlayedGames(user.userId));
 };
 
 /**

@@ -53,7 +53,8 @@ app.use(
         .post("/login", user.postLogin)
         .post("/signup", user.postSignup)
         .post("/:username", user.postByUsername)
-        .get("/:username", user.getByUsername),
+        .get("/:username", user.getByUsername)
+        .get("/:username/recently-played", user.getRecentlyPlayed),
     ),
 );
 
