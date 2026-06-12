@@ -10,7 +10,7 @@ import { withAuth } from "@gamenite/shared";
 import { z } from "zod";
 import { ChannelRepo } from "../repository.ts";
 /**
- * Socket listener wrapper to register a user to their personal real-time notification node
+ * Socket listener wrapper to register a user to  real-time notification node
  */
 export const socketRegisterUserSession = (socket: GameServerSocket) => async (userId: string) => {
   await socket.join(userId);
@@ -96,7 +96,7 @@ export const socketSendChatMessage: SocketAPI = (socket, io) => async (body) => 
 
   if (!channel) return;
 
-  // User Room Fan-out: push the text payload directly into everyone's active session room
+  // push the text payload directly into everyone's active session room
   for (const memberId of channel.memberIds) {
     io.to(memberId).emit("globalChatMessageReceived", message);
   }

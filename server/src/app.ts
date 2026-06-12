@@ -91,21 +91,27 @@ io.on("connection", (socket) => {
 
   socket.on("gameAddBot", game.socketAddBot(socket, io));
 
-  // Inside your main io.on("connection", (socket) => { ... }) loop:
+  //DM stuff
   socket.on("registerUserSession", (userId) => {
-    socketRegisterUserSession(socket)(userId);
+    void socketRegisterUserSession(socket)(userId);
   });
 
   socket.on("openDirectChat", (body) => {
-    socketOpenDirectChat(socket, io)(body);
+    void (async () => {
+      await socketOpenDirectChat(socket, io)(body);
+    })();
   });
 
   socket.on("createGroupChat", (body) => {
-    socketCreateGroupChat(socket, io)(body);
+    void (async () => {
+      await socketCreateGroupChat(socket, io)(body);
+    })();
   });
 
   socket.on("sendChatMessage", (body) => {
-    socketSendChatMessage(socket, io)(body);
+    void (async () => {
+      await socketSendChatMessage(socket, io)(body);
+    })();
   });
 
   socket.onAny((name, payload) => {
