@@ -136,6 +136,6 @@ test.describe("Viewing other users' profiles", () => {
       .first()
       .dispatchEvent("click");
 
-    await expect(page2.getByText("Number Guesser")).toBeVisible();
+    await expect(page2.getByText("Number Guesser").first()).toBeVisible();
   });
 });
