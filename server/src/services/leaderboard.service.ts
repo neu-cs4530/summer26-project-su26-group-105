@@ -14,6 +14,7 @@ type LeaderboardStats = {
   totalGames: number;
   totalWins: number;
   rankPoints: number;
+  gameCounts: Partial<Record<GameKey, number>>;
   gameWins: Partial<Record<GameKey, number>>;
 };
 
@@ -56,6 +57,7 @@ function getOrCreatePlayerStats(
       totalGames: 0,
       totalWins: 0,
       rankPoints: 0,
+      gameCounts: {},
       gameWins: {},
     });
   }
@@ -139,6 +141,7 @@ export async function getLeaderboard(
       const playerStats = getOrCreatePlayerStats(stats, player);
 
       playerStats.totalGames += 1;
+      playerStats.gameCounts[game.type] = (playerStats.gameCounts[game.type] ?? 0) + 1;
       //only counts win if the user id matches the stored game winner
       if (game.players[i] === game.winner) {
         playerStats.totalWins += 1;
@@ -166,6 +169,7 @@ export async function getLeaderboard(
       totalGames: playerStats.totalGames,
       totalWins: playerStats.totalWins,
       rankPoints: playerStats.rankPoints,
+      gameCounts: playerStats.gameCounts,
       gameWins: playerStats.gameWins,
     }));
 }
