@@ -19,5 +19,7 @@ export type LeaderboardPlayer = {
   user: SafeUserInfo;
   totalGames: number;
   totalWins: number;
+  rankPoints: number;
+  gameCounts: Partial<Record<GameKey, number>>;
   gameWins: Partial<Record<GameKey, number>>;
 };
