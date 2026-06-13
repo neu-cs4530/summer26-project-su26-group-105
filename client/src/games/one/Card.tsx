@@ -7,7 +7,7 @@ type CardProps = {
   isButton?: boolean;
   onClick?: () => void;
   onHover?: () => void;
-  location: { x: number; y: number };
+  location: { x: string; y: string; isSmall?: boolean };
   rotation?: number;
 };
 
@@ -21,14 +21,14 @@ type CardProps = {
  * @param rotation The rotation of the card
  */
 export default function Card({ card, onClick, isButton, onHover, location, rotation }: CardProps) {
-  const style: CSSProperties = {
-    left: `${location.x}%`,
-    top: `${location.y}%`,
+  const style: CSSProperties & { [key: `--${string}`]: string } = {
+    "--left": location.x,
+    "--top": location.y,
     cursor: "not-allowed",
   };
   if (onClick) style.cursor = "pointer";
 
-  if (rotation) style.rotate = `${rotation}deg`;
+  if (rotation) style["--rotate"] = `${rotation}deg`;
 
   let text: string | null = card?.value ?? null;
   switch (card?.value) {
@@ -52,6 +52,7 @@ export default function Card({ card, onClick, isButton, onHover, location, rotat
       data-back={card === null}
       data-color={card?.color}
       data-type={card?.value}
+      data-isSmall={!!location?.isSmall}
       data-inactive={isButton && !onClick}
       onClick={() => onClick?.()}
       onMouseEnter={() => onHover?.()}

@@ -1,12 +1,31 @@
 .one-player {
   display: flex;
   gap: 1ch;
+  z-index: 1;
+
+  .name {
+    font-size: 1.1em;
+  }
 
   &[data-active="true"] {
     filter: drop-shadow(0 0 0.5ch yellow);
   }
 
-  .cards {
+  .cards-number {
+    display: flex;
+    grid-column: 2;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: yellow;
+    border: 1px solid gold;
+    color: black;
+    width: 2ch;
+    height: 2ch;
+    margin: 1em 0 0 1em;
+  }
+
+  /*.cards {
     display: grid;
     grid-template-columns: max-content max-content;
     gap: 1ch;
@@ -42,6 +61,6 @@
       width: 2ch;
       height: 2ch;
       align-self: end;
-    }
-  }
+    }*/
+  /*}*/
 }

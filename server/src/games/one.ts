@@ -8,6 +8,7 @@ import {
   type Card,
   type CardColor,
   type CardValue,
+  type OneAction,
 } from "../../../shared/src/games/one.types.ts";
 
 /**
@@ -40,6 +41,12 @@ export const oneLogic: GameLogic<OneState, OneView> = {
       direction: 1,
       activeColor: firstCard.color,
       hasDrawnThisTurn: false,
+      lastTurnActions: playerHands.map((hand, idx) => ({
+        type: "draw",
+        userIndex: idx,
+        amount: hand.length,
+        cardIds: hand.map((c) => c.id),
+      })),
     };
   },
 
@@ -87,6 +94,14 @@ export const oneLogic: GameLogic<OneState, OneView> = {
         discardPile: currentDiscard,
         playerHands: updatedHands,
         hasDrawnThisTurn: true, // Mark that they've drawn.. can now play that card or pass
+        lastTurnActions: [
+          {
+            type: "draw",
+            userIndex: playerIndex,
+            amount: 1,
+            cardIds: [drawnCard.id],
+          },
+        ],
       };
     }
 
@@ -99,11 +114,20 @@ export const oneLogic: GameLogic<OneState, OneView> = {
         ...state,
         nextPlayer: advanceTurn(state, 1),
         hasDrawnThisTurn: false,
+        lastTurnActions: [],
       };
     }
 
     // play a card
     if (move.type === "play") {
+      const actions: OneAction[] = [
+        {
+          type: "play",
+          userIndex: playerIndex,
+          card: currentHand.find((c) => c.id === move.cardId)!,
+        },
+      ];
+
       const cardToPlay = currentHand.find((c) => c.id === move.cardId);
       if (!cardToPlay) return null;
 
@@ -172,6 +196,13 @@ export const oneLogic: GameLogic<OneState, OneView> = {
           ...updatedHands[advanceTurn(partialState, 1)],
           ...drawn,
         ];
+
+        actions.push({
+          type: "draw",
+          amount: cardsToDrawNext,
+          cardIds: drawn.map((c) => c.id),
+          userIndex: advanceTurn(partialState, 1),
+        });
       }
 
       return {
@@ -182,6 +213,7 @@ export const oneLogic: GameLogic<OneState, OneView> = {
         direction: nextDirection,
         activeColor: nextActiveColor,
         hasDrawnThisTurn: false,
+        lastTurnActions: actions,
       };
     }
 
@@ -206,9 +238,10 @@ export const oneLogic: GameLogic<OneState, OneView> = {
       nextPlayer: state.nextPlayer,
       direction: state.direction,
       yourHand: targetHand,
-      playerHandCounts: state.playerHands.map((hand) => hand.length),
+      playerHandIds: state.playerHands.map((hand) => hand.map((c) => c.id)),
       deckCount: state.deck.length,
       hasDrawnThisTurn: state.hasDrawnThisTurn,
+      lastTurnActions: state.lastTurnActions,
     };
   },
 

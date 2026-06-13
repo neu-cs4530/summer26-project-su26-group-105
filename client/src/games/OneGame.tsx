@@ -1,20 +1,74 @@
-import type { Card as CardType, OneMove, OneView } from "@gamenite/shared";
+import type { Card as CardType, OneMove, OneView, SafeUserInfo } from "@gamenite/shared";
 import type { GameProps } from "../util/types.ts";
 import Card from "./one/Card.tsx";
-import { useState, type MouseEvent } from "react";
+import { useEffect, useState, type MouseEvent } from "react";
 import "./OneGame.css";
-import Player from "./one/Player.tsx";
+import Player, { userAnchor } from "./one/Player.tsx";
 import DisplayName from "../components/DisplayName.tsx";
 
 export default function OneGame({
-  view,
+  view: serverView,
   players,
   userPlayerIndex,
   makeMove,
 }: GameProps<OneView, OneMove>) {
+  const [view, setView] = useState<OneView>({ ...serverView, lastTurnActions: [] });
   const isUserTurn = view.nextPlayer === userPlayerIndex;
   const [hoveredCardIdx, setHoveredCardIdx] = useState<number | null>(null);
   const [wildCardId, setWildCardId] = useState<string | null>(null);
+
+  useEffect(() => {
+    void (async () => {
+      setView((view) => ({ ...view, lastTurnActions: [] }));
+      for (const action of serverView.lastTurnActions) {
+        if (action.type === "play") {
+          setView((view) => ({ ...view, lastTurnActions: [...view.lastTurnActions, action] }));
+          await new Promise((resolve) => setTimeout(resolve, 300));
+          setView((view) => ({
+            ...view,
+            discardTop: serverView.discardTop,
+            activeColor: serverView.activeColor,
+          }));
+          if (action.userIndex === userPlayerIndex) {
+            setView((view) => ({
+              ...view,
+              yourHand: serverView.yourHand,
+            }));
+          } else {
+            setView((view) => ({
+              ...view,
+              playerHandIds: view.playerHandIds.map((hand, idx) =>
+                idx === action.userIndex ? hand.filter((id) => id !== action.card.id) : hand,
+              ),
+            }));
+          }
+        } else if (action.type === "draw") {
+          setView((view) => ({ ...view, lastTurnActions: [...view.lastTurnActions, action] }));
+          for (const id of action.cardIds) {
+            if (action.userIndex === userPlayerIndex) {
+              setView((view) => ({
+                ...view,
+                yourHand: [...view.yourHand, serverView.yourHand.find((c) => c.id === id)!],
+              }));
+            } else {
+              setView((view) => ({
+                ...view,
+                playerHandIds: view.playerHandIds.map((hand, idx) =>
+                  idx === action.userIndex ? [...hand, id] : hand,
+                ),
+              }));
+            }
+            await new Promise((resolve) => setTimeout(resolve, 500));
+          }
+          // setView((view) => ({
+          //   ...view,
+          //   yourHand: serverView.yourHand,
+          // }));
+        }
+      }
+      setView(serverView);
+    })();
+  }, [serverView, userPlayerIndex]);
 
   function handleMouseMove(e: MouseEvent) {
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
@@ -22,14 +76,26 @@ export default function OneGame({
     if (y < 50) setHoveredCardIdx(null);
   }
 
-  function getHandCardCoordinates(index: number): { x: number; y: number; rotation: number } {
+  function isCardPlayed(c: string) {
+    return view.lastTurnActions.some((action) => action.type === "play" && action.card.id === c);
+  }
+
+  function getHandCardCoordinates(
+    c: CardType,
+    index: number,
+  ): { x: number; y: number; rotation: number } {
+    if (isCardPlayed(c.id)) return { x: 50, y: 50, rotation: 0 };
+
     const handX = 50;
     const handY = 80;
     const totalArc = Math.PI;
     const xRadius = 12;
     const yRadius = 6;
 
-    const angle = -totalArc / 2 + (index / (view.yourHand.length - 1)) * totalArc;
+    const angle =
+      view.yourHand.length === 1
+        ? 0
+        : -totalArc / 2 + (index / (view.yourHand.length - 1)) * totalArc;
 
     let x = handX + Math.sin(angle) * xRadius;
     let y = handY + yRadius - Math.cos(angle) * yRadius;
@@ -45,6 +111,18 @@ export default function OneGame({
       }
     }
     return { x, y, rotation: angle * 0.15 * (180 / Math.PI) };
+  }
+
+  function getOtherCardCoordinates(user: SafeUserInfo, card: string) {
+    if (isCardPlayed(card)) {
+      return { x: "50%", y: "50%", isSmall: false };
+    }
+
+    return {
+      x: `anchor(${userAnchor(user)} left)`,
+      y: `anchor(${userAnchor(user)} top)`,
+      isSmall: true,
+    };
   }
 
   function isValidMove(card: CardType) {
@@ -80,7 +158,13 @@ export default function OneGame({
       ? { ...view.discardTop, color: view.activeColor }
       : view.discardTop;
 
-  const winnerIdx = view.playerHandCounts.findIndex((count) => count === 0);
+  const winnerIdx = view.playerHandIds.findIndex((hand) => hand.length === 0);
+
+  function PlayerComponent({ player }: { player: SafeUserInfo }) {
+    const idx = players.indexOf(player);
+    const hand = view.playerHandIds[idx];
+    return <Player user={player} numCards={hand.length} isTurn={idx === view.nextPlayer} />;
+  }
 
   return (
     <div onMouseMove={handleMouseMove} className="one-game">
@@ -90,36 +174,30 @@ export default function OneGame({
       />
       <div className="players players-left">
         {otherPlayers.slice(0, playersPerSide).map((p) => (
-          <Player
-            user={p}
-            numCards={view.playerHandCounts[players.indexOf(p)]}
-            isTurn={players.indexOf(p) === view.nextPlayer}
-          />
+          <PlayerComponent key={p.username} player={p} />
         ))}
       </div>
       <div className="players players-top">
         {otherPlayers.slice(playersPerSide, playersPerSide * 2).map((p) => (
-          <Player
-            user={p}
-            numCards={view.playerHandCounts[players.indexOf(p)]}
-            isTurn={players.indexOf(p) === view.nextPlayer}
-          />
+          <PlayerComponent key={p.username} player={p} />
         ))}
       </div>
       <div className="players players-right">
         {otherPlayers.slice(playersPerSide * 2).map((p) => (
-          <Player
-            user={p}
-            numCards={view.playerHandCounts[players.indexOf(p)]}
-            isTurn={players.indexOf(p) === view.nextPlayer}
-            key={p.username}
-          />
+          <PlayerComponent key={p.username} player={p} />
         ))}
       </div>
-      <Card card={null} location={{ x: 10, y: 15 }} onClick={drawFunction} isButton />
-      <Card card={discardCard} location={{ x: 50, y: 50 }} />
+      <Card card={discardCard} location={{ x: "50%", y: "50%" }} />
+      {otherPlayers.flatMap((p) => {
+        const idx = players.indexOf(p);
+        const hand = view.playerHandIds[idx];
+        return hand.map((c) => (
+          <Card card={null} location={getOtherCardCoordinates(p, c)} key={c} />
+        ));
+      })}
+      <Card card={null} location={{ x: "10%", y: "15%" }} onClick={drawFunction} isButton />
       {view.yourHand.map((c, i) => {
-        const loc = getHandCardCoordinates(i);
+        const loc = getHandCardCoordinates(c, i);
 
         return (
           <Card
@@ -128,7 +206,8 @@ export default function OneGame({
             isButton
             onClick={moveFunction(c)}
             onHover={() => setHoveredCardIdx(i)}
-            location={{ x: loc.x, y: loc.y }}
+            // from={view.lastTurnActions.{}}
+            location={{ x: `${loc.x}%`, y: `${loc.y}%` }}
             rotation={loc.rotation}
           />
         );
