@@ -13,24 +13,34 @@ type LeaderboardStats = {
   user: SafeUserInfo;
   totalGames: number;
   totalWins: number;
+  rankPoints: number;
   gameWins: Partial<Record<GameKey, number>>;
 };
 
 //gets the player's rank into a status
-function statusForRank(rank: number): string {
-  if (rank === 1) {
+//gets the player's points into a status
+function statusForPoints(rankPoints: number): string {
+  if (rankPoints >= 500) {
+    return "Champion";
+  }
+
+  if (rankPoints >= 300) {
+    return "Platinum";
+  }
+
+  if (rankPoints >= 200) {
     return "Gold";
   }
 
-  if (rank === 2) {
+  if (rankPoints >= 100) {
     return "Silver";
   }
 
-  if (rank === 3) {
+  if (rankPoints >= 3) {
     return "Bronze";
   }
 
-  return "";
+  return "Unranked";
 }
 
 //gets existing leaderboard stats for a player
@@ -45,6 +55,7 @@ function getOrCreatePlayerStats(
       user,
       totalGames: 0,
       totalWins: 0,
+      rankPoints: 0,
       gameWins: {},
     });
   }
@@ -131,20 +142,30 @@ export async function getLeaderboard(
       //only counts win if the user id matches the stored game winner
       if (game.players[i] === game.winner) {
         playerStats.totalWins += 1;
+        playerStats.rankPoints += 10;
         playerStats.gameWins[game.type] = (playerStats.gameWins[game.type] ?? 0) + 1;
+      } else {
+        playerStats.rankPoints = Math.max(0, playerStats.rankPoints - 5);
       }
     }
   }
 
   //takes stats and turns into final array for frontend table
   return Array.from(stats.values())
-    .sort((a, b) => b.totalWins - a.totalWins)
+    .sort((a, b) => {
+      if (b.rankPoints !== a.rankPoints) {
+        return b.rankPoints - a.rankPoints;
+      }
+
+      return b.totalWins - a.totalWins;
+    })
     .map((playerStats, index) => ({
       rank: index + 1,
-      status: statusForRank(index + 1),
+      status: statusForPoints(playerStats.rankPoints),
       user: playerStats.user,
       totalGames: playerStats.totalGames,
       totalWins: playerStats.totalWins,
+      rankPoints: playerStats.rankPoints,
       gameWins: playerStats.gameWins,
     }));
 }
