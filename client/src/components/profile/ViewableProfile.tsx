@@ -3,27 +3,24 @@ import ProfileImage from "../ProfileImage";
 import SocialMedia from "../SocialMedia";
 import useUser from "../../hooks/useUser";
 import useTimeSince from "../../hooks/useTimeSince";
-import useRecentlyPlayedGames from "../../hooks/useRecentlyPlayedGames";
-import { Link } from "react-router-dom";
-import type { GameKey } from "@gamenite/shared";
-import { gameNames } from "../../util/consts";
-import Nim from "../../assets/nim.png";
-import One from "../../assets/one.png";
-import Guess from "../../assets/numberguesser.png";
+import ProfileStats from "./ProfileStats";
+import RecentlyPlayedGames from "./RecentlyPlayedGames";
 
 type ViewableProfileProps = {
   username: string;
 };
 
 /**
- * Component for displaying a user's profile information.
+ * Component for displaying another user's public profile information.
  * @param username The username of the user whose profile to display
+ * @returns the viewable profile page UI
  */
 export default function ViewableProfile({ username }: ViewableProfileProps) {
+  //gets the profiled ata for the user being looked at
   const user = useUser(username);
-  const recentlyPlayedGames = useRecentlyPlayedGames(username);
   const timeSince = useTimeSince();
 
+  //if user could not be found, display error message
   if ("message" in user) {
     return (
       <div className="content spacedSection">
@@ -33,52 +30,36 @@ export default function ViewableProfile({ username }: ViewableProfileProps) {
   }
 
   return (
-    <div className="content spacedSection profile-container">
-      <div className="pfp">
-        <ProfileImage src={user.image} size="large" />
-      </div>
-      <div className="name">
-        <h1>{user.display}</h1>
-        <span className="join-date">Joined {timeSince(user.createdAt)}</span>
-      </div>
-      <div className="socials">
-        {user.socialMedias.map((s, i) => (
-          <SocialMedia socialMedia={s} />
-        ))}
-      </div>
-      <p className="bio">{user.bio}</p>
-      {recentlyPlayedGames.length > 0 && (
-        <div className="games">
-          <h3>Recently Played Games</h3>
+    <div className="content spacedSection profile-layout">
+      {/* left side shows user's basic profile info */}
+      <section className="profile-left-panel">
+        {/* Shows user's profile pic */}
+        <div className="pfp">
+          <ProfileImage src={user.image} size="large" />
+        </div>
 
-          {recentlyPlayedGames.map((entry) => (
-            <Link key={entry.gameId} className="game-entry" to={`/game/${entry.gameId}`}>
-              <GameImage game={entry.gameType} />
-              <span className="game-type">{gameNames[entry.gameType]}</span> -{" "}
-              <span className="date-played">{timeSince(entry.datePlayed)}</span>
-            </Link>
+        {/* show users display name and join date */}
+        <div className="name">
+          <h1>{user.display}</h1>
+          <span className="join-date">Joined {timeSince(user.createdAt)}</span>
+        </div>
+
+        {/* Display user's bio */}
+        <p className="bio">{user.bio}</p>
+
+        {/* Display user's linked social media accounts */}
+        <div className="socials">
+          {user.socialMedias.map((s, i) => (
+            <SocialMedia key={i + s.link + s.username} socialMedia={s} />
           ))}
         </div>
-      )}
+      </section>
+
+      {/*Right side shows the game stats and recently played games */}
+      <section className="profile-right-panel">
+        <ProfileStats username={username} />
+        <RecentlyPlayedGames username={username} />
+      </section>
     </div>
   );
-}
-
-function GameImage({ game }: { game: GameKey }) {
-  let gameSrc: string;
-  switch (game) {
-    case "guess":
-      gameSrc = Guess;
-      break;
-    case "nim":
-      gameSrc = Nim;
-      break;
-    case "one":
-      gameSrc = One;
-      break;
-    default:
-      return null;
-  }
-
-  return <img src={gameSrc} alt={`${gameNames[game]} Game`} className="game-image" />;
 }

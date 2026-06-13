@@ -4,7 +4,7 @@
   }
 }
 
-.profile-container {
+.profile-left-panel {
   .pfp {
     button {
       position: relative;
@@ -14,6 +14,7 @@
       border: 0;
       outline: none;
       overflow: hidden;
+      cursor: pointer;
 
       &::after {
         content: "Change profile picture";
