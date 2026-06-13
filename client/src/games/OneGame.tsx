@@ -1,7 +1,7 @@
 import type { Card as CardType, OneMove, OneView, SafeUserInfo } from "@gamenite/shared";
 import type { GameProps } from "../util/types.ts";
 import Card from "./one/Card.tsx";
-import { useEffect, useState, type MouseEvent } from "react";
+import { Fragment, useEffect, useState, type MouseEvent } from "react";
 import "./OneGame.css";
 import Player, { userAnchor } from "./one/Player.tsx";
 import DisplayName from "../components/DisplayName.tsx";
@@ -60,10 +60,6 @@ export default function OneGame({
             }
             await new Promise((resolve) => setTimeout(resolve, 500));
           }
-          // setView((view) => ({
-          //   ...view,
-          //   yourHand: serverView.yourHand,
-          // }));
         }
       }
       setView(serverView);
@@ -125,6 +121,15 @@ export default function OneGame({
     };
   }
 
+  function getOtherCard(card: string) {
+    if (!isCardPlayed(card)) return null;
+
+    const action = view.lastTurnActions.find(
+      (a) => a.type === "play" && a.card.id === card,
+    ) as Extract<(typeof view.lastTurnActions)[number], { type: "play" }>;
+    return action.card;
+  }
+
   function isValidMove(card: CardType) {
     const top = { ...view.discardTop, color: view.activeColor };
 
@@ -160,7 +165,7 @@ export default function OneGame({
 
   const winnerIdx = view.playerHandIds.findIndex((hand) => hand.length === 0);
 
-  function PlayerComponent({ player }: { player: SafeUserInfo }) {
+  function playerComponent({ player }: { player: SafeUserInfo }) {
     const idx = players.indexOf(player);
     const hand = view.playerHandIds[idx];
     return <Player user={player} numCards={hand.length} isTurn={idx === view.nextPlayer} />;
@@ -174,17 +179,17 @@ export default function OneGame({
       />
       <div className="players players-left">
         {otherPlayers.slice(0, playersPerSide).map((p) => (
-          <PlayerComponent key={p.username} player={p} />
+          <Fragment key={p.username}>{playerComponent({ player: p })}</Fragment>
         ))}
       </div>
       <div className="players players-top">
         {otherPlayers.slice(playersPerSide, playersPerSide * 2).map((p) => (
-          <PlayerComponent key={p.username} player={p} />
+          <Fragment key={p.username}>{playerComponent({ player: p })}</Fragment>
         ))}
       </div>
       <div className="players players-right">
         {otherPlayers.slice(playersPerSide * 2).map((p) => (
-          <PlayerComponent key={p.username} player={p} />
+          <Fragment key={p.username}>{playerComponent({ player: p })}</Fragment>
         ))}
       </div>
       <Card card={discardCard} location={{ x: "50%", y: "50%" }} />
@@ -192,7 +197,7 @@ export default function OneGame({
         const idx = players.indexOf(p);
         const hand = view.playerHandIds[idx];
         return hand.map((c) => (
-          <Card card={null} location={getOtherCardCoordinates(p, c)} key={c} />
+          <Card card={getOtherCard(c)} location={getOtherCardCoordinates(p, c)} key={c} />
         ));
       })}
       <Card card={null} location={{ x: "10%", y: "15%" }} onClick={drawFunction} isButton />
