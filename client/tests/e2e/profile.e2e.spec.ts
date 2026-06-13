@@ -87,10 +87,9 @@ test.describe("Viewing other users' profiles", () => {
   }
 
   async function createGame(page: Page) {
-    await page1.getByRole("button", { name: "Create New Game" }).click();
-    await page1.waitForURL("/game/new");
-    await page1.getByLabel("Game selection").selectOption("nim");
-    await page1.getByRole("button", { name: "Create New Game" }).click();
+    await page.getByRole("button", { name: "Create New Game" }).click();
+    await page.waitForURL("/game/new");
+    await page.getByRole("button").filter({ hasText: "Nim" }).click();
   }
 
   let username1: string;

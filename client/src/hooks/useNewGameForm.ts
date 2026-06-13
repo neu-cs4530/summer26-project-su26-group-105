@@ -1,5 +1,5 @@
 import type { GameKey } from "@gamenite/shared";
-import { type ChangeEvent, type FormEvent, useState } from "react";
+import { useState } from "react";
 import useAuth from "./useAuth.ts";
 import { useNavigate } from "react-router-dom";
 import { createGame } from "../services/gameService.ts";
@@ -9,54 +9,46 @@ import useLoginContext from "./useLoginContext.ts";
  * Custom hook to manage game creation form logic
  * @throws if outside a LoginContext
  * @returns an object containing
- *  - Form value `gameKey`
  *  - Form value `friendOnly`
  *  - Possibly-null error message `err`
- *  - Form handlers `handleInputChange`, `toggleFriendOnly`, and `handleSubmit`
- */
+ *  - Form handlers `toggleFriendOnly` and `handleGameClick` */
 export default function useNewGameForm() {
-  const [gameKey, setGameKey] = useState<GameKey | "">("");
+  //tracks if game should be friends only or public
   const [friendOnly, setFriendOnly] = useState(false);
+  //stores error if there is one
   const [err, setErr] = useState<string | null>(null);
   const auth = useAuth();
   const { socket } = useLoginContext();
   const navigate = useNavigate();
 
-  const handleInputChange = (e: ChangeEvent<HTMLSelectElement>) => {
-    setErr(null);
-
-    // type assertion is safe because NewGame.tsx only allows selection of
-    // valid game keys
-    setGameKey(e.target.value as GameKey | "");
-  };
-
   const toggleFriendOnly = () => {
     setFriendOnly((v) => !v);
   };
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    if (gameKey === "") {
-      setErr("Please select a game");
-      return;
-    }
+  //creates a game with the selected game key
+  const createSelectedGame = async (selectedGameKey: GameKey) => {
     setErr(null);
     try {
-      const game = await createGame(auth, gameKey, friendOnly);
+      //creates the game and if its friends only or public
+      const game = await createGame(auth, selectedGameKey, friendOnly);
+      //emits that friend created a game (notification)
       socket.emit("friendGameCreated", { auth, payload: game.gameId });
+      //sends user directly into newly created game
       await navigate(`/game/${game.gameId}`);
     } catch (err) {
       setErr(`${err}`);
     }
   };
 
+  //handles game card click
+  const handleGameClick = async (selectedGameKey: GameKey) => {
+    await createSelectedGame(selectedGameKey);
+  };
+
   return {
-    gameKey,
     friendOnly,
     err,
-    handleInputChange,
     toggleFriendOnly,
-    handleSubmit,
+    handleGameClick,
   };
 }
