@@ -69,10 +69,10 @@ export default function OneGame({
     return () => makeMove({ type: "play", cardId: c.id });
   }
 
-  const otherPlayers = [
-    ...players.slice(userPlayerIndex + 1),
-    ...players.slice(0, userPlayerIndex),
-  ];
+  const otherPlayers =
+    userPlayerIndex === -1
+      ? players
+      : [...players.slice(userPlayerIndex + 1), ...players.slice(0, userPlayerIndex)];
   const playersPerSide = Math.max(Math.floor(otherPlayers.length / 3), 1);
 
   const discardCard =
