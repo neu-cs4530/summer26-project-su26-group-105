@@ -17,7 +17,7 @@ type CardProps = {
  * @param onClick The function to call when the card is clicked(also used for determining styling)
  * @param isButton Whether the card is ever clickable(as opposed to purely informational)
  * @param onHover The function to call when the card is hovered
- * @param location The position of the card
+ * @param location The position of the card, and whether it's a smaller card (for other players' hands)
  * @param rotation The rotation of the card
  */
 export default function Card({ card, onClick, isButton, onHover, location, rotation }: CardProps) {

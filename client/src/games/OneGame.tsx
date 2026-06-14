@@ -136,7 +136,7 @@ export default function OneGame({
     }
 
     return {
-      x: `anchor(${userAnchor(user)} left)`,
+      x: `calc(anchor(${userAnchor(user)} left) - 0.25%)`,
       y: `anchor(${userAnchor(user)} top)`,
       isSmall: true,
     };
