@@ -17,6 +17,11 @@ export async function logInUser(page: Page, username: string, password: string) 
   await page.waitForURL("/");
 }
 
+/**
+ * Creates a new random test user and waits for signup to finish
+ * @param page the page used to sign the user up
+ * @returns usernam and password for the new user
+ */
 export async function createUser(page: Page) {
   const username = "user" + Math.floor(Math.random() * 2_000_000);
   const password = "pwd_for_" + username;
@@ -29,6 +34,20 @@ export async function createUser(page: Page) {
   await page.waitForURL("/");
 
   return { username, password };
+}
+
+//gets the display name for each game
+function getGameDisplayName(gameId: string) {
+  switch (gameId) {
+    case "guess":
+      return "Number Guesser";
+    case "nim":
+      return "Nim";
+    case "one":
+      return "One";
+    default:
+      return gameId;
+  }
 }
 
 /**
@@ -56,8 +75,10 @@ export async function createAndLoadGame(
   // User 1 creates a new game
   await page1.getByRole("button", { name: "Create New Game" }).click();
   await page1.waitForURL("/game/new");
-  await page1.getByLabel("Game selection").selectOption(gameId);
-  await page1.getByRole("button", { name: "Create New Game" }).click();
+  await page1
+    .getByRole("button")
+    .filter({ hasText: getGameDisplayName(gameId) })
+    .click();
 
   // Causes Playwright to auto-wait for for game to be enabled
   await page1.getByPlaceholder("Send a message to chat").click();
@@ -127,4 +148,38 @@ export async function createAndLoadGame(
   }
 
   return username1;
+}
+
+/**
+ * Makes 2 already logged in users create and start a game, then makes them both play to finish the game.
+ * @param page1
+ * @param page2
+ * @param username1 the username of the user on page1
+ */
+export async function createAndFinishGuessGame(page1: Page, page2: Page, username1: string) {
+  await page1.getByRole("link", { name: "Games", exact: true }).click();
+  await page1.getByRole("button", { name: "Create New Game" }).click();
+  await page1.waitForURL("/game/new");
+  await page1
+    .getByRole("button")
+    .filter({ hasText: getGameDisplayName("guess") })
+    .click();
+
+  // Refresh games page if already on it, to trigger the new game to appear
+  await page2.getByRole("link", { name: "Home", exact: true }).click();
+  await page2.getByRole("link", { name: "Games", exact: true }).click();
+
+  await page2
+    .getByRole("listitem")
+    .filter({ hasText: username1 })
+    .getByRole("link", { name: "A game of Number Guesser" })
+    .first()
+    .click();
+
+  await page2.getByRole("button", { name: "Join Game" }).click();
+
+  await page1.getByRole("button", { name: "Start Game" }).click();
+
+  await page1.getByRole("button", { name: "Submit Guess", exact: true }).click();
+  await page2.getByRole("button", { name: "Submit Guess", exact: true }).click();
 }

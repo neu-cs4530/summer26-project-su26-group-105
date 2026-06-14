@@ -5,7 +5,8 @@
     "pfp socials socials socials"
     "pfp socials socials socials"
     "name socials socials socials"
-    "bio bio bio bio";
+    "bio bio bio bio"
+    "games games games games";
   gap: 1em;
   place-items: center;
 
@@ -33,6 +34,34 @@
   .bio {
     grid-area: bio;
     width: 100%;
+  }
+
+  .games {
+    grid-area: games;
+    width: 100%;
+    .game-entry {
+      color: var(--text-color);
+      display: inline-block;
+      text-decoration: none;
+      border: 1px solid var(--border-color);
+      border-radius: 5px;
+      padding: 0.5em 1em;
+      margin-right: 0.5em;
+
+      .game-image {
+        border-radius: 5px;
+        border: 1px solid var(--border-color);
+        margin-inline: auto;
+        margin-bottom: 1ch;
+        transition: scale 0.15s ease;
+      }
+
+      &:hover {
+        .game-image {
+          scale: 1.05;
+        }
+      }
+    }
   }
 
   .join-date {

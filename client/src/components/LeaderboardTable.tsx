@@ -28,6 +28,7 @@ export default function LeaderboardTable({ title, rows, currentUsername }: Leade
             <th>Rank</th>
             <th>Status</th>
             <th>User</th>
+            <th>Points</th>
             <th>Total Games</th>
             <th>Total Wins</th>
             <th>Win Rate</th>
@@ -43,6 +44,7 @@ export default function LeaderboardTable({ title, rows, currentUsername }: Leade
                 <DisplayName user={player.user} showFullInfo />
                 {player.user.username === currentUsername && " (you)"}
               </td>
+              <td>{player.rankPoints}</td>
               <td>{player.totalGames}</td>
               <td>{player.totalWins}</td>
               <td>

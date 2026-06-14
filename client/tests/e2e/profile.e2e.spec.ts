@@ -1,5 +1,5 @@
 import { test, expect, type BrowserContext, type Page } from "@playwright/test";
-import { createUser } from "./testUtils.ts";
+import { createAndFinishGuessGame, createUser } from "./testUtils.ts";
 
 let userContext1: BrowserContext;
 let userContext2: BrowserContext;
@@ -87,10 +87,9 @@ test.describe("Viewing other users' profiles", () => {
   }
 
   async function createGame(page: Page) {
-    await page1.getByRole("button", { name: "Create New Game" }).click();
-    await page1.waitForURL("/game/new");
-    await page1.getByLabel("Game selection").selectOption("nim");
-    await page1.getByRole("button", { name: "Create New Game" }).click();
+    await page.getByRole("button", { name: "Create New Game" }).click();
+    await page.waitForURL("/game/new");
+    await page.getByRole("button").filter({ hasText: "Nim" }).click();
   }
 
   let username1: string;
@@ -105,7 +104,10 @@ test.describe("Viewing other users' profiles", () => {
     await addProfileDetails(page1, `${username1} Display`);
     await page2.getByRole("link", { name: "Games", exact: true }).click();
     // Trigger clicking without hovering, so we don't accidentally test the hover card
-    await page2.getByRole("link", { name: `${username1} Display` }).dispatchEvent("click");
+    await page2
+      .getByRole("link", { name: `${username1} Display` })
+      .first()
+      .dispatchEvent("click");
 
     await expect(page2.getByText("This is my bio.")).toBeVisible();
     await expect(page2.getByRole("link", { name: "@test_social" })).toBeVisible();
@@ -114,9 +116,25 @@ test.describe("Viewing other users' profiles", () => {
   test("displays other users' profile information on hover", async () => {
     await addProfileDetails(page1, `${username1} Display`);
     await page2.getByRole("link", { name: "Games", exact: true }).click();
-    await page2.getByRole("link", { name: `${username1} Display` }).hover();
+    await page2
+      .getByRole("link", { name: `${username1} Display` })
+      .first()
+      .hover();
 
     await expect(page2.getByText(`@${username1}`)).toBeVisible();
     await expect(page2.getByText("This is my bio.")).toBeVisible();
+  });
+
+  test("displays recently played games", async () => {
+    await addProfileDetails(page1, `${username1} Display`);
+    await createAndFinishGuessGame(page1, page2, username1);
+    await page2.getByRole("link", { name: "Games", exact: true }).click();
+    // Trigger clicking without hovering, so we don't accidentally test the hover card
+    await page2
+      .getByRole("link", { name: `${username1} Display` })
+      .first()
+      .dispatchEvent("click");
+
+    await expect(page2.getByText("Number Guesser").first()).toBeVisible();
   });
 });
