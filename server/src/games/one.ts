@@ -41,12 +41,7 @@ export const oneLogic: GameLogic<OneState, OneView> = {
       direction: 1,
       activeColor: firstCard.color,
       hasDrawnThisTurn: false,
-      lastTurnActions: playerHands.map((hand, idx) => ({
-        type: "draw",
-        userIndex: idx,
-        amount: hand.length,
-        cardIds: hand.map((c) => c.id),
-      })),
+      lastTurnActions: [],
     };
   },
 

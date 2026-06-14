@@ -1,7 +1,13 @@
-import type { Card as CardType, OneMove, OneView, SafeUserInfo } from "@gamenite/shared";
+import {
+  oneAnimationDurations,
+  type Card as CardType,
+  type OneMove,
+  type OneView,
+  type SafeUserInfo,
+} from "@gamenite/shared";
 import type { GameProps } from "../util/types.ts";
 import Card from "./one/Card.tsx";
-import { Fragment, useEffect, useState, type MouseEvent } from "react";
+import { Fragment, useEffect, useState, type CSSProperties, type MouseEvent } from "react";
 import "./OneGame.css";
 import Player, { userAnchor } from "./one/Player.tsx";
 import DisplayName from "../components/DisplayName.tsx";
@@ -12,30 +18,41 @@ export default function OneGame({
   userPlayerIndex,
   makeMove,
 }: GameProps<OneView, OneMove>) {
-  const [view, setView] = useState<OneView>({ ...serverView, lastTurnActions: [] });
+  const [view, setView] = useState<OneView>(serverView);
   const isUserTurn = view.nextPlayer === userPlayerIndex;
   const [hoveredCardIdx, setHoveredCardIdx] = useState<number | null>(null);
   const [wildCardId, setWildCardId] = useState<string | null>(null);
 
   useEffect(() => {
+    let cancelled = false;
+
+    const setIfNotCancelled: typeof setView = (updater) => {
+      if (!cancelled) {
+        setView(updater);
+      }
+    };
+
     void (async () => {
-      setView((view) => ({ ...view, lastTurnActions: [] }));
+      setIfNotCancelled((view) => ({ ...view, lastTurnActions: [] }));
       for (const action of serverView.lastTurnActions) {
         if (action.type === "play") {
-          setView((view) => ({ ...view, lastTurnActions: [...view.lastTurnActions, action] }));
-          await new Promise((resolve) => setTimeout(resolve, 300));
-          setView((view) => ({
+          setIfNotCancelled((view) => ({
+            ...view,
+            lastTurnActions: [...view.lastTurnActions, action],
+          }));
+          await new Promise((resolve) => setTimeout(resolve, oneAnimationDurations.play));
+          setIfNotCancelled((view) => ({
             ...view,
             discardTop: serverView.discardTop,
             activeColor: serverView.activeColor,
           }));
           if (action.userIndex === userPlayerIndex) {
-            setView((view) => ({
+            setIfNotCancelled((view) => ({
               ...view,
               yourHand: serverView.yourHand,
             }));
           } else {
-            setView((view) => ({
+            setIfNotCancelled((view) => ({
               ...view,
               playerHandIds: view.playerHandIds.map((hand, idx) =>
                 idx === action.userIndex ? hand.filter((id) => id !== action.card.id) : hand,
@@ -43,27 +60,35 @@ export default function OneGame({
             }));
           }
         } else if (action.type === "draw") {
-          setView((view) => ({ ...view, lastTurnActions: [...view.lastTurnActions, action] }));
+          setIfNotCancelled((view) => ({
+            ...view,
+            lastTurnActions: [...view.lastTurnActions, action],
+          }));
           for (const id of action.cardIds) {
             if (action.userIndex === userPlayerIndex) {
-              setView((view) => ({
+              setIfNotCancelled((view) => ({
                 ...view,
                 yourHand: [...view.yourHand, serverView.yourHand.find((c) => c.id === id)!],
               }));
             } else {
-              setView((view) => ({
+              setIfNotCancelled((view) => ({
                 ...view,
                 playerHandIds: view.playerHandIds.map((hand, idx) =>
                   idx === action.userIndex ? [...hand, id] : hand,
                 ),
               }));
             }
-            await new Promise((resolve) => setTimeout(resolve, 500));
+            await new Promise((resolve) => setTimeout(resolve, oneAnimationDurations.draw));
           }
         }
       }
-      setView(serverView);
+      setIfNotCancelled(serverView);
     })();
+
+    return () => {
+      cancelled = true;
+      setView(serverView);
+    };
   }, [serverView, userPlayerIndex]);
 
   function handleMouseMove(e: MouseEvent) {
@@ -172,7 +197,16 @@ export default function OneGame({
   }
 
   return (
-    <div onMouseMove={handleMouseMove} className="one-game">
+    <div
+      onMouseMove={handleMouseMove}
+      className="one-game"
+      style={
+        {
+          "--draw-anim-time": oneAnimationDurations.draw + "ms",
+          "--play-anim-time": oneAnimationDurations.play + "ms",
+        } as CSSProperties
+      }
+    >
       <div
         className="direction-indicator"
         data-direction={view.direction === 1 ? "clockwise" : "counterclockwise"}

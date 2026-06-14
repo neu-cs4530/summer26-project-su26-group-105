@@ -21,15 +21,15 @@
   translate: -50% -50%;
 
   transition:
-    left 0.3s ease,
-    top 0.3s ease,
-    rotate 0.3s ease,
-    width 0.3s ease;
+    left var(--play-anim-time) ease,
+    top var(--play-anim-time) ease,
+    rotate var(--play-anim-time) ease,
+    width var(--play-anim-time) ease;
 
   left: var(--left);
   top: var(--top);
   rotate: var(--rotate);
-  animation: deal 0.5s;
+  animation: deal var(--draw-anim-time);
 
   span {
     text-shadow:

@@ -328,7 +328,7 @@ function checkAndRunBotTurn(io: GameServer, gameId: string, currentPlayers: stri
     if (nextPlayerId && nextPlayerId.startsWith("bot_")) {
       // Calculate the move using the game's registered service handler
       const stateWithTurn = game.state as { nextPlayer: number };
-      const botMove = service.generateBotMove(game.state, stateWithTurn.nextPlayer);
+      const botMove = await service.generateBotMove(game.state, stateWithTurn.nextPlayer);
       if (!botMove) return;
 
       // Execute the move
