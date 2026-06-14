@@ -65,6 +65,15 @@
       top: 2rem;
       justify-content: space-evenly;
     }
+    &.players-bottom {
+      position: absolute;
+      display: flex;
+      flex-direction: row-reverse;
+      width: 75%;
+      left: 12.5%;
+      bottom: 2rem;
+      justify-content: space-evenly;
+    }
     &.players-right {
       position: absolute;
       top: 12.5%;

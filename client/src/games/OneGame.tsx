@@ -177,7 +177,10 @@ export default function OneGame({
     userPlayerIndex === -1
       ? players
       : [...players.slice(userPlayerIndex + 1), ...players.slice(0, userPlayerIndex)];
-  const playersPerSide = Math.max(Math.floor(otherPlayers.length / 3), 1);
+  const playersPerSide = Math.max(
+    Math.floor(otherPlayers.length / (userPlayerIndex === -1 ? 4 : 3)),
+    1,
+  );
 
   const discardCard =
     view.discardTop.color === "wild"
@@ -218,10 +221,19 @@ export default function OneGame({
         ))}
       </div>
       <div className="players players-right">
-        {otherPlayers.slice(playersPerSide * 2).map((p) => (
-          <Fragment key={p.username}>{playerComponent({ player: p })}</Fragment>
-        ))}
+        {otherPlayers
+          .slice(playersPerSide * 2, userPlayerIndex === -1 ? playersPerSide * 3 : undefined)
+          .map((p) => (
+            <Fragment key={p.username}>{playerComponent({ player: p })}</Fragment>
+          ))}
       </div>
+      {userPlayerIndex === -1 && (
+        <div className="players players-bottom">
+          {otherPlayers.slice(playersPerSide * 3).map((p) => (
+            <Fragment key={p.username}>{playerComponent({ player: p })}</Fragment>
+          ))}
+        </div>
+      )}
       <Card card={discardCard} location={{ x: "50%", y: "50%" }} />
       {otherPlayers.flatMap((p) => {
         const idx = players.indexOf(p);
