@@ -1,5 +1,6 @@
 .card {
   position: fixed;
+  z-index: 10;
   top: calc(anchor(top));
   left: calc(anchor(right));
   width: max-content;
