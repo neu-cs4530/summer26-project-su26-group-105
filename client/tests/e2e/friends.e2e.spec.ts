@@ -23,10 +23,9 @@ async function createFriendOnlyGame(page: Page) {
   await page.getByRole("link", { name: "Games", exact: true }).click();
   await page.getByRole("button", { name: "Create New Game" }).click();
   await page.waitForURL("/game/new");
-  await page.getByLabel("Game selection").selectOption("nim");
-  await page.getByRole("switch").click(); // click the actual toggle button
+  await page.getByRole("switch", { name: "Friends only" }).click();
   await expect(page.getByText("Only your friends can join")).toBeVisible();
-  await page.getByRole("button", { name: "Create New Game" }).click();
+  await page.locator(".newGameEntry").filter({ hasText: "Nim" }).click();
   await page.waitForURL(/\/game\/.+/);
 }
 
