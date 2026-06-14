@@ -10,6 +10,7 @@
   animation: growing-background 100s ease-out infinite alternate;
 
   .color-picker {
+    z-index: 1;
     position: absolute;
     width: 100%;
     height: 100%;
