@@ -23,6 +23,8 @@ export default function OneGame({
   const [hoveredCardIdx, setHoveredCardIdx] = useState<number | null>(null);
   const [wildCardId, setWildCardId] = useState<string | null>(null);
 
+  const isSpectating = userPlayerIndex === -1;
+
   useEffect(() => {
     let cancelled = false;
 
@@ -40,6 +42,8 @@ export default function OneGame({
           lastTurnActions: [...view.lastTurnActions, action],
         }));
         if (action.type === "play") {
+          // Playing the respective card will already be animated, so we just need to wait for the animation
+          // and then update the view to the end state(setting the discard top, and player hands)
           await new Promise((resolve) => setTimeout(resolve, oneAnimationDurations.play));
           setIfNotCancelled((view) => ({
             ...view,
@@ -61,6 +65,8 @@ export default function OneGame({
           }
         } else if (action.type === "draw") {
           for (const id of action.cardIds) {
+            // Drawing is already animated, but this ensures we animate them 1 at a time
+            // instead of all at once.
             if (action.userIndex === userPlayerIndex) {
               setIfNotCancelled((view) => ({
                 ...view,
@@ -97,6 +103,12 @@ export default function OneGame({
     return view.lastTurnActions.some((action) => action.type === "play" && action.card.id === c);
   }
 
+  /**
+   * Gets the coordinates and rotation of a card in the current users hand
+   * @param c The card
+   * @param index The index of the card within the players hand
+   * @returns The coordinates(out of 100) and rotation of the card
+   */
   function getHandCardCoordinates(
     c: CardType,
     index: number,
@@ -130,6 +142,13 @@ export default function OneGame({
     return { x, y, rotation: angle * 0.15 * (180 / Math.PI) };
   }
 
+  /**
+   * Gets the coordinates of a card in another players hand
+   * Also handles animating to the discard pile if the card has been played this turn
+   * @param user The user who has the card in their hand
+   * @param card The card id
+   * @returns The card coordinates, and whether it should be rendered small or large
+   */
   function getOtherCardCoordinates(user: SafeUserInfo, card: string) {
     if (isCardPlayed(card)) {
       return { x: "50%", y: "50%", isSmall: false };
@@ -142,6 +161,11 @@ export default function OneGame({
     };
   }
 
+  /**
+   * Gets the value of a card that has been played this turn by its id
+   * @param card The card id
+   * @returns The card details
+   */
   function getOtherCard(card: string) {
     if (!isCardPlayed(card)) return null;
 
@@ -173,14 +197,10 @@ export default function OneGame({
     return () => makeMove({ type: "play", cardId: c.id });
   }
 
-  const otherPlayers =
-    userPlayerIndex === -1
-      ? players
-      : [...players.slice(userPlayerIndex + 1), ...players.slice(0, userPlayerIndex)];
-  const playersPerSide = Math.max(
-    Math.floor(otherPlayers.length / (userPlayerIndex === -1 ? 4 : 3)),
-    1,
-  );
+  const otherPlayers = isSpectating
+    ? players
+    : [...players.slice(userPlayerIndex + 1), ...players.slice(0, userPlayerIndex)];
+  const playersPerSide = Math.max(Math.floor(otherPlayers.length / (isSpectating ? 4 : 3)), 1);
 
   const discardCard =
     view.discardTop.color === "wild"
@@ -222,12 +242,12 @@ export default function OneGame({
       </div>
       <div className="players players-right">
         {otherPlayers
-          .slice(playersPerSide * 2, userPlayerIndex === -1 ? playersPerSide * 3 : undefined)
+          .slice(playersPerSide * 2, isSpectating ? playersPerSide * 3 : undefined)
           .map((p) => (
             <Fragment key={p.username}>{playerComponent({ player: p })}</Fragment>
           ))}
       </div>
-      {userPlayerIndex === -1 && (
+      {isSpectating && (
         <div className="players players-bottom">
           {otherPlayers.slice(playersPerSide * 3).map((p) => (
             <Fragment key={p.username}>{playerComponent({ player: p })}</Fragment>
@@ -253,7 +273,6 @@ export default function OneGame({
             isButton
             onClick={moveFunction(c)}
             onHover={() => setHoveredCardIdx(i)}
-            // from={view.lastTurnActions.{}}
             location={{ x: `${loc.x}%`, y: `${loc.y}%` }}
             rotation={loc.rotation}
           />
