@@ -18,7 +18,7 @@ export default function OneGame({
   userPlayerIndex,
   makeMove,
 }: GameProps<OneView, OneMove>) {
-  const [view, setView] = useState<OneView>(serverView);
+  const [view, setView] = useState<OneView>({ ...serverView, lastTurnActions: [] });
   const isUserTurn = view.nextPlayer === userPlayerIndex;
   const [hoveredCardIdx, setHoveredCardIdx] = useState<number | null>(null);
   const [wildCardId, setWildCardId] = useState<string | null>(null);
@@ -35,11 +35,11 @@ export default function OneGame({
     void (async () => {
       setIfNotCancelled((view) => ({ ...view, lastTurnActions: [] }));
       for (const action of serverView.lastTurnActions) {
+        setIfNotCancelled((view) => ({
+          ...view,
+          lastTurnActions: [...view.lastTurnActions, action],
+        }));
         if (action.type === "play") {
-          setIfNotCancelled((view) => ({
-            ...view,
-            lastTurnActions: [...view.lastTurnActions, action],
-          }));
           await new Promise((resolve) => setTimeout(resolve, oneAnimationDurations.play));
           setIfNotCancelled((view) => ({
             ...view,
@@ -60,10 +60,6 @@ export default function OneGame({
             }));
           }
         } else if (action.type === "draw") {
-          setIfNotCancelled((view) => ({
-            ...view,
-            lastTurnActions: [...view.lastTurnActions, action],
-          }));
           for (const id of action.cardIds) {
             if (action.userIndex === userPlayerIndex) {
               setIfNotCancelled((view) => ({

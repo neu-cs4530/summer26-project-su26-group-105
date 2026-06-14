@@ -1,5 +1,4 @@
 import type { SafeUserInfo } from "@gamenite/shared";
-import DisplayName from "../../components/DisplayName";
 import "./Player.css";
 import ProfileImage from "../../components/ProfileImage";
 
@@ -30,12 +29,6 @@ export default function Player({ user, numCards, isTurn }: PlayerProps) {
           {numCards}
         </span>
       </span>
-      {/*<DisplayName user={user} />
-      <div className="cards">
-        {numCards > 0 && <div className="card-back" />}
-        {numCards > 1 && <div className="card-back" />}
-        <span className="cards-number">{numCards}</span>
-      </div>*/}
     </div>
   );
 }

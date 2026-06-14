@@ -15,6 +15,7 @@ function createMockOneState(customFields: Partial<OneState> = {}): OneState {
     ],
     direction: 1,
     deck: [],
+    lastTurnActions: [],
     ...customFields,
   };
 }
@@ -147,16 +148,16 @@ describe("One Bot Brain Unit Tests", () => {
   });
 
   describe("generateBotMove", () => {
-    it("returns a random valid choice out of legal arrays", () => {
+    it("returns a random valid choice out of legal arrays", async () => {
       const state = createMockOneState();
-      const move = generateBotMove(state, 0);
+      const move = await generateBotMove(state, 0);
       expect(move).not.toBeNull();
       expect(["draw", "play"]).toContain(move!.type);
     });
 
-    it("returns null cleanly when no turn actions are mathematically legal", () => {
+    it("returns null cleanly when no turn actions are mathematically legal", async () => {
       const state = createMockOneState({ nextPlayer: 1 });
-      const move = generateBotMove(state, 0);
+      const move = await generateBotMove(state, 0);
       expect(move).toBeNull();
     });
   });
