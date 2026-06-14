@@ -17,6 +17,7 @@ import {
 import { type RestAPI } from "../types.ts";
 import { z } from "zod";
 import { checkAuth, getUserByUsername } from "../services/auth.service.ts";
+import { getFriendStats, type FriendStats } from "../services/friendStats.service.ts";
 
 /**
  * Handles user login by validating credentials.
@@ -127,4 +128,30 @@ export const postList: RestAPI<SafeUserInfo[]> = async (req, res) => {
   }
 
   res.send(users);
+};
+
+/**
+ * Returns the shared game stats between current user and a friend user,
+ * only returns stats if they are friends.
+ * @param req The request containing auth and the target username as a route param
+ * @param res The response containing the shared stats or an error
+ */
+export const getFriendStatsHandler: RestAPI<FriendStats, { username: string }> = async (
+  req,
+  res,
+) => {
+  const body = zUserAuth.safeParse(req.body);
+  if (!body.success) {
+    res.status(400).send({ error: "Poorly-formed request" });
+    return;
+  }
+
+  const user = await checkAuth(body.data);
+  if (!user) {
+    res.status(403).send({ error: "Invalid credentials" });
+    return;
+  }
+
+  const stats = await getFriendStats(user.username, req.params.username);
+  res.send(stats);
 };
