@@ -23,6 +23,7 @@ export default function NewGame() {
         <button
           type="button"
           role="switch"
+          aria-label="Friends only"
           aria-checked={friendOnly}
           onClick={toggleFriendOnly}
           className={`friendOnlySwitch ${friendOnly ? "friendOnlySwitchOn" : ""}`}
