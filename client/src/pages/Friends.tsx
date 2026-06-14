@@ -1,10 +1,12 @@
 import { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
+import { Link } from "react-router-dom";
 import useSocketsForFriends from "../hooks/useSocketsForFriends";
 import type { FriendEntry, SearchResult } from "@gamenite/shared/src/friend.types";
 import Modal from "../components/Modal";
 import ProfileImage from "../components/ProfileImage";
 import "./Friends.css";
+import DisplayName from "../components/DisplayName";
 
 type Tab = "friends" | "pending" | "search" | "blocked";
 
@@ -257,13 +259,19 @@ export default function Friends() {
                       marginBottom: "0.5rem",
                     }}
                   >
-                    <ProfileImage
-                      src={"image" in f ? f.image : null}
-                      size="small"
-                      activityStatus={"activityStatus" in f ? f.activityStatus : undefined}
-                    />
                     <span style={{ flex: 1 }}>
-                      {f.display} <span className="smallAndGray">@{f.username}</span>
+                      <DisplayName
+                        user={{
+                          username: f.username,
+                          display: f.display,
+                          image: "image" in f ? f.image : null,
+                          bio: "",
+                          socialMedias: [],
+                          createdAt: new Date(),
+                          isBot: false,
+                        }}
+                        showFullInfo
+                      />
                     </span>
                     <ThreeDotMenu
                       onRemove={() => confirmRemove(f)}
@@ -294,7 +302,18 @@ export default function Friends() {
                     }}
                   >
                     <span style={{ flex: 1 }}>
-                      {f.display} <span className="smallAndGray">@{f.username}</span>
+                      <DisplayName
+                        user={{
+                          username: f.username,
+                          display: f.display,
+                          image: "image" in f ? f.image : null,
+                          bio: "",
+                          socialMedias: [],
+                          createdAt: new Date(),
+                          isBot: false,
+                        }}
+                        showFullInfo
+                      />
                     </span>
                     <button className="primary narrow" onClick={() => acceptRequest(f.friendId)}>
                       Accept
@@ -322,7 +341,18 @@ export default function Friends() {
                     }}
                   >
                     <span style={{ flex: 1 }}>
-                      {f.display} <span className="smallAndGray">@{f.username}</span>
+                      <DisplayName
+                        user={{
+                          username: f.username,
+                          display: f.display,
+                          image: "image" in f ? f.image : null,
+                          bio: "",
+                          socialMedias: [],
+                          createdAt: new Date(),
+                          isBot: false,
+                        }}
+                        showFullInfo
+                      />
                     </span>
                     <span className="smallAndGray">Pending...</span>
                   </li>
@@ -363,10 +393,13 @@ export default function Friends() {
                       marginBottom: "0.5rem",
                     }}
                   >
-                    <span style={{ flex: 1 }}>
+                    <Link
+                      to={`/profile/${r.username}`}
+                      style={{ flex: 1, textDecoration: "none", color: "inherit" }}
+                    >
                       {r.display} <span className="smallAndGray">@{r.username}</span>
                       {relationshipLabel(r.relationship)}
-                    </span>
+                    </Link>
                     {r.relationship === "none" && (
                       <button className="primary narrow" onClick={() => sendRequest(r.username)}>
                         Add Friend
