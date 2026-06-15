@@ -115,6 +115,8 @@ export const oneLogic: GameLogic<OneState, OneView> = {
 
     // play a card
     if (move.type === "play") {
+      let currentDiscard = [...discardPile];
+
       const actions: OneAction[] = [
         {
           type: "play",
@@ -182,8 +184,9 @@ export const oneLogic: GameLogic<OneState, OneView> = {
       if (cardsToDrawNext > 0) {
         // Check deck pool size & recycle if needed before applying penalty
         if (updatedDeck.length < cardsToDrawNext) {
-          const recycled = shuffle(discardPile.filter((c) => c.id !== topCard.id));
+          const recycled = shuffle(currentDiscard);
           updatedDeck = [...updatedDeck, ...recycled];
+          currentDiscard = [];
         }
 
         const drawn = updatedDeck.splice(0, cardsToDrawNext);
@@ -202,7 +205,7 @@ export const oneLogic: GameLogic<OneState, OneView> = {
 
       return {
         deck: updatedDeck,
-        discardPile: [...discardPile, cardToPlay],
+        discardPile: [...currentDiscard, cardToPlay],
         playerHands: updatedHands,
         nextPlayer: nextPlayerTarget,
         direction: nextDirection,
