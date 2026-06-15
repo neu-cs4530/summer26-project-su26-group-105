@@ -61,6 +61,9 @@ export const avatarDecorations = {
   tophat: "tophat",
   sweater: "sweater",
   bowtie: "bowtie",
+  suit: "suit",
+  goggles: "goggles",
+  party: "party",
 } as const;
 
 export type AvatarDecorations = (typeof avatarDecorations)[keyof typeof avatarDecorations];

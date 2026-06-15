@@ -4,14 +4,20 @@ import glasses from "../assets/decorations/glasses.png";
 import tophat from "../assets/decorations/tophat.png";
 import sweater from "../assets/decorations/sweater.png";
 import bowtie from "../assets/decorations/bowtie.png";
+import suit from "../assets/decorations/suit.svg";
+import goggles from "../assets/decorations/goggles.svg";
+import party from "../assets/decorations/party.svg";
 import { useEffect, useRef, useState } from "react";
 
 export const avatarDecorations: Record<AvatarDecorations, { image: string; width: number }> = {
   sunglasses: { image: sunglasses, width: 80 },
   glasses: { image: glasses, width: 60 },
+  goggles: { image: goggles, width: 70 },
   tophat: { image: tophat, width: 40 },
-  sweater: { image: sweater, width: 100 },
+  party: { image: party, width: 25 },
   bowtie: { image: bowtie, width: 50 },
+  sweater: { image: sweater, width: 100 },
+  suit: { image: suit, width: 50 },
 };
 
 type AvatarDecorationProps = {

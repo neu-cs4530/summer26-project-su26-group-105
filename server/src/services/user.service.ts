@@ -67,7 +67,8 @@ function generateBotDecorations(id: string) {
   }
 
   if (getRandomNumber("hashat", 2)) {
-    const hat = "tophat";
+    const hats: AvatarDecoration["type"][] = ["tophat", "party"];
+    const hat = hats[getRandomNumber("hattype", hats.length)];
     const angle = getRandomNumber("hatangle", 30) - 15;
     const x = 25 + getRandomNumber("hatx", 11) - 5;
     const y = 0 + getRandomNumber("haty", 11) - 5;
@@ -82,7 +83,8 @@ function generateBotDecorations(id: string) {
 
   // Bots with shirts should be more rare since shirts take up more of the avatar
   if (getRandomNumber("hasshirt", 4) === 0) {
-    const shirt = "sweater";
+    const shirts: AvatarDecoration["type"][] = ["sweater", "suit"];
+    const shirt = shirts[getRandomNumber("shirttype", shirts.length)];
     const angle = getRandomNumber("shirtangle", 30) - 15;
     const x = 0 + getRandomNumber("shirtx", 11) - 5;
     const y = 40 + getRandomNumber("shirty", 11) - 5;
@@ -110,7 +112,8 @@ function generateBotDecorations(id: string) {
   }
 
   if (getRandomNumber("hasglasses", 2)) {
-    const glasses = getRandomNumber("glasses", 2) ? "sunglasses" : "glasses";
+    const allGlasses: AvatarDecoration["type"][] = ["sunglasses", "glasses", "goggles"];
+    const glasses = allGlasses[getRandomNumber("glassestype", allGlasses.length)];
     const angle = getRandomNumber("glassesangle", 30) - 15;
     const x = 25 + getRandomNumber("glassesx", 11) - 5;
     const y = 20 + getRandomNumber("glassesy", 11) - 5;
