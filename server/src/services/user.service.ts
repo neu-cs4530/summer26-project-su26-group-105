@@ -70,7 +70,7 @@ function generateBotDecorations(id: string) {
     const hats: AvatarDecoration["type"][] = ["tophat", "party"];
     const hat = hats[getRandomNumber("hattype", hats.length)];
     const angle = getRandomNumber("hatangle", 30) - 15;
-    const x = 25 + getRandomNumber("hatx", 11) - 5;
+    const x = 30 + getRandomNumber("hatx", 11) - 5;
     const y = 0 + getRandomNumber("haty", 11) - 5;
     decorations.push({
       type: hat,
@@ -115,7 +115,7 @@ function generateBotDecorations(id: string) {
     const allGlasses: AvatarDecoration["type"][] = ["sunglasses", "glasses", "goggles"];
     const glasses = allGlasses[getRandomNumber("glassestype", allGlasses.length)];
     const angle = getRandomNumber("glassesangle", 30) - 15;
-    const x = 25 + getRandomNumber("glassesx", 11) - 5;
+    const x = 20 + getRandomNumber("glassesx", 11) - 5;
     const y = 20 + getRandomNumber("glassesy", 11) - 5;
     decorations.push({
       type: glasses,
