@@ -21,6 +21,13 @@ type AvatarDecorationProps = {
   onRotate?: (id: number, rotation: number) => void;
 };
 
+/**
+ * An avatar decoration that can be dragged, rotated, and removed.
+ * @param decoration - The decoration to display, with x and y as %s, and rotation in degrees
+ * @param onDrag - Callback for when the decoration is dragged, with new x and y as %s
+ * @param onRemove - Callback for when the decoration is removed
+ * @param onRotate - Callback for when the decoration is rotated, with new rotation in degrees
+ */
 export default function AvatarDecoration({
   decoration,
   onDrag,

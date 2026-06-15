@@ -19,6 +19,7 @@ type ProfileImageProps = {
  * @param size The size to display the image
  * @param activityStatus If provided, renders a status dot in the bottom-right corner
  * @param blocked If user is blocked, profile image is not available
+ * @param decorations An array of avatar decorations to render on top of the profile image
  */
 export default function ProfileImage({ decorations, ...props }: ProfileImageProps) {
   return (
@@ -36,6 +37,7 @@ export default function ProfileImage({ decorations, ...props }: ProfileImageProp
  * @param size The size to display the image
  * @param activityStatus If provided, renders a status dot in the bottom-right corner
  * @param blocked If user is blocked, profile image is not available
+ * @param children Any additional elements to render on top of the profile image, such as avatar decorations
  */
 export function RawProfileImage({
   src,
