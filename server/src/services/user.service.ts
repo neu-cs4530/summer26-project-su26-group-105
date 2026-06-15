@@ -3,10 +3,12 @@ import {
   type UserUpdateRequest,
   type SafeSelfUserInfo,
   type RecentlyPlayedEntry,
+  type AvatarDecoration,
 } from "@gamenite/shared";
 import { getUserByUsername, updateAuth } from "./auth.service.ts";
 import { GameRepo, UserRepo } from "../repository.ts";
 import type { UserRecord } from "../models.ts";
+import { createHash } from "node:crypto";
 
 const disallowedUsernames = new Set(["login", "signup", "list"]);
 
@@ -47,6 +49,84 @@ function recordToSafeSelfUserInfo(record: UserRecord): SafeSelfUserInfo {
 }
 
 /**
+ * Given an id, generates a deterministic set of avatar decorations for a bot user.
+ * @param id - the bot user's id, which should be in the format "bot_[displayName]"
+ * @returns a list of avatar decorations
+ */
+function generateBotDecorations(id: string) {
+  const decorations: AvatarDecoration[] = [];
+  let decorId = 0;
+
+  function getRandomNumber(key: string, range: number) {
+    return (
+      createHash("sha256")
+        .update(id + key)
+        .digest()
+        .readUInt32BE() % range
+    );
+  }
+
+  if (getRandomNumber("hashat", 2)) {
+    const hat = "tophat";
+    const angle = getRandomNumber("hatangle", 30) - 15;
+    const x = 25 + getRandomNumber("hatx", 11) - 5;
+    const y = 0 + getRandomNumber("haty", 11) - 5;
+    decorations.push({
+      type: hat,
+      id: decorId++,
+      x,
+      y,
+      rotation: angle,
+    });
+  }
+
+  // Bots with shirts should be more rare since shirts take up more of the avatar
+  if (getRandomNumber("hasshirt", 4) === 0) {
+    const shirt = "sweater";
+    const angle = getRandomNumber("shirtangle", 30) - 15;
+    const x = 0 + getRandomNumber("shirtx", 11) - 5;
+    const y = 40 + getRandomNumber("shirty", 11) - 5;
+    decorations.push({
+      type: shirt,
+      id: decorId++,
+      x,
+      y,
+      rotation: angle,
+    });
+  }
+
+  if (getRandomNumber("hasneckdecor", 2)) {
+    const neck = "bowtie";
+    const angle = getRandomNumber("neckangle", 30) - 15;
+    const x = 25 + getRandomNumber("neckx", 11) - 5;
+    const y = 30 + getRandomNumber("necky", 11) - 5;
+    decorations.push({
+      type: neck,
+      id: decorId++,
+      x,
+      y,
+      rotation: angle,
+    });
+  }
+
+  if (getRandomNumber("hasglasses", 2)) {
+    const glasses = getRandomNumber("glasses", 2) ? "sunglasses" : "glasses";
+    const angle = getRandomNumber("glassesangle", 30) - 15;
+    const x = 25 + getRandomNumber("glassesx", 11) - 5;
+    const y = 20 + getRandomNumber("glassesy", 11) - 5;
+    decorations.push({
+      type: glasses,
+      id: decorId++,
+      x,
+      y,
+      rotation: angle,
+    });
+  }
+
+  return decorations;
+}
+
+/**
  * Retrieves a single user from the database.
  *
  * @param userId - Valid user id.
@@ -63,7 +143,7 @@ export async function populateSafeUserInfo(userId: string): Promise<SafeUserInfo
       display: `🤖 ${displayName}`,
       createdAt: new Date(),
       image: null,
-      decorations: [],
+      decorations: generateBotDecorations(userId),
       bio: `Hi, I'm ${displayName}!`,
       socialMedias: [],
       isBot: true,
