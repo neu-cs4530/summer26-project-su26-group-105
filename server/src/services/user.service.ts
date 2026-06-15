@@ -15,10 +15,11 @@ const disallowedUsernames = new Set(["login", "signup", "list"]);
  * @param record the user database record to convert
  * @returns public safe user info without private settings
  */
-function recordToSafeUserInfo(record: UserRecord): SafeUserInfo {
+export function recordToSafeUserInfo(record: UserRecord): SafeUserInfo {
   return {
     username: record.username,
     display: record.display,
+    decorations: record.decorations,
     createdAt: new Date(record.createdAt),
     bio: record.bio,
     image: record.image,
@@ -62,6 +63,7 @@ export async function populateSafeUserInfo(userId: string): Promise<SafeUserInfo
       display: `🤖 ${displayName}`,
       createdAt: new Date(),
       image: null,
+      decorations: [],
       bio: `Hi, I'm ${displayName}!`,
       socialMedias: [],
       isBot: true,
@@ -128,6 +130,7 @@ export async function createUser(
     display: username,
     bio: `Hi, I'm ${username}!`,
     image: null,
+    decorations: [],
     socialMedias: [],
     settings: {
       receivesFriendRequestNotifications: true,
@@ -170,7 +173,7 @@ export async function getUsersByUsername(usernames: string[]): Promise<SafeUserI
  */
 export async function updateUser(
   username: string,
-  { display, password, bio, image, socialMedias, settings }: UserUpdateRequest,
+  { display, password, bio, image, decorations, socialMedias, settings }: UserUpdateRequest,
 ): Promise<SafeSelfUserInfo> {
   const user = await getUserByUsername(username);
   if (!user) throw new Error(`No user ${username}`);
@@ -187,6 +190,7 @@ export async function updateUser(
   if (display !== undefined) newUser.display = display;
   if (bio !== undefined) newUser.bio = bio;
   if (image !== undefined) newUser.image = image;
+  if (decorations) newUser.decorations = decorations;
   if (socialMedias !== undefined) newUser.socialMedias = socialMedias;
   if (settings) {
     const {

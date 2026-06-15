@@ -1,3 +1,5 @@
+import type { SafeUserInfo } from "./user.types.ts";
+
 /**
  * Activity status for a user.
  * - `online`: actively connected
@@ -13,9 +15,7 @@ export type ActivityStatus = "online" | "idle" | "dnd" | "offline";
 export interface FriendEntry {
   friendId: string;
   userId: string;
-  username: string;
-  display: string;
-  image: string | null;
+  user: SafeUserInfo;
   requestDirection: "incoming" | "outgoing" | "mutual";
   activityStatus: ActivityStatus;
 }
@@ -26,8 +26,7 @@ export interface FriendEntry {
  */
 export interface SearchResult<FriendOnly = false> {
   userId: string;
-  username: string;
-  display: string;
+  user: SafeUserInfo;
   relationship: "friend" | "incoming" | "outgoing" | "none";
   friendId: FriendOnly extends true ? string : undefined; // included if friend-only search
 }
