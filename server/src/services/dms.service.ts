@@ -14,7 +14,7 @@ import {
  *  channel memberIds, message `senderId`,
  * and the socket rooms users are placed in are all usernames
  * userIds are used only where needed for the other thingies
- * privacy/friends checks, since UserRepo and FriendRepo are keyed by userId :/
+ * privacy/friends checks, since UserRepo and FriendRepo are keyed by userId lol
  */
 
 /**
@@ -62,7 +62,7 @@ export async function verifyMessagingPermissions(
 
 /**
  * Retrieves an existing 1-on-1 direct message channel,
- * or creates a new one if permissions allow and it doesn't exist yet.
+ * or creates a new one if permissions allow and it doesn't exist yet
  *
  * @param sender - the authenticated sender (we need both their username for channel
  *   membership and their userId for the permission check)
@@ -121,11 +121,11 @@ export async function getOrCreateDirectChannel(
 /**
  * brand new group chat channel
  *
- * @param creatorUsername - the authenticated creator's username
- * @param rawPayload - `{ groupName, memberIds }` where memberIds are usernames
+ * @param creator - the authenticated creator (username for membership, userId for checks)
+ * @param rawPayload - { groupName, memberIds } where memberIds are usernames
  */
 export async function createGroupChannel(
-  creatorUsername: string,
+  creator: { username: string; userId: string },
   rawPayload: unknown,
 ): Promise<{ channel: MessageChannel | null; error?: string }> {
   const parsed = zCreateGroupPayload.safeParse(rawPayload);
@@ -138,15 +138,22 @@ export async function createGroupChannel(
 
   const { groupName, memberIds } = parsed.data;
 
-  // Validate every requested member actually exists before creating the room.
+  // Validate each member exists and that the creator is actually allowed to message
+  // them — a block (either direction) or their privacy setting (no_one / friends_only
+  // when not friends) stops users from addingt hem
   for (const username of memberIds) {
+    if (username === creator.username) continue;
     const member = await getUserByUsername(username);
     if (!member) {
       return { channel: null, error: `User "${username}" does not exist` };
     }
+    const permission = await verifyMessagingPermissions(creator.userId, member.userId);
+    if (!permission.allowed) {
+      return { channel: null, error: `Can't add ${username}: ${permission.reason}` };
+    }
   }
 
-  const distinctMembers = Array.from(new Set([creatorUsername, ...memberIds]));
+  const distinctMembers = Array.from(new Set([creator.username, ...memberIds]));
   if (distinctMembers.length < 2) {
     return { channel: null, error: "Group chats need at least one other participant" };
   }
@@ -232,7 +239,7 @@ export async function postMessageToChannel(
 }
 
 /**
- * Lists historical message entries bound to a specific channel, oldest first.
+ * Lists historical message entries bound to a specific channel, oldest first
  *
  * DirectMessageRepo has no per-channel index, so we scan all messages and
  * filter by channelId....this is probably not the best way to do it
@@ -253,9 +260,26 @@ export async function getChannelHistory(
 
   const keys = await DirectMessageRepo.getAllKeys();
   const all = keys.length === 0 ? [] : await DirectMessageRepo.getMany(keys);
-  const messages = all
+  const ordered = all
     .filter((m) => m.channelId === channelId)
     .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+
+  // Hide messages from anyone the viewer can no longer message (block / privacy),
+  // so the suppression also holds across reloads, not just for live delivery
+  const exchangeCache = new Map<string, boolean>();
+  const messages: ChatMessage[] = [];
+  for (const m of ordered) {
+    if (m.senderId === username) {
+      messages.push(m);
+      continue;
+    }
+    let canSee = exchangeCache.get(m.senderId);
+    if (canSee === undefined) {
+      canSee = await canUsersExchange(username, m.senderId);
+      exchangeCache.set(m.senderId, canSee);
+    }
+    if (canSee) messages.push(m);
+  }
 
   return { messages };
 }
@@ -275,4 +299,43 @@ export async function getChannelsForUser(username: string): Promise<MessageChann
 /** Most-recent-activity timestamp for a channel, falling back to its creation time. */
 function channelActivityTime(channel: MessageChannel): number {
   return new Date(channel.lastActivityAt ?? channel.createdAt).getTime();
+}
+
+/**
+ * Whether two users may exchange messages, considering both of their settings and
+ * blocks.
+ * a message is only delivered if BOTH directions
+ * are permitted, so a block or a privacy change (no_one / friends_only) by either
+ * party stops messaging between them
+ */
+async function canUsersExchange(aUsername: string, bUsername: string): Promise<boolean> {
+  if (aUsername === bUsername) return true;
+  const a = await getUserByUsername(aUsername);
+  const b = await getUserByUsername(bUsername);
+  // If either user can't be found, don't suppress anything. just send it lol
+  if (!a || !b) return true;
+
+  const aToB = await verifyMessagingPermissions(a.userId, b.userId);
+  if (!aToB.allowed) return false;
+  const bToA = await verifyMessagingPermissions(b.userId, a.userId);
+  return bToA.allowed;
+}
+
+/**
+ * Given a sender and a channel's members, returns the subset that should actually
+ * receive a message from that sender
+ * basically everyone the sender can still mutually
+ * message. Used so a block OR a privacy change stops delivery
+ */
+export async function filterDeliverableMembers(
+  senderUsername: string,
+  memberUsernames: string[],
+): Promise<string[]> {
+  const deliverable: string[] = [];
+  for (const username of memberUsernames) {
+    if (await canUsersExchange(senderUsername, username)) {
+      deliverable.push(username);
+    }
+  }
+  return deliverable;
 }

@@ -5,6 +5,7 @@ import {
   postMessageToChannel,
   getChannelHistory,
   getChannelsForUser,
+  filterDeliverableMembers,
 } from "../services/dms.service.ts";
 import { checkAuth, getUserByUsername } from "../services/auth.service.ts";
 import { withAuth } from "@gamenite/shared";
@@ -12,8 +13,8 @@ import { z } from "zod";
 import { ChannelRepo } from "../repository.ts";
 
 /**
- * Validates an incoming socket request's shape and credentials
- * @returns the authenticated user and validated payload, or `null` if the
+ * Validates an incoming socket
+ * @returns the authenticated user and validated payload, or null if the
  *   request was rejected (an error has already been emitted in that case)
  * (is this needed?)
  */
@@ -42,7 +43,7 @@ async function authenticate<T>(
  * Registers a user's socket for real-time messaging
  *
  * The client sends its username. DM broadcasts target io.to(username) (channel
- * membership is keyed by username), so we join that room.
+ * membership is keyed by username), so we join that room
  */
 export const socketRegisterUserSession = (socket: GameServerSocket) => async (username: string) => {
   if (typeof username !== "string") return;
@@ -58,7 +59,7 @@ export const socketRegisterUserSession = (socket: GameServerSocket) => async (us
 };
 
 /**
- * start or open a 1-on-1 direct message conversation.
+ * start or open a 1-on-1 direct message conversation
  * The payload is the recipient's username
  */
 export const socketOpenDirectChat: SocketAPI = (socket, io) => async (body) => {
@@ -127,7 +128,7 @@ export const socketCreateGroupChat: SocketAPI = (socket, io) => async (body) => 
   if (!ctx) return;
   const { user, payload } = ctx;
 
-  const { channel, error } = await createGroupChannel(user.username, payload);
+  const { channel, error } = await createGroupChannel(user, payload);
 
   if (error || !channel) {
     socket.emit("globalChatActionError", {
@@ -172,7 +173,9 @@ export const socketSendChatMessage: SocketAPI = (socket, io) => async (body) => 
   const channel = await ChannelRepo.find(payload.channelId);
   if (!channel) return;
 
-  for (const memberId of channel.memberIds) {
+  // Don't deliver between users who have blocked each other, even in a shared group.
+  const recipients = await filterDeliverableMembers(user.username, channel.memberIds);
+  for (const memberId of recipients) {
     io.to(memberId).emit("globalChatMessageReceived", message);
   }
 };

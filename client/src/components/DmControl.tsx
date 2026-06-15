@@ -8,7 +8,7 @@ export default function DMControlPanel() {
   const [textInput, setTextInput] = useState("");
   const [searchInput, setSearchInput] = useState("");
   const [groupName, setGroupName] = useState("");
-  const [groupMembers, setGroupMembers] = useState("");
+  const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
   const [showGroupForm, setShowGroupForm] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
@@ -36,10 +36,38 @@ export default function DMControlPanel() {
     return () => clearTimeout(timer);
   }, [searchInput, handleSearchUsers]);
 
+  // The active conversation, used to show its name/members in the header.
+  const activeChannel = channels.find((c) => c.channelId === activeChannelId);
+
+  // Toggle between the group-creation form and the start-a-DM search, clearing
+  // any in-progress search/selection so the two modes don't bleed together.
+  const toggleGroupForm = () => {
+    setShowGroupForm((prev) => !prev);
+    setSearchInput("");
+    setGroupName("");
+    setSelectedMembers([]);
+  };
+
   // Start a DM with a chosen user and reset the search box
   const startDmWith = (username: string) => {
     handleOpenDirectChat(username);
     setSearchInput("");
+  };
+
+  // Add one user to the in-progress group, then clear the search to add the next
+  const addGroupMember = (username: string) => {
+    setSelectedMembers((prev) => (prev.includes(username) ? prev : [...prev, username]));
+    setSearchInput("");
+  };
+
+  const removeGroupMember = (username: string) => {
+    setSelectedMembers((prev) => prev.filter((m) => m !== username));
+  };
+
+  // Clicking a search result either starts a DM or adds a group member
+  const handleResultClick = (username: string) => {
+    if (showGroupForm) addGroupMember(username);
+    else startDmWith(username);
   };
 
   const handleStartDM = (e: React.SyntheticEvent) => {
@@ -50,14 +78,11 @@ export default function DMControlPanel() {
 
   const handleStartGroup = (e: React.SyntheticEvent) => {
     e.preventDefault();
-    const members = groupMembers
-      .split(",")
-      .map((m) => m.trim())
-      .filter((m) => m.length > 0);
-    if (!groupName.trim() || members.length === 0) return;
-    handleCreateGroup(groupName.trim(), members);
+    if (!groupName.trim() || selectedMembers.length === 0) return;
+    handleCreateGroup(groupName.trim(), selectedMembers);
     setGroupName("");
-    setGroupMembers("");
+    setSelectedMembers([]);
+    setSearchInput("");
     setShowGroupForm(false);
   };
 
@@ -66,6 +91,35 @@ export default function DMControlPanel() {
     if (!textInput.trim()) return;
     handleSendMessage(textInput.trim());
     setTextInput("");
+  };
+
+  // Shared search-results list. Clicking a result starts a DM or adds a group
+  // member depending on the current mode. Hides yourself and already-picked members
+  const renderSearchResults = () => {
+    if (!searchInput.trim()) return null;
+    const filtered = searchResults.filter(
+      (r) =>
+        r.username !== user.username && !(showGroupForm && selectedMembers.includes(r.username)),
+    );
+    return (
+      <div className="dm-search-results">
+        {filtered.length === 0 ? (
+          <p className="smallAndGray">No users found.</p>
+        ) : (
+          filtered.map((r) => (
+            <button
+              key={r.userId}
+              type="button"
+              className="dm-search-result-item"
+              onClick={() => handleResultClick(r.username)}
+            >
+              <span className="dm-search-display">{r.display}</span>
+              <span className="smallAndGray">@{r.username}</span>
+            </button>
+          ))
+        )}
+      </div>
+    );
   };
 
   return (
@@ -91,45 +145,29 @@ export default function DMControlPanel() {
 
         {error && <div className="dm-error-banner">{error}</div>}
 
-        {/* Search for a user to start a new chat with */}
-        <form onSubmit={handleStartDM} className="new-dm-footer">
-          <input
-            type="text"
-            placeholder="Search users to message..."
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-          />
-          <button type="submit" className="action-pill-btn">
-            Chat
-          </button>
-        </form>
-        {searchInput.trim() && (
-          <div className="dm-search-results">
-            {searchResults.length === 0 ? (
-              <p className="smallAndGray">No users found.</p>
-            ) : (
-              searchResults
-                .filter((r) => r.username !== user.username)
-                .map((r) => (
-                  <button
-                    key={r.userId}
-                    type="button"
-                    className="dm-search-result-item"
-                    onClick={() => startDmWith(r.username)}
-                  >
-                    <span className="dm-search-display">{r.display}</span>
-                    <span className="smallAndGray">@{r.username}</span>
-                  </button>
-                ))
-            )}
-          </div>
+        {/* Start a new DM*/}
+        {!showGroupForm && (
+          <>
+            <form onSubmit={handleStartDM} className="new-dm-footer">
+              <input
+                type="text"
+                placeholder="Search users to message..."
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+              />
+              <button type="submit" className="action-pill-btn">
+                Chat
+              </button>
+            </form>
+            {renderSearchResults()}
+          </>
         )}
 
         {/* Group chat creation */}
         <button
           type="button"
           className="action-pill-btn group-toggle-btn"
-          onClick={() => setShowGroupForm((prev) => !prev)}
+          onClick={toggleGroupForm}
         >
           {showGroupForm ? "Cancel" : "+ New Group"}
         </button>
@@ -141,13 +179,38 @@ export default function DMControlPanel() {
               value={groupName}
               onChange={(e) => setGroupName(e.target.value)}
             />
+
+            {/* Selected members so far and are removable */}
+            {selectedMembers.length > 0 && (
+              <div className="group-member-chips">
+                {selectedMembers.map((m) => (
+                  <button
+                    key={m}
+                    type="button"
+                    className="group-member-chip"
+                    onClick={() => removeGroupMember(m)}
+                    title="Remove"
+                  >
+                    {m} ✕
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* Search and add members one at a time */}
             <input
               type="text"
-              placeholder="Members (comma-separated usernames)..."
-              value={groupMembers}
-              onChange={(e) => setGroupMembers(e.target.value)}
+              placeholder="Search users to add..."
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
             />
-            <button type="submit" className="action-pill-btn">
+            {renderSearchResults()}
+
+            <button
+              type="submit"
+              className="action-pill-btn"
+              disabled={selectedMembers.length === 0}
+            >
               Create Group
             </button>
           </form>
@@ -157,6 +220,23 @@ export default function DMControlPanel() {
       <div className="profile-right-panel chat-viewport">
         {activeChannelId ? (
           <div className="chat-stream-container">
+            {activeChannel && (
+              <div className="chat-header">
+                <h3 className="chat-header-title">
+                  {activeChannel.isGroup
+                    ? `👥 ${activeChannel.name}`
+                    : `👤 ${activeChannel.memberIds.find((id) => id !== user.username) || "User"}`}
+                </h3>
+                {activeChannel.isGroup && (
+                  <div className="chat-header-members smallAndGray">
+                    {activeChannel.memberIds.length} members:{" "}
+                    {activeChannel.memberIds
+                      .map((m) => (m === user.username ? "You" : m))
+                      .join(", ")}
+                  </div>
+                )}
+              </div>
+            )}
             <div className="dottedList message-bubbles-box">
               {messages.map(({ messageId, content, senderId, timestamp }) => {
                 const isMe = senderId === user.username;
