@@ -14,7 +14,6 @@ import { getUserByUsername } from "../../src/services/auth.service.ts";
 import { sendFriendRequest, acceptFriendRequest } from "../../src/services/friend.service.ts";
 import type { UserWithId } from "../../src/types.ts";
 
-
 let userA: UserWithId;
 let userB: UserWithId;
 let userC: UserWithId;
@@ -308,20 +307,24 @@ describe("updateGame — game completion", () => {
     const game = await createGame(userA, "nim", new Date());
     await joinGame(game.gameId, userB);
     await startGame(game.gameId, userA);
- 
+
     const gameId = game.gameId;
- 
+
     // plays full nim game to get winner at end
     const moves: [UserWithId, number][] = [
-      [userA, 3], [userB, 3], [userA, 3],
-      [userB, 3], [userA, 3], [userB, 3],
+      [userA, 3],
+      [userB, 3],
+      [userA, 3],
+      [userB, 3],
+      [userA, 3],
+      [userB, 3],
       [userA, 3],
     ];
- 
+
     for (const [player, move] of moves) {
       await updateGame(gameId, player, move);
     }
- 
+
     const finished = await getGameById(gameId);
     expect(finished!.status).toBe("done");
     expect(finished!.winner).toBeDefined();
@@ -329,101 +332,114 @@ describe("updateGame — game completion", () => {
     // player 1 wins
     expect(finished!.winner).toBe(userB.userId);
   });
- 
+
   it("sets winner correctly when player 0 wins nim", async () => {
     const game = await createGame(userA, "nim", new Date());
     await joinGame(game.gameId, userB);
     await startGame(game.gameId, userA);
- 
+
     const gameId = game.gameId;
- 
+
     // plays full nim game with player 0 winning
     const moves: [UserWithId, number][] = [
-      [userA, 3], [userB, 3], [userA, 3],
-      [userB, 3], [userA, 3], [userB, 2],
-      [userA, 3], [userB, 1],
+      [userA, 3],
+      [userB, 3],
+      [userA, 3],
+      [userB, 3],
+      [userA, 3],
+      [userB, 2],
+      [userA, 3],
+      [userB, 1],
     ];
- 
+
     for (const [player, move] of moves) {
       await updateGame(gameId, player, move);
     }
- 
+
     const finished = await getGameById(gameId);
     expect(finished!.status).toBe("done");
     expect(finished!.winner).toBe(userA.userId);
   });
- 
+
   it("does not set winner twice if updateGame called after game is done", async () => {
     const game = await createGame(userA, "nim", new Date());
     await joinGame(game.gameId, userB);
     await startGame(game.gameId, userA);
- 
+
     const gameId = game.gameId;
- 
+
     const moves: [UserWithId, number][] = [
-      [userA, 3], [userB, 3], [userA, 3],
-      [userB, 3], [userA, 3], [userB, 3],
+      [userA, 3],
+      [userB, 3],
+      [userA, 3],
+      [userB, 3],
+      [userA, 3],
+      [userB, 3],
       [userA, 3],
     ];
- 
+
     for (const [player, move] of moves) {
       await updateGame(gameId, player, move);
     }
- 
+
     const finished = await getGameById(gameId);
     const originalWinner = finished!.winner;
- 
+
     // tests attempting move after game ending, should fail since winner is unchanged
     try {
       await updateGame(gameId, userB, 1);
     } catch {
       // expected to fail
     }
- 
+
     const stillFinished = await getGameById(gameId);
     expect(stillFinished!.winner).toBe(originalWinner);
   });
- 
+
   it("completes a guess game and sets winner", async () => {
     const game = await createGame(userA, "guess", new Date());
     await joinGame(game.gameId, userB);
     await startGame(game.gameId, userA);
- 
+
     const gameId = game.gameId;
- 
+
     // guess game updates
     await updateGame(gameId, userA, 50);
     await updateGame(gameId, userB, 50);
- 
+
     const finished = await getGameById(gameId);
     expect(finished!.status).toBe("done");
     expect(finished!.winner).toBeDefined();
     expect(finished!.endedAt).toBeDefined();
   });
 });
- 
+
 // populateGameInfo endedAt/winner tests
 describe("getGameById — completed game fields", () => {
   it("returns endedAt and winner on a completed game", async () => {
     const game = await createGame(userA, "nim", new Date());
     await joinGame(game.gameId, userB);
     await startGame(game.gameId, userA);
- 
+
     const gameId = game.gameId;
     const moves: [UserWithId, number][] = [
-      [userA, 3], [userB, 3], [userA, 3],
-      [userB, 3], [userA, 3], [userB, 3],
+      [userA, 3],
+      [userB, 3],
+      [userA, 3],
+      [userB, 3],
+      [userA, 3],
+      [userB, 3],
       [userA, 3],
     ];
     for (const [player, move] of moves) {
       await updateGame(gameId, player, move);
     }
- 
+
     const finished = await getGameById(gameId);
     expect(finished!.endedAt).toBeInstanceOf(Date);
     expect(finished!.winner).toBe(userB.userId);
   });
- 
+
   it("returns undefined endedAt for an unfinished game", async () => {
     const game = await createGame(userA, "nim", new Date());
     const found = await getGameById(game.gameId);
