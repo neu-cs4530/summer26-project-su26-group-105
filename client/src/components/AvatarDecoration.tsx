@@ -57,6 +57,7 @@ export default function AvatarDecoration({
   }
 
   function onClick() {
+    if (!onRotate) return;
     setIsSelected((s) => !s);
   }
 
