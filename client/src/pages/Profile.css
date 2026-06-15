@@ -108,16 +108,11 @@
   gap: 8px;
 }
 
-.profile-stats-card,
-.profile-right-panel .games {
+.profile-stats-card {
   padding: 24px;
   border-radius: 20px;
   background-color: var(--card-background-solid);
   border: 1px solid var(--border-color);
-}
-
-.profile-right-panel .games h3 {
-  margin-top: 0;
 }
 
 .profile-stats-card {
@@ -166,25 +161,6 @@
   border: 1px solid var(--border-color);
   font-weight: 800;
   text-align: center;
-}
-
-.profile-right-panel .game-entry {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 8px;
-  font-size: 0.9rem;
-}
-
-.profile-right-panel .games {
-  padding: 16px;
-}
-
-.profile-right-panel .game-image {
-  width: 32px;
-  height: 32px;
-  object-fit: cover;
-  border-radius: 8px;
 }
 
 .profile-section-title {
