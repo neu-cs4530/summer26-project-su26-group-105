@@ -3,18 +3,24 @@
   position: relative;
   vertical-align: middle;
   flex-shrink: 0;
+  aspect-ratio: 1;
+
+  --padding-proportion: calc(0.5 / 2.5);
+  --size: 2.5rem;
+
+  width: var(--size);
+  padding: calc(var(--size) * var(--padding-proportion) / 2);
+
+  overflow: hidden;
 
   &.small {
-    width: 2rem;
-    height: 2rem;
+    --size: 2.5rem;
   }
   &.medium {
-    width: 5rem;
-    height: 5rem;
+    --size: 5.5rem;
   }
   &.large {
-    width: 10rem;
-    height: 10rem;
+    --size: 10.5rem;
   }
 }
 
@@ -27,6 +33,7 @@
   aspect-ratio: 1;
   object-fit: cover;
   background: white;
+  user-select: none;
 
   &.small {
     border-width: 1px;

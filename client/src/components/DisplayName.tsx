@@ -45,7 +45,7 @@ export default function DisplayName({ user, showFullInfo }: DisplayNameProps) {
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
-        <ProfileImage src={user.image} size="small" /> {user.display}
+        <ProfileImage src={user.image} decorations={user.decorations} size="small" /> {user.display}
       </div>
     );
   }
@@ -58,7 +58,13 @@ export default function DisplayName({ user, showFullInfo }: DisplayNameProps) {
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      <ProfileImage src={user.image} size="small" activityStatus={activityStatus} /> {user.display}
+      <ProfileImage
+        src={user.image}
+        decorations={user.decorations}
+        size="small"
+        activityStatus={activityStatus}
+      />{" "}
+      {user.display}
     </Link>
   );
 }

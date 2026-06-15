@@ -3,6 +3,7 @@ import { FriendRepo, UserRepo } from "../repository.ts";
 import type { FriendsRecord, RecordId } from "../models.ts";
 import { getStatus } from "./activityStatus.service.ts";
 import type { FriendEntry, SearchResult } from "@gamenite/shared/src/friend.types.ts";
+import { recordToSafeUserInfo } from "./user.service.ts";
 
 /** Returns all id, FriendsRecord pairs in the data store */
 async function getAllFriendRecords(): Promise<[string, FriendsRecord][]> {
@@ -210,9 +211,7 @@ export async function getFriends(userId: RecordId): Promise<FriendEntry[]> {
     results.push({
       friendId: id,
       userId: otherUserId,
-      username: otherUser.username,
-      display: otherUser.display,
-      image: otherUser.image,
+      user: recordToSafeUserInfo(otherUser),
       requestDirection: "mutual",
       activityStatus: getStatus(otherUserId),
     });
@@ -233,9 +232,7 @@ export async function getIncomingRequests(userId: RecordId): Promise<FriendEntry
     results.push({
       friendId: id,
       userId: record.fromUserId,
-      username: sender.username,
-      display: sender.display,
-      image: sender.image,
+      user: recordToSafeUserInfo(sender),
       requestDirection: "incoming",
       activityStatus: getStatus(record.fromUserId),
     });
@@ -256,9 +253,7 @@ export async function getOutgoingRequests(userId: RecordId): Promise<FriendEntry
     results.push({
       friendId: id,
       userId: record.toUserId,
-      username: requested.username,
-      display: requested.display,
-      image: requested.image,
+      user: recordToSafeUserInfo(requested),
       requestDirection: "outgoing",
       activityStatus: getStatus(record.toUserId),
     });
@@ -279,9 +274,7 @@ export async function getBlockedUsers(userId: RecordId): Promise<FriendEntry[]> 
     results.push({
       friendId: id,
       userId: record.toUserId,
-      username: blocked.username,
-      display: blocked.display,
-      image: blocked.image,
+      user: recordToSafeUserInfo(blocked),
       requestDirection: "outgoing",
       activityStatus: getStatus(record.toUserId),
     });
@@ -298,11 +291,12 @@ async function searchFriends(
 
   const friends = await getFriends(currentUserId);
   return friends
-    .filter((u) => u.username.toLowerCase().includes(q) || u.display.toLowerCase().includes(q))
+    .filter(
+      (u) => u.user.username.toLowerCase().includes(q) || u.user.display.toLowerCase().includes(q),
+    )
     .map((u) => ({
       userId: u.userId,
-      username: u.username,
-      display: u.display,
+      user: u.user,
       relationship: "friend",
       friendId: u.friendId,
     }));
@@ -352,8 +346,7 @@ export async function searchUsers(
 
     results.push({
       userId: id,
-      username: u.username,
-      display: u.display,
+      user: recordToSafeUserInfo(u),
       relationship,
       friendId: undefined,
     });

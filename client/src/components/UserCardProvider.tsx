@@ -53,7 +53,11 @@ export default function UserCardProvider({ children }: { children: React.ReactNo
         >
           <div className="user-info">
             <div className="pfp">
-              <ProfileImage src={state.active.user.image} size="medium" />
+              <ProfileImage
+                src={state.active.user.image}
+                decorations={state.active.user.decorations}
+                size="medium"
+              />
             </div>
             <div className="user">
               <div className="display">{state.active.user.display}</div>
