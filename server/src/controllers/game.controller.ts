@@ -139,7 +139,7 @@ export const socketJoinAsPlayer: SocketAPI = (socket, io) => async (body) => {
     //sends game activity popup to each friend of user who joined
     await Promise.all(
       friends.map(async (friend) => {
-        const friendUser = await getUserByUsername(friend.username);
+        const friendUser = await getUserByUsername(friend.user.username);
         if (!friendUser) return;
 
         //sends popup only to the friend's notification room
@@ -184,7 +184,7 @@ export const socketStart: SocketAPI = (socket, io) => async (body) => {
     //sends game activity popup to each friend of the user who started a game
     await Promise.all(
       friends.map(async (friend) => {
-        const friendUser = await getUserByUsername(friend.username);
+        const friendUser = await getUserByUsername(friend.user.username);
         if (!friendUser) return;
 
         //sends popup only to the friend's notification room
@@ -215,7 +215,7 @@ export const socketFriendGameCreated: SocketAPI = (socket, io) => async (body) =
     //sends game activity popup to each friend of user who created game
     await Promise.all(
       friends.map(async (friend) => {
-        const friendUser = await getUserByUsername(friend.username);
+        const friendUser = await getUserByUsername(friend.user.username);
         if (!friendUser) return;
         //sends popup only to the friend's notification room
         io.to(friendNotificationRoom(friendUser.userId)).emit("notificationPopup", {

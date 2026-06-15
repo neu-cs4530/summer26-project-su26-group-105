@@ -1,4 +1,4 @@
-import type { GameKey } from "@gamenite/shared";
+import type { AvatarDecoration, GameKey } from "@gamenite/shared";
 
 /**
  * Record identifiers used to look up records in a database. This type
@@ -110,6 +110,7 @@ export interface UserRecord {
   username: string; // References Auth records
   display: string;
   image: string | null;
+  decorations: AvatarDecoration[];
   bio: string;
   socialMedias: {
     username: string;

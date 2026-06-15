@@ -32,7 +32,7 @@ export default function useFriendStatusMap(): FriendStatusMap {
         const next = new Map(prev);
         for (const f of payload.friends) {
           next.set(f.userId, f.activityStatus);
-          next.set(f.username, f.activityStatus);
+          next.set(f.user.username, f.activityStatus);
         }
         return next;
       });
