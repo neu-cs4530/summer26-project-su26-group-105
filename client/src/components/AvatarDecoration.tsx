@@ -68,6 +68,8 @@ export default function AvatarDecoration({
   }
 
   useEffect(() => {
+    if (!onDrag && !onRotate && !onRemove) return;
+
     function onMouseUp(e: MouseEvent) {
       if (draggingOffset) {
         if (!decorationRef.current) return;
