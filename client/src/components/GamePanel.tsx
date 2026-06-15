@@ -1,6 +1,6 @@
 import "./GamePanel.css";
 import type { GameInfo } from "@gamenite/shared";
-import { gameNames } from "../util/consts.ts";
+import { gameInstructions, gameNames, type GameInstructionsType } from "../util/consts.ts";
 import useLoginContext from "../hooks/useLoginContext.ts";
 import GameDispatch from "../games/GameDispatch.tsx";
 import useSocketsForGame from "../hooks/useSocketsForGame.ts";
@@ -102,10 +102,33 @@ export default function GamePanel({
           />
         </div>
       ) : (
-        <div className="gameFrame waiting content">waiting for game to begin</div>
+        <div className="gameFrame waiting content">
+          <h2>How to Play</h2>
+          <GameInstructions instructions={gameInstructions[type]} />
+          <span className="waiting-text">waiting for game to begin</span>
+        </div>
       )}
     </div>
   ) : (
     <div></div>
+  );
+}
+
+function GameInstructions({ instructions }: { instructions: GameInstructionsType }) {
+  return (
+    <ul className="instructions">
+      {instructions.map((item, index) => (
+        <li key={index}>
+          {typeof item === "string" ? (
+            <>
+              <span>{item}</span>
+              <hr />
+            </>
+          ) : (
+            <GameInstructions instructions={item} />
+          )}
+        </li>
+      ))}
+    </ul>
   );
 }

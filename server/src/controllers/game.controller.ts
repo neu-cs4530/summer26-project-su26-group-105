@@ -164,7 +164,7 @@ export const socketJoinAsPlayer: SocketAPI = (socket, io) => async (body) => {
     if (game.players.length === gameServices[game.type].maxPlayers) {
       sendViewUpdates(io, gameId, await startGame(gameId, user));
       const playerUsernames = game.players.map((p) => p.username);
-      checkAndRunBotTurn(io, gameId, playerUsernames);
+      await checkAndRunBotTurn(io, gameId, playerUsernames);
     }
   } catch (err) {
     logSocketError(socket, err);
@@ -197,7 +197,7 @@ export const socketStart: SocketAPI = (socket, io) => async (body) => {
     sendViewUpdates(io, gameId, await startGame(gameId, user));
     const game = await GameRepo.find(gameId);
     if (game) {
-      checkAndRunBotTurn(io, gameId, game.players);
+      await checkAndRunBotTurn(io, gameId, game.players);
     }
   } catch (err) {
     logSocketError(socket, err);
@@ -249,7 +249,7 @@ export const socketMakeMove: SocketAPI = (socket, io) => async (body) => {
     }
     const game = await GameRepo.find(gameId);
     if (game) {
-      checkAndRunBotTurn(io, gameId, game.players);
+      await checkAndRunBotTurn(io, gameId, game.players);
     }
   } catch (err) {
     logSocketError(socket, err);
@@ -300,7 +300,7 @@ export const socketAddBot: SocketAPI = (socket, io) => async (body) => {
 
   if (game.players.length === gameServices.one.maxPlayers) {
     sendViewUpdates(io, gameId, await startGame(gameId, user));
-    checkAndRunBotTurn(io, gameId, game.players);
+    await checkAndRunBotTurn(io, gameId, game.players);
   }
 };
 
@@ -309,40 +309,39 @@ export const socketAddBot: SocketAPI = (socket, io) => async (body) => {
  * Automatically checks if the next player is a bot and executes their move
  * using the registered bot brain for that specific game type.
  */
-function checkAndRunBotTurn(io: GameServer, gameId: string, currentPlayers: string[]) {
+async function checkAndRunBotTurn(io: GameServer, gameId: string, currentPlayers: string[]) {
+  const game = await GameRepo.find(gameId);
+  if (!game || !game.state || game.done) return;
+
+  // Find the service matching this game type (e.g., 'one', 'nim', etc)
+  const service = gameServices[game.type];
+
+  // If this game engine doesn't support bots, just return
+  if (!service || !service.generateBotMove) return;
+
+  const stateWithTurn = game.state as { nextPlayer: number };
+  const nextPlayerId = currentPlayers[stateWithTurn.nextPlayer];
+
+  // Detect if the next player is a bot
+  if (!nextPlayerId || !nextPlayerId.startsWith("bot_")) return;
+
+  // Calculate the move using the game's registered service handler
+  const botMove = await service.generateBotMove(game.state, stateWithTurn.nextPlayer);
+  if (!botMove) return;
+
   // 2-second pause for UI readability
-  setTimeout(async () => {
-    const game = await GameRepo.find(gameId);
-    if (!game || !game.state || game.done) return;
+  await new Promise((res) => setTimeout(res, 2000));
 
-    // Find the service matching this game type (e.g., 'one', 'nim', etc)
-    const service = gameServices[game.type];
+  // Execute the move
+  const viewUpdates = await updateGame(
+    gameId,
+    { userId: nextPlayerId, username: nextPlayerId },
+    botMove,
+  );
 
-    // If this game engine doesn't support bots, just return
-    if (!service || !service.generateBotMove) return;
+  // Broadcast updates
+  sendViewUpdates(io, gameId, viewUpdates);
 
-    const stateWithTurn = game.state as { nextPlayer: number };
-    const nextPlayerId = currentPlayers[stateWithTurn.nextPlayer];
-
-    // Detect if the next player is a bot
-    if (nextPlayerId && nextPlayerId.startsWith("bot_")) {
-      // Calculate the move using the game's registered service handler
-      const stateWithTurn = game.state as { nextPlayer: number };
-      const botMove = service.generateBotMove(game.state, stateWithTurn.nextPlayer);
-      if (!botMove) return;
-
-      // Execute the move
-      const viewUpdates = await updateGame(
-        gameId,
-        { userId: nextPlayerId, username: nextPlayerId },
-        botMove,
-      );
-
-      // Broadcast updates
-      sendViewUpdates(io, gameId, viewUpdates);
-
-      // Recursively trigger the check for back-to-back bot sequences
-      checkAndRunBotTurn(io, gameId, currentPlayers);
-    }
-  }, 2000);
+  // Recursively trigger the check for back-to-back bot sequences
+  await checkAndRunBotTurn(io, gameId, currentPlayers);
 }

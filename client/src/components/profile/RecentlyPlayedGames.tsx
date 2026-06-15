@@ -3,6 +3,7 @@ import useRecentlyPlayedGames from "../../hooks/useRecentlyPlayedGames";
 import useTimeSince from "../../hooks/useTimeSince";
 import { gameNames } from "../../util/consts";
 import GameImage from "./GameImage";
+import "./RecentlyPlayedGames.css";
 
 type RecentlyPlayedGamesProps = {
   username: string;
@@ -27,7 +28,7 @@ export default function RecentlyPlayedGames({ username }: RecentlyPlayedGamesPro
     <>
       <h3 className="profile-section-title recently-played-title">Recently Played Games</h3>
 
-      <div className="games">
+      <div className="recently-played-games">
         {/* only shows the 3 most recent games on the profile */}
         {recentlyPlayedGames.slice(0, 3).map((entry) => (
           <Link key={entry.gameId} className="game-entry" to={`/game/${entry.gameId}`}>

@@ -1,6 +1,4 @@
 .gamePanel {
-  padding: 1rem;
-  padding-right: 0;
   display: grid;
   grid-template-rows: max-content 1fr;
 }
@@ -21,8 +19,37 @@
   border: 1px solid black;
   border-radius: 0.5rem;
   margin-top: 0.5rem;
+  overflow: hidden;
 }
 
 .gameFrame.waiting {
   background-color: var(--gray-background);
+
+  overflow: auto;
+
+  --indent: 0;
+  --indent-other: 0;
+
+  .instructions {
+    list-style: none;
+    padding-left: 0;
+    width: 100%;
+    --indent: var(--indent-other);
+
+    /* A hack to avoid cyclic variables being ignored */
+    li {
+      --indent-other: calc(var(--indent) + 1);
+    }
+
+    span {
+      padding-left: calc(var(--indent) * 5ch);
+    }
+  }
+
+  .waiting-text {
+    text-align: center;
+    color: var(--gray-foreground);
+    font-size: 1rem;
+    font-weight: bold;
+  }
 }
