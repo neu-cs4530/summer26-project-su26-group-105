@@ -1,29 +1,72 @@
-import { type GameServerSocket, type SocketAPI } from "../types.ts";
+import { type GameServerSocket, type SocketAPI, type UserWithId } from "../types.ts";
 import {
   getOrCreateDirectChannel,
   createGroupChannel,
   postMessageToChannel,
   getChannelHistory,
+  getChannelsForUser,
 } from "../services/dms.service.ts";
-import { enforceAuth } from "../services/auth.service.ts";
+import { checkAuth, getUserByUsername } from "../services/auth.service.ts";
 import { withAuth } from "@gamenite/shared";
 import { z } from "zod";
 import { ChannelRepo } from "../repository.ts";
+
 /**
- * Socket listener wrapper to register a user to  real-time notification node
+ * Validates an incoming socket request's shape and credentials
+ * @returns the authenticated user and validated payload, or `null` if the
+ *   request was rejected (an error has already been emitted in that case)
+ * (is this needed?)
  */
-export const socketRegisterUserSession = (socket: GameServerSocket) => async (userId: string) => {
-  await socket.join(userId);
+async function authenticate<T>(
+  socket: GameServerSocket,
+  action: string,
+  body: unknown,
+  zPayload: z.ZodType<T>,
+): Promise<{ user: UserWithId; payload: T } | null> {
+  const parsed = withAuth(zPayload).safeParse(body);
+  if (!parsed.success) {
+    socket.emit("globalChatActionError", { action, error: "Invalid request" });
+    return null;
+  }
+
+  const user = await checkAuth(parsed.data.auth);
+  if (!user) {
+    socket.emit("globalChatActionError", { action, error: "You must be logged in to do that" });
+    return null;
+  }
+
+  return { user, payload: parsed.data.payload };
+}
+
+/**
+ * Registers a user's socket for real-time messaging
+ *
+ * The client sends its username. DM broadcasts target io.to(username) (channel
+ * membership is keyed by username), so we join that room.
+ */
+export const socketRegisterUserSession = (socket: GameServerSocket) => async (username: string) => {
+  if (typeof username !== "string") return;
+  const user = await getUserByUsername(username);
+  if (!user) return;
+
+  await socket.join(user.username);
+
+  const channels = await getChannelsForUser(user.username);
+  for (const channel of channels) {
+    socket.emit("globalChatCreated", channel);
+  }
 };
 
 /**
- * Real-time endpoint to initialize or open a 1-on-1 direct message conversation
+ * start or open a 1-on-1 direct message conversation.
+ * The payload is the recipient's username
  */
 export const socketOpenDirectChat: SocketAPI = (socket, io) => async (body) => {
-  const { auth, payload: recipientId } = withAuth(z.string()).parse(body);
-  const user = await enforceAuth(auth);
+  const ctx = await authenticate(socket, "open_dm", body, z.string());
+  if (!ctx) return;
+  const { user, payload: recipientUsername } = ctx;
 
-  const { channel, error } = await getOrCreateDirectChannel(user.userId, { recipientId });
+  const { channel, error } = await getOrCreateDirectChannel(user, recipientUsername);
 
   if (error || !channel) {
     socket.emit("globalChatActionError", {
@@ -33,28 +76,58 @@ export const socketOpenDirectChat: SocketAPI = (socket, io) => async (body) => {
     return;
   }
 
-  const { messages } = await getChannelHistory(user.userId, channel.channelId);
+  // Make sure the conversation shows up in every member's sidebar
+  for (const memberId of channel.memberIds) {
+    io.to(memberId).emit("globalChatCreated", channel);
+  }
 
-  // Send the channel data and logs exclusively to the requesting user
-  io.to(user.userId).emit("globalChatJoined", {
+  // Switch the requesting user into the channel with its history
+  const { messages } = await getChannelHistory(user.username, channel.channelId);
+  io.to(user.username).emit("globalChatJoined", {
     channelId: channel.channelId,
     messages: messages || [],
   });
 };
 
 /**
- * Real-time endpoint to establish a multi-participant group conversation room
+ * open an already-existing channel by its id,
+ * basically when a user clicks a conversation in their sidebar
+ */
+export const socketOpenChannelById: SocketAPI = (socket, io) => async (body) => {
+  const ctx = await authenticate(socket, "open_channel", body, z.string());
+  if (!ctx) return;
+  const { user, payload: channelId } = ctx;
+
+  const channel = await ChannelRepo.find(channelId);
+  if (!channel || !channel.memberIds.includes(user.username)) {
+    socket.emit("globalChatActionError", {
+      action: "open_channel",
+      error: "Conversation not found or you don't have access to it",
+    });
+    return;
+  }
+
+  const { messages } = await getChannelHistory(user.username, channelId);
+  io.to(user.username).emit("globalChatJoined", {
+    channelId,
+    messages: messages || [],
+  });
+};
+
+/**
+ * create a groupchat
  */
 export const socketCreateGroupChat: SocketAPI = (socket, io) => async (body) => {
-  const zPayload = z.object({
-    groupName: z.string(),
-    memberIds: z.array(z.string()),
-  });
+  const ctx = await authenticate(
+    socket,
+    "create_group",
+    body,
+    z.object({ groupName: z.string(), memberIds: z.array(z.string()) }),
+  );
+  if (!ctx) return;
+  const { user, payload } = ctx;
 
-  const { auth, payload } = withAuth(zPayload).parse(body);
-  const user = await enforceAuth(auth);
-
-  const { channel, error } = await createGroupChannel(user.userId, payload);
+  const { channel, error } = await createGroupChannel(user.username, payload);
 
   if (error || !channel) {
     socket.emit("globalChatActionError", {
@@ -64,25 +137,29 @@ export const socketCreateGroupChat: SocketAPI = (socket, io) => async (body) => 
     return;
   }
 
-  // Broadcast out to every single member added that their new room dashboard is ready
+  // Broadcast to every member so the new chat appears
   for (const memberId of channel.memberIds) {
     io.to(memberId).emit("globalChatCreated", channel);
   }
+
+  io.to(user.username).emit("globalChatJoined", {
+    channelId: channel.channelId,
+    messages: [],
+  });
 };
 
-/**
- * Real-time endpoint to transmit and broadcast text messages inside a channel room
- */
+//send messages
 export const socketSendChatMessage: SocketAPI = (socket, io) => async (body) => {
-  const zPayload = z.object({
-    channelId: z.string(),
-    content: z.string(),
-  });
+  const ctx = await authenticate(
+    socket,
+    "send_message",
+    body,
+    z.object({ channelId: z.string(), content: z.string() }),
+  );
+  if (!ctx) return;
+  const { user, payload } = ctx;
 
-  const { auth, payload } = withAuth(zPayload).parse(body);
-  const user = await enforceAuth(auth);
-
-  const { message, error } = await postMessageToChannel(user.userId, payload);
+  const { message, error } = await postMessageToChannel(user.username, payload);
 
   if (error || !message) {
     socket.emit("globalChatActionError", {
@@ -92,11 +169,9 @@ export const socketSendChatMessage: SocketAPI = (socket, io) => async (body) => 
     return;
   }
 
-  const channel = await ChannelRepo.get(payload.channelId);
-
+  const channel = await ChannelRepo.find(payload.channelId);
   if (!channel) return;
 
-  // push the text payload directly into everyone's active session room
   for (const memberId of channel.memberIds) {
     io.to(memberId).emit("globalChatMessageReceived", message);
   }

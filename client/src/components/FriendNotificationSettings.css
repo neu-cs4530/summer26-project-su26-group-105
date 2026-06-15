@@ -28,3 +28,14 @@
   cursor: pointer;
   accent-color: var(--primary-button);
 }
+
+.messaging-privacy-settings {
+  max-width: 650px;
+}
+
+.messaging-privacy-toggle {
+  display: flex;
+  gap: 8px;
+  margin: 12px 0;
+  flex-wrap: wrap;
+}

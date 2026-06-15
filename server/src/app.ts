@@ -14,6 +14,7 @@ import { type GameServer, type GameServerSocket } from "./types.ts";
 import { clearStatus } from "./services/activityStatus.service.ts";
 import {
   socketOpenDirectChat,
+  socketOpenChannelById,
   socketCreateGroupChat,
   socketSendChatMessage,
   socketRegisterUserSession,
@@ -92,13 +93,23 @@ io.on("connection", (socket) => {
   socket.on("gameAddBot", game.socketAddBot(socket, io));
 
   //DM stuff
-  socket.on("registerUserSession", (userId) => {
-    void socketRegisterUserSession(socket)(userId);
+  socket.on("registerUserSession", (body) => {
+    if (body && typeof body === "object" && "payload" in body) {
+      void socketRegisterUserSession(socket)(body.payload);
+    } else {
+      void socketRegisterUserSession(socket)(body);
+    }
   });
 
   socket.on("openDirectChat", (body) => {
     void (async () => {
       await socketOpenDirectChat(socket, io)(body);
+    })();
+  });
+
+  socket.on("openChannelById", (body) => {
+    void (async () => {
+      await socketOpenChannelById(socket, io)(body);
     })();
   });
 

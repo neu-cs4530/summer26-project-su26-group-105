@@ -4,13 +4,15 @@ import { z } from "zod";
 export const zMessagePrivacySetting = z.enum(["anyone", "friends_only", "no_one"]);
 export type MessagePrivacySetting = z.infer<typeof zMessagePrivacySetting>;
 
-// Core Channel payload rules
 export const zMessageChannel = z.object({
   channelId: z.string(),
   isGroup: z.boolean(),
   name: z.string().nullable(),
   memberIds: z.array(z.string()),
-  createdAt: z.coerce.date(), // Automatically converts string timestamps to Date objects safely
+  createdAt: z.coerce.date(),
+  // Timestamp of the most recent message (or creation time if none yet); used to
+  // order conversations by recent activity. Optional for back-compat with older records.
+  lastActivityAt: z.coerce.date().optional(),
 });
 export type MessageChannel = z.infer<typeof zMessageChannel>;
 
@@ -37,7 +39,7 @@ export const zCreateGroupPayload = z.object({
 });
 export type CreateGroupPayload = z.infer<typeof zCreateGroupPayload>;
 
-// For transmitting a standard conversation text block
+// For transmitting a standard conversation
 export const zSendMessagePayload = z.object({
   channelId: z.string(),
   content: z.string().min(1).trim(),

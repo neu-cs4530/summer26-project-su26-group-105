@@ -18,6 +18,7 @@ const selfUserSettings = {
     receivesFriendAcceptedNotifications: true,
     receivesGameInviteNotifications: true,
     receivesFriendGameActivityNotifications: true,
+    allowMessagesFrom: "anyone",
   },
 };
 const auth1 = { username: "user1", password: "pwd1111" };

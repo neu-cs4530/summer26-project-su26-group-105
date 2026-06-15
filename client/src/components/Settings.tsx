@@ -1,6 +1,7 @@
 import { useState } from "react";
 import useEditProfileForm from "../hooks/profile/useEditProfileForm";
 import FriendNotificationSettings from "./FriendNotificationSettings";
+import MessagingPrivacySettings from "./MessagingPrivacySettings";
 import TextInput from "./TextInput";
 import Loading from "./Loading";
 import "../pages/Profile.css";
@@ -81,6 +82,12 @@ export default function Settings() {
         <h2 style={{ textAlign: "center" }}>Notification Settings</h2>
         <h3>Friend Notifications</h3>
         <FriendNotificationSettings />
+      </div>
+      <hr />
+      <div className="content spacedSection">
+        <h2 style={{ textAlign: "center" }}>Privacy Settings</h2>
+        <h3>Direct Messages</h3>
+        <MessagingPrivacySettings />
       </div>
       <hr />
       {/* Password Form */}

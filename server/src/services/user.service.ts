@@ -41,6 +41,7 @@ function recordToSafeSelfUserInfo(record: UserRecord): SafeSelfUserInfo {
       receivesGameInviteNotifications: record.settings.receivesGameInviteNotifications,
       receivesFriendGameActivityNotifications:
         record.settings.receivesFriendGameActivityNotifications,
+      allowMessagesFrom: record.settings.allowMessagesFrom ?? "anyone",
     },
   };
 }
@@ -134,6 +135,7 @@ export async function createUser(
       receivesFriendAcceptedNotifications: true,
       receivesGameInviteNotifications: true,
       receivesFriendGameActivityNotifications: true,
+      allowMessagesFrom: "anyone" as const,
     },
   };
   const id = await UserRepo.add(record);
@@ -183,6 +185,7 @@ export async function updateUser(
     receivesGameInviteNotifications: newUser.settings.receivesGameInviteNotifications ?? true,
     receivesFriendGameActivityNotifications:
       newUser.settings.receivesFriendGameActivityNotifications ?? true,
+    allowMessagesFrom: newUser.settings.allowMessagesFrom ?? "anyone",
   };
   if (display !== undefined) newUser.display = display;
   if (bio !== undefined) newUser.bio = bio;
@@ -194,6 +197,7 @@ export async function updateUser(
       receivesFriendAcceptedNotifications,
       receivesGameInviteNotifications,
       receivesFriendGameActivityNotifications,
+      allowMessagesFrom,
     } = settings;
     if (receivesFriendRequestNotifications !== undefined)
       newUser.settings.receivesFriendRequestNotifications = receivesFriendRequestNotifications;
@@ -204,6 +208,7 @@ export async function updateUser(
     if (receivesFriendGameActivityNotifications !== undefined)
       newUser.settings.receivesFriendGameActivityNotifications =
         receivesFriendGameActivityNotifications;
+    if (allowMessagesFrom !== undefined) newUser.settings.allowMessagesFrom = allowMessagesFrom;
   }
   await UserRepo.set(user.userId, newUser);
   return populateSafeSelfUserInfo(user.userId);

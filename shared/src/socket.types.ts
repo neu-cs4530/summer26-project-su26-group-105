@@ -40,14 +40,16 @@ export interface ClientToServerEvents {
   setStatus: (payload: WithAuth<{ status: ActivityStatus }>) => void;
   userConnect: (payload: WithAuth<Record<string, never>>) => void;
 
-  registerUserSession: (userId: string) => void;
-  openDirectChat: (body: { auth: { token: string; username: string }; payload: string }) => void;
+  registerUserSession: (body: { auth: { username: string }; payload: string }) => void;
+
+  openDirectChat: (body: { auth: { username: string }; payload: string }) => void;
+  openChannelById: (body: { auth: { username: string }; payload: string }) => void;
   createGroupChat: (body: {
-    auth: { token: string; username: string };
+    auth: { username: string };
     payload: { groupName: string; memberIds: string[] };
   }) => void;
   sendChatMessage: (body: {
-    auth: { token: string; username: string };
+    auth: { username: string };
     payload: { channelId: string; content: string };
   }) => void;
 }

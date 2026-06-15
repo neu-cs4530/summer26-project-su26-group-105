@@ -34,6 +34,24 @@ async function findAnyRecord(
   return (await findRecord(userA, userB)) ?? (await findRecord(userB, userA));
 }
 
+/** Whether two users are currently accepted friends. */
+export async function areUsersFriends(userA: RecordId, userB: RecordId): Promise<boolean> {
+  const existing = await findAnyRecord(userA, userB);
+  return existing?.record.status === "accepted";
+}
+
+/**
+ * Whether either user has blocked the other. Blocking is mutual for the purposes
+ * of messaging: if A blocked B (or B blocked A), neither can message the other
+ * can use just the record but this is easier
+ */
+export async function isBlockedBetween(userA: RecordId, userB: RecordId): Promise<boolean> {
+  const aToB = await findRecord(userA, userB);
+  if (aToB?.record.status === "blocked") return true;
+  const bToA = await findRecord(userB, userA);
+  return bToA?.record.status === "blocked";
+}
+
 /** Sends a friend request from one user (fromUserId) to another (toUserId) */
 export async function sendFriendRequest(
   fromUserId: RecordId,
