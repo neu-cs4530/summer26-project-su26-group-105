@@ -88,6 +88,63 @@ function ThreeDotMenu({ onRemove, onBlock }: ThreeDotMenuProps) {
   );
 }
 
+function SearchThreeDotMenu({
+  isFriend,
+  onBlock,
+  onRemove,
+}: {
+  isFriend: boolean;
+  onBlock: () => void;
+  onRemove?: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  return (
+    <div ref={ref} className="friendsMenuWrapper" style={{ marginLeft: "8px" }}>
+      <button
+        className="secondary narrow"
+        aria-label="More options"
+        onClick={() => setOpen((v) => !v)}
+        style={{ padding: "0.25rem 0.75rem" }}
+      >
+        •••
+      </button>
+      {open && (
+        <div className="friendsMenuDropdown">
+          {isFriend && onRemove && (
+            <button
+              onClick={() => {
+                setOpen(false);
+                onRemove();
+              }}
+            >
+              Remove Friend 🚩
+            </button>
+          )}
+          <button
+            className="danger"
+            onClick={() => {
+              setOpen(false);
+              onBlock();
+            }}
+          >
+            Block User ⚠️
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function Friends() {
   const {
     friends,
@@ -128,7 +185,7 @@ export default function Friends() {
     });
   }
 
-  function confirmBlock(f: FriendEntry) {
+  function confirmBlock(f: { user: { display: string; username: string } }) {
     setModal({
       message: `Warning! Blocking ${f.user.display} (@${f.user.username}) means you can no longer view
                     each other's profiles or play together. Click OK if you wish to proceed.`,
@@ -189,7 +246,7 @@ export default function Friends() {
           className={tab === "search" ? "primary narrow" : "secondary narrow"}
           onClick={() => setTab("search")}
         >
-          Add Friend
+          Search Users
         </button>
         <button
           className={tab === "blocked" ? "primary narrow" : "secondary narrow"}
@@ -237,7 +294,7 @@ export default function Friends() {
                     <td className="friendsActions">
                       <ThreeDotMenu
                         onRemove={() => confirmRemove(f as FriendEntry)}
-                        onBlock={() => confirmBlock(f as FriendEntry)}
+                        onBlock={() => confirmBlock(f)}
                       />
                     </td>
                   </tr>
@@ -372,6 +429,20 @@ export default function Friends() {
                             Add Friend
                           </button>
                         )}
+                        <SearchThreeDotMenu
+                          isFriend={r.relationship === "friend"}
+                          onBlock={() => confirmBlock(r)}
+                          onRemove={
+                            r.relationship === "friend"
+                              ? () => {
+                                  const friend = friends.find(
+                                    (f) => f.user.username === r.user.username,
+                                  );
+                                  if (friend) confirmRemove(friend);
+                                }
+                              : undefined
+                          }
+                        />
                       </td>
                     </tr>
                   ))}

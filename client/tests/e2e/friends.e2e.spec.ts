@@ -38,7 +38,7 @@ async function makeFriends(
 ) {
   // Sender searches for and requests receiver
   await senderPage.getByRole("link", { name: "Friends" }).click();
-  await senderPage.getByRole("button", { name: "Add Friend" }).click();
+  await senderPage.getByRole("button", { name: "Search Users" }).click();
   await senderPage.getByPlaceholder("Search by username or display name...").fill(receiverUsername);
   await expect(senderPage.getByText(`@${receiverUsername}`)).toBeVisible();
   await senderPage
