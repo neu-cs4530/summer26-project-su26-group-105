@@ -48,13 +48,13 @@ export interface GameServicer {
     playerIndex: number,
     players: string[],
   ) => null | { state: unknown; views: GameViewUpdates; done: boolean };
-  generateBotMove?: (state: any, playerIndex: number) => unknown;
+  generateBotMove?: (state: any, playerIndex: number) => Promise<unknown>;
 }
 
 export class GameService<State, View> implements GameServicer {
   private _logic: GameLogic<State, View>;
 
-  public generateBotMove?: (state: State, playerIndex: number) => unknown;
+  public generateBotMove?: (state: State, playerIndex: number) => Promise<unknown>;
 
   constructor(logic: GameLogic<State, View>) {
     this._logic = logic;

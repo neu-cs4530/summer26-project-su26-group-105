@@ -24,6 +24,19 @@ export interface Card {
   value: CardValue;
 }
 
+export type OneAction =
+  | {
+      type: "play";
+      card: Card;
+      userIndex: number;
+    }
+  | {
+      type: "draw";
+      amount: number;
+      cardIds: string[];
+      userIndex: number;
+    };
+
 /**
  * Internal Game State (server side)
  */
@@ -35,6 +48,7 @@ export interface OneState {
   direction: 1 | -1; // 1 for clockwise, -1 for counter-clockwise
   activeColor: CardColor; // Tracks chosen color after a wild card is played
   hasDrawnThisTurn: boolean;
+  lastTurnActions: OneAction[]; // For tracking what happened on the last turn
 }
 
 /**
@@ -47,9 +61,10 @@ export interface OneView {
   nextPlayer: number;
   direction: 1 | -1;
   yourHand: Card[]; // Empty if spectator (playerIndex === -1)
-  playerHandCounts: number[]; // Index maps to player index, shows card count
+  playerHandIds: string[][]; // Index maps to player index, contains card IDs
   deckCount: number;
   hasDrawnThisTurn: boolean;
+  lastTurnActions: OneAction[]; // For showing recent actions in the UI
 }
 
 /**

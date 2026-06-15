@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { oneLogic } from "../../src/games/one.ts";
-import { type OneState, type Card } from "../../../shared/src/games/one.types.ts";
+import { type OneState, type Card, type OneView } from "../../../shared/src/games/one.types.ts";
 
 // Helper to assemble clean baseline states
 function createTestState(customFields: Partial<OneState> = {}): OneState {
@@ -22,6 +22,7 @@ function createTestState(customFields: Partial<OneState> = {}): OneState {
     direction: 1,
     activeColor: "red",
     hasDrawnThisTurn: false,
+    lastTurnActions: [],
     ...customFields,
   };
 }
@@ -300,9 +301,10 @@ describe("One Game Logic Tests", () => {
           { id: "p0-c1", color: "red", value: "2" },
           { id: "p0-skip", color: "blue", value: "skip" },
         ], // Exactly Player 0's cards
-        playerHandCounts: [2, 1, 1], // Tracks how many cards everyone has remaining
+        playerHandIds: [["p0-c1", "p0-skip"], ["p1-c1"], ["p2-c1"]], // Tracks how many cards everyone has remaining
         deckCount: 2,
         hasDrawnThisTurn: true,
+        lastTurnActions: [],
       });
     });
 
@@ -314,19 +316,21 @@ describe("One Game Logic Tests", () => {
 
       expect(spectatorView.yourHand).toHaveLength(0); // Spectators can't see any private card sets
       expect(spectatorView.deckCount).toBe(2); // Can still verify public metrics
-      expect(spectatorView.playerHandCounts).toStrictEqual([2, 1, 1]);
+      // We don't care about actual card IDs, only the counts
+      expect(spectatorView.playerHandIds.map((h) => h.length)).toStrictEqual([2, 1, 1]);
     });
 
     it("correctly encapsulates the inner structural data layout using tagView formatting templates", () => {
-      const mockViewPayload = {
+      const mockViewPayload: OneView = {
         discardTop: { id: "top" } as Card,
         activeColor: "green" as const,
         nextPlayer: 2,
         direction: 1 as const,
         yourHand: [],
-        playerHandCounts: [0],
+        playerHandIds: [[]],
         deckCount: 52,
         hasDrawnThisTurn: false,
+        lastTurnActions: [],
       };
 
       const tagged = oneLogic.tagView(mockViewPayload);
