@@ -52,7 +52,7 @@ export default function Card({ card, onClick, isButton, onHover, location, rotat
       data-back={card === null}
       data-color={card?.color}
       data-type={card?.value}
-      data-isSmall={!!location?.isSmall}
+      data-small={!!location?.isSmall}
       data-inactive={isButton && !onClick}
       onClick={() => onClick?.()}
       onMouseEnter={() => onHover?.()}
