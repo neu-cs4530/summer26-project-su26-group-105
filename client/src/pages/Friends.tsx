@@ -54,41 +54,18 @@ function ThreeDotMenu({ onRemove, onBlock }: ThreeDotMenuProps) {
   }, []);
 
   return (
-    <div ref={ref} style={{ position: "relative" }}>
+    <div ref={ref} className="friendsMenuWrapper">
       <button
         className="secondary narrow"
         aria-label="More options"
         onClick={() => setOpen((v) => !v)}
-        style={{ padding: "0.25rem 0.6 rem", fontSize: "1rem" }}
+        style={{ padding: "0.25rem 0.75rem" }}
       >
-        ...
+        •••
       </button>
       {open && (
-        <div
-          style={{
-            position: "absolute",
-            right: 0,
-            top: "2rem",
-            background: "var(--background, white)",
-            border: "1px solid var(--border, #ccc)",
-            borderRadius: "6px",
-            boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
-            zIndex: 100,
-            minWidth: "150px",
-          }}
-        >
+        <div className="friendsMenuDropdown">
           <button
-            style={{
-              display: "flex",
-              alignItems: "center",
-              width: "100%",
-              padding: "0.6rem 1rem",
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              textAlign: "left",
-              whiteSpace: "nowrap",
-            }}
             onClick={() => {
               setOpen(false);
               onRemove();
@@ -97,18 +74,7 @@ function ThreeDotMenu({ onRemove, onBlock }: ThreeDotMenuProps) {
             Remove Friend 🚩
           </button>
           <button
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "0.5rem",
-              width: "100%",
-              padding: "0.6rem 1rem",
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              textAlign: "left",
-              color: "var(--error, #c00)",
-            }}
+            className="danger"
             onClick={() => {
               setOpen(false);
               onBlock();
@@ -185,10 +151,10 @@ export default function Friends() {
   }
 
   function relationshipLabel(relationship: SearchResult["relationship"]) {
-    if (relationship === "friend") return <span className="smallAndGray"> · Already friends</span>;
+    if (relationship === "friend") return <span className="friendsRelBadge">Already friends</span>;
     if (relationship === "incoming")
-      return <span className="smallAndGray"> · Request received</span>;
-    if (relationship === "outgoing") return <span className="smallAndGray"> · Request sent</span>;
+      return <span className="friendsRelBadge">Request received</span>;
+    if (relationship === "outgoing") return <span className="friendsRelBadge">Request sent</span>;
     return null;
   }
 
@@ -233,185 +199,218 @@ export default function Friends() {
         </button>
       </div>
 
-      <hr />
-
       {tab === "friends" && (
-        <div className="spacedSection">
+        <>
           <input
-            className="widefill notTooWide"
-            placeholder="Search by username or display name..."
+            className="friendsSearchBar"
+            placeholder="Search friends by username or display name..."
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
             autoFocus
           />
           {friendsTabFriends.length === 0 ? (
-            <p className="smallAndGray">No friends yet. Use the Add Friend tab to get started!</p>
+            <div className="friendsEmpty">
+              <p>
+                No friends yet. Use the <strong>Add Friend</strong> tab to get started!
+              </p>
+            </div>
           ) : (
-            <>
-              <ul style={{ listStyle: "none", padding: 0 }}>
+            <table className="friendsTable">
+              <thead>
+                <tr>
+                  <th>User</th>
+                  <th>Status</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
                 {friendsTabFriends.map((f: FriendEntry | SearchResult<true>) => (
-                  <li
-                    key={f.userId}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "0.5rem",
-                      marginBottom: "0.5rem",
-                    }}
-                  >
-                    <span style={{ flex: 1 }}>
+                  <tr key={f.userId}>
+                    <td>
                       <DisplayName user={f.user} showFullInfo />
-                    </span>
-                    <ThreeDotMenu
-                      onRemove={() => confirmRemove(f as FriendEntry)}
-                      onBlock={() => confirmBlock(f as FriendEntry)}
-                    />
-                  </li>
+                    </td>
+                    <td>
+                      {"activityStatus" in f && f.activityStatus ? (
+                        <span className="friendsRelBadge">{f.activityStatus}</span>
+                      ) : null}
+                    </td>
+                    <td className="friendsActions">
+                      <ThreeDotMenu
+                        onRemove={() => confirmRemove(f as FriendEntry)}
+                        onBlock={() => confirmBlock(f as FriendEntry)}
+                      />
+                    </td>
+                  </tr>
                 ))}
-              </ul>
-            </>
+              </tbody>
+            </table>
           )}
-        </div>
+        </>
       )}
 
       {tab === "pending" && (
-        <div className="spacedSection">
+        <>
           {incoming.length > 0 && (
             <>
-              <h3>Incoming</h3>
-              <ul style={{ listStyle: "none", padding: 0 }}>
-                {incoming.map((f: FriendEntry) => (
-                  <li
-                    key={f.friendId}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "0.5rem",
-                      marginBottom: "0.5rem",
-                    }}
-                  >
-                    <span style={{ flex: 1 }}>
-                      <DisplayName user={f.user} showFullInfo />
-                    </span>
-                    <button className="primary narrow" onClick={() => acceptRequest(f.friendId)}>
-                      Accept
-                    </button>
-                    <button className="secondary narrow" onClick={() => declineRequest(f.friendId)}>
-                      Decline
-                    </button>
-                  </li>
-                ))}
-              </ul>
+              <p className="friendsSectionTitle">Incoming Requests</p>
+              <table className="friendsTable" style={{ marginBottom: "24px" }}>
+                <thead>
+                  <tr>
+                    <th>User</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {incoming.map((f: FriendEntry) => (
+                    <tr key={f.friendId}>
+                      <td>
+                        <DisplayName user={f.user} showFullInfo />
+                      </td>
+                      <td className="friendsActions">
+                        <button
+                          className="primary narrow"
+                          onClick={() => acceptRequest(f.friendId)}
+                        >
+                          Accept
+                        </button>
+                        <button
+                          className="secondary narrow"
+                          style={{ marginLeft: "8px" }}
+                          onClick={() => declineRequest(f.friendId)}
+                        >
+                          Decline
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </>
           )}
           {outgoing.length > 0 && (
             <>
-              <h3>Sent</h3>
-              <ul style={{ listStyle: "none", padding: 0 }}>
-                {outgoing.map((f: FriendEntry) => (
-                  <li
-                    key={f.friendId}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "0.5rem",
-                      marginBottom: "0.5rem",
-                    }}
-                  >
-                    <span style={{ flex: 1 }}>
-                      <DisplayName user={f.user} showFullInfo />
-                    </span>
-                    <span className="smallAndGray">Pending...</span>
-                  </li>
-                ))}
-              </ul>
+              <p className="friendsSectionTitle">Sent Requests</p>
+              <table className="friendsTable">
+                <thead>
+                  <tr>
+                    <th>User</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {outgoing.map((f: FriendEntry) => (
+                    <tr key={f.friendId}>
+                      <td>
+                        <DisplayName user={f.user} showFullInfo />
+                      </td>
+                      <td className="friendsActions">
+                        <span className="friendsRelBadge">Pending...</span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </>
           )}
           {incoming.length === 0 && outgoing.length === 0 && (
-            <p className="smallAndGray">No pending requests.</p>
+            <div className="friendsEmpty">
+              <p>No pending requests.</p>
+            </div>
           )}
-        </div>
+        </>
       )}
 
       {tab === "search" && (
-        <div className="spacedSection">
-          <h3>Find Players</h3>
+        <>
           <input
-            className="widefill notTooWide"
+            className="friendsSearchBar"
             placeholder="Search by username or display name..."
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
             autoFocus
           />
-          {searchInput.trim() && (
-            <ul style={{ listStyle: "none", padding: 0, marginTop: "0.75rem" }}>
-              {searchResults.length === 0 ? (
-                <li>
-                  <p className="smallAndGray">No players found.</p>
-                </li>
-              ) : (
-                searchResults.map((r: SearchResult) => (
-                  <li
-                    key={r.userId}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "0.5rem",
-                      marginBottom: "0.5rem",
-                    }}
-                  >
-                    <Link
-                      to={`/profile/${r.user.username}`}
-                      style={{ flex: 1, textDecoration: "none", color: "inherit" }}
-                    >
-                      {r.user.display} <span className="smallAndGray">@{r.user.username}</span>
-                      {relationshipLabel(r.relationship)}
-                    </Link>
-                    {r.relationship === "none" && (
-                      <button
-                        className="primary narrow"
-                        onClick={() => sendRequest(r.user.username)}
-                      >
-                        Add Friend
-                      </button>
-                    )}
-                  </li>
-                ))
-              )}
-            </ul>
-          )}
-        </div>
+          {searchInput.trim() &&
+            (searchResults.length === 0 ? (
+              <div className="friendsEmpty">
+                <p>No players found.</p>
+              </div>
+            ) : (
+              <table className="friendsTable">
+                <thead>
+                  <tr>
+                    <th>User</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {searchResults.map((r: SearchResult) => (
+                    <tr key={r.userId}>
+                      <td>
+                        <Link
+                          to={`/profile/${r.user.username}`}
+                          style={{
+                            textDecoration: "none",
+                            color: "inherit",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "0.4rem",
+                          }}
+                        >
+                          {r.user.display}
+                          <span style={{ color: "var(--muted-text)", fontSize: "0.85rem" }}>
+                            @{r.user.username}
+                          </span>
+                        </Link>
+                        {relationshipLabel(r.relationship)}
+                      </td>
+                      <td className="friendsActions">
+                        {r.relationship === "none" && (
+                          <button
+                            className="primary narrow"
+                            onClick={() => sendRequest(r.user.username)}
+                          >
+                            Add Friend
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ))}
+        </>
       )}
 
-      {tab === "blocked" && (
-        <div className="spacedSection">
-          {blocked.length === 0 ? (
-            <p className="smallAndGray">You haven't blocked anyone.</p>
-          ) : (
-            <ul style={{ listStyle: "none", padding: 0 }}>
+      {tab === "blocked" &&
+        (blocked.length === 0 ? (
+          <div className="friendsEmpty">
+            <p>You haven't blocked anyone.</p>
+          </div>
+        ) : (
+          <table className="friendsTable">
+            <thead>
+              <tr>
+                <th>User</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
               {blocked.map((f: FriendEntry) => (
-                <li
-                  key={f.friendId}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "0.5rem",
-                    marginBottom: "0.5rem",
-                  }}
-                >
-                  <ProfileImage src={null} size="small" blocked decorations={[]} />
-                  <span style={{ flex: 1 }} className="smallAndGray">
-                    @{f.user.username}
-                  </span>
-                  <button className="secondary narrow" onClick={() => confirmUnblock(f)}>
-                    Unblock
-                  </button>
-                </li>
+                <tr key={f.friendId}>
+                  <td style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                    <ProfileImage src={null} size="small" blocked decorations={[]} />
+                    <span style={{ color: "var(--muted-text)" }}>@{f.user.username}</span>
+                  </td>
+                  <td className="friendsActions">
+                    <button className="secondary narrow" onClick={() => confirmUnblock(f)}>
+                      Unblock
+                    </button>
+                  </td>
+                </tr>
               ))}
-            </ul>
-          )}
-        </div>
-      )}
+            </tbody>
+          </table>
+        ))}
     </div>
   );
 }

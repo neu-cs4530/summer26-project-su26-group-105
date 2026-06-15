@@ -42,7 +42,7 @@ async function makeFriends(
   await senderPage.getByPlaceholder("Search by username or display name...").fill(receiverUsername);
   await expect(senderPage.getByText(`@${receiverUsername}`)).toBeVisible();
   await senderPage
-    .getByRole("listitem")
+    .getByRole("row")
     .filter({ hasText: `@${receiverUsername}` })
     .getByRole("button", { name: "Add Friend" })
     .click();
@@ -53,7 +53,7 @@ async function makeFriends(
   await receiverPage.getByRole("button", { name: "Accept" }).click();
   await receiverPage.getByRole("button", { name: "Friends" }).click();
   await expect(
-    receiverPage.locator("li").filter({ hasText: new RegExp(senderUsername) }),
+    receiverPage.getByRole("row").filter({ hasText: new RegExp(senderUsername) }),
   ).toBeVisible({ timeout: 5000 });
 }
 
@@ -145,11 +145,11 @@ test.describe("Activity status", () => {
   test("online status dot is visible on friends page for online friend", async () => {
     await page2.getByRole("link", { name: "Friends" }).click();
     // First verify the friend entry exists at all
-    await expect(page2.locator("li").filter({ hasText: new RegExp(username1) })).toHaveCount(1, {
+    await expect(page2.getByRole("row").filter({ hasText: new RegExp(username1) })).toHaveCount(1, {
       timeout: 10000,
     });
     // Then check for the dot
-    const friendEntry = page2.locator("li").filter({ hasText: new RegExp(username1) });
+    const friendEntry = page2.getByRole("row").filter({ hasText: new RegExp(username1) });
     await expect(friendEntry.locator(".status-dot--online")).toBeVisible({ timeout: 10000 });
   });
 
@@ -160,7 +160,7 @@ test.describe("Activity status", () => {
 
     // user2 should see DND dot on friends page
     await page2.getByRole("link", { name: "Friends" }).click();
-    const friendEntry = page2.locator("li").filter({ hasText: new RegExp(username1) });
+    const friendEntry = page2.getByRole("row").filter({ hasText: new RegExp(username1) });
     await expect(friendEntry.locator(".status-dot--dnd")).toBeVisible({ timeout: 10000 });
   });
 });
