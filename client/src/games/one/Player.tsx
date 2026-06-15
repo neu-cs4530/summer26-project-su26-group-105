@@ -1,12 +1,16 @@
 import type { SafeUserInfo } from "@gamenite/shared";
-import DisplayName from "../../components/DisplayName";
 import "./Player.css";
+import ProfileImage from "../../components/ProfileImage";
 
 type PlayerProps = {
   user: SafeUserInfo;
   numCards: number;
   isTurn: boolean;
 };
+
+export function userAnchor(user: SafeUserInfo) {
+  return `--player-${user.username.replace(/[^a-zA-Z0-9_-]/g, "")}`;
+}
 
 /**
  * Represents a Player in the One game, showing/linking to their profile, showing if it's their
@@ -18,12 +22,13 @@ type PlayerProps = {
 export default function Player({ user, numCards, isTurn }: PlayerProps) {
   return (
     <div className="one-player" data-active={isTurn}>
-      <DisplayName user={user} />
-      <div className="cards">
-        {numCards > 0 && <div className="card-back" />}
-        {numCards > 1 && <div className="card-back" />}
-        <span className="cards-number">{numCards}</span>
-      </div>
+      <ProfileImage src={user.image} size="medium" />
+      <span>
+        <span className="name">{user.display}</span>
+        <span className="cards-number" style={{ anchorName: userAnchor(user) }}>
+          {numCards}
+        </span>
+      </span>
     </div>
   );
 }

@@ -1,3 +1,4 @@
+import { oneAnimationDurations } from "@gamenite/shared";
 import { type OneState, type OneMove } from "../../../shared/src/games/one.types.ts";
 
 /**
@@ -60,7 +61,18 @@ export function getLegalMoves(state: OneState, playerIndex: number): OneMove[] {
 /**
  * Selects a random valid move for a bot player.
  */
-export function generateBotMove(state: OneState, botPlayerIndex: number): OneMove | null {
+export async function generateBotMove(
+  state: OneState,
+  botPlayerIndex: number,
+): Promise<OneMove | null> {
+  // Wait the length of any animations that should've happened
+  await new Promise((res) =>
+    setTimeout(
+      res,
+      state.lastTurnActions.reduce((prev, a) => prev + oneAnimationDurations[a.type], 0),
+    ),
+  );
+
   const legalMoves = getLegalMoves(state, botPlayerIndex);
   if (legalMoves.length === 0) return null;
 

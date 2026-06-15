@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
+import { randomUUID } from "node:crypto";
 import supertest, { type Response } from "supertest";
 import { app } from "../src/app.ts";
-import { randomUUID } from "crypto";
 
 let response: Response;
 
@@ -61,6 +61,24 @@ describe("POST /api/game/create", () => {
       maxPlayers: 2,
       players: [user3],
     });
+  });
+});
+
+describe("POST /api/game/create — friend-only", () => {
+  it("creates a friend-only game with friendOnly: true", async () => {
+    const response = await supertest(app)
+      .post("/api/game/create")
+      .send({ auth: auth3, payload: { gameKey: "nim", friendOnly: true } });
+    expect(response.status).toBe(200);
+    expect(response.body.friendOnly).toBe(true);
+  });
+
+  it("creates a non-friend-only game by default", async () => {
+    const response = await supertest(app)
+      .post("/api/game/create")
+      .send({ auth: auth3, payload: { gameKey: "nim", friendOnly: false } });
+    expect(response.status).toBe(200);
+    expect(response.body.friendOnly).toBe(false);
   });
 });
 

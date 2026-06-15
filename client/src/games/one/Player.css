@@ -1,47 +1,27 @@
 .one-player {
   display: flex;
   gap: 1ch;
+  z-index: 1;
+
+  .name {
+    font-size: 1.1em;
+  }
 
   &[data-active="true"] {
     filter: drop-shadow(0 0 0.5ch yellow);
   }
 
-  .cards {
-    display: grid;
-    grid-template-columns: max-content max-content;
-    gap: 1ch;
-    height: fit-content;
-
-    .card-back {
-      grid-column: 1;
-      grid-row: 1;
-
-      background:
-        url("../../assets/one.png") center/contain no-repeat,
-        #333;
-      width: 2ch;
-      aspect-ratio: 1/1.55;
-      border: 1px solid white;
-      border-radius: 2px;
-      rotate: 0deg;
-
-      &:has(+ .card-back) {
-        rotate: -10deg;
-      }
-    }
-
-    .cards-number {
-      display: flex;
-      grid-column: 2;
-      align-items: center;
-      justify-content: center;
-      border-radius: 50%;
-      background: yellow;
-      border: 1px solid gold;
-      color: black;
-      width: 2ch;
-      height: 2ch;
-      align-self: end;
-    }
+  .cards-number {
+    display: flex;
+    grid-column: 2;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: yellow;
+    border: 1px solid gold;
+    color: black;
+    width: 2ch;
+    height: 2ch;
+    margin: 1.5em 0 0 0.75em;
   }
 }
