@@ -1,10 +1,17 @@
 import type { AvatarDecoration as AvatarDecorationType, AvatarDecorations } from "@gamenite/shared";
 import sunglasses from "../assets/decorations/sunglasses.png";
+import glasses from "../assets/decorations/glasses.png";
+import tophat from "../assets/decorations/tophat.png";
+import sweater from "../assets/decorations/sweater.png";
+import bowtie from "../assets/decorations/bowtie.png";
 import { useEffect, useRef, useState } from "react";
 
 export const avatarDecorations: Record<AvatarDecorations, { image: string; width: number }> = {
   sunglasses: { image: sunglasses, width: 80 },
-  glasses: { image: sunglasses, width: 60 },
+  glasses: { image: glasses, width: 60 },
+  tophat: { image: tophat, width: 40 },
+  sweater: { image: sweater, width: 100 },
+  bowtie: { image: bowtie, width: 50 },
 };
 
 type AvatarDecorationProps = {
@@ -134,7 +141,7 @@ export default function AvatarDecoration({
       <img
         src={avatarDecorations[decoration.type].image}
         alt={decoration.type}
-        style={{ userSelect: "none" }}
+        style={{ userSelect: "none", width: "100%" }}
         draggable={false}
       />
       {isSelected && (

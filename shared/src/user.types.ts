@@ -58,6 +58,9 @@ export const zSocialMedia = z.object({
 export const avatarDecorations = {
   sunglasses: "sunglasses",
   glasses: "glasses",
+  tophat: "tophat",
+  sweater: "sweater",
+  bowtie: "bowtie",
 } as const;
 
 export type AvatarDecorations = (typeof avatarDecorations)[keyof typeof avatarDecorations];
