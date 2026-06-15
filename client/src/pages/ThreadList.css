@@ -15,7 +15,6 @@
   transition: all 0.2s ease-in-out;
 }
 
-/* Active selection rule mapping back to your CSS theme variables */
 .content .profile-tabs .active-tab {
   background-color: var(--primary-button);
   color: var(--button-text);
