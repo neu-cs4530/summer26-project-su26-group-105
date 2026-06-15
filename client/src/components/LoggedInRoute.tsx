@@ -3,6 +3,7 @@ import { type AuthContext, LoginContext } from "../contexts/LoginContext.ts";
 import type { GameSocket } from "../util/types.ts";
 import { Navigate } from "react-router-dom";
 import NotificationPopupContainer from "./NotificationPopupContainer.tsx";
+import BackgroundMusic from "./BackgroundMusic.tsx";
 
 interface LoggedInRouteParams {
   auth: AuthContext | null;
@@ -29,6 +30,7 @@ export default function LoggedInRoute({ auth, socket, children }: LoggedInRouteP
   return context ? (
     <LoginContext.Provider value={context}>
       <NotificationPopupContainer />
+      <BackgroundMusic />
       {children}
     </LoginContext.Provider>
   ) : (

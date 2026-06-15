@@ -144,6 +144,68 @@ export default function useEditProfileForm() {
     }));
   };
 
+  /**
+   * Saves the background music setting immediately when the user picks a track
+   * @param backgroundMusic the selected background music option
+   */
+  const handleBackgroundMusicChange = async (
+    //clears old errors before saving new music setting
+    backgroundMusic: NonNullable<UpdateForm["settings"]>["backgroundMusic"],
+  ) => {
+    resetSubmissionState();
+
+    const settingsForm = {
+      settings: {
+        backgroundMusic,
+      },
+    };
+
+    //checks if music is valid
+    const valid = zUpdateForm.safeParse(settingsForm);
+    if (!valid.success) {
+      setValidationError(valid.error);
+      return;
+    }
+
+    //updates form so selected music changes
+    updateValue("settings", {
+      ...(updatedForm.settings ?? {}),
+      backgroundMusic,
+    });
+
+    //saves new music setting to database
+    await submitValidForm(valid.data);
+  };
+
+  /**
+   * Saves the selected background music volume.
+   * @param backgroundMusicVolume the selected volume to play the music
+   */
+  const handleBackgroundMusicVolumeChange = async (backgroundMusicVolume: number) => {
+    resetSubmissionState();
+
+    // update the music volume setting
+    const settingsForm = {
+      settings: {
+        backgroundMusicVolume,
+      },
+    };
+
+    const valid = zUpdateForm.safeParse(settingsForm);
+    if (!valid.success) {
+      setValidationError(valid.error);
+      return;
+    }
+
+    // updates the slider
+    updateValue("settings", {
+      ...(updatedForm.settings ?? {}),
+      backgroundMusicVolume,
+    });
+
+    await submitValidForm(valid.data);
+  };
+
   const validationErrors = validationError && z.treeifyError(validationError);
   return {
     display: updatedForm.display ?? user.display,
@@ -152,6 +214,14 @@ export default function useEditProfileForm() {
     password: updatedForm.password ?? "",
     confirm: updatedForm.confirm ?? "",
     image: updatedForm.image === undefined ? user.image : updatedForm.image,
+    backgroundMusic: updatedForm.settings?.backgroundMusic ?? user.settings.backgroundMusic,
+    setBackgroundMusic: (backgroundMusic: NonNullable<UpdateForm["settings"]>["backgroundMusic"]) =>
+      updateValue("settings", {
+        ...(updatedForm.settings ?? {}),
+        backgroundMusic,
+      }),
+    backgroundMusicVolume:
+      updatedForm.settings?.backgroundMusicVolume ?? user.settings.backgroundMusicVolume,
     setDisplay: (display: string | undefined) => updateValue("display", display),
     setBio: (bio: string) => updateValue("bio", bio),
     setPassword: (password: string) => updateValue("password", password),
@@ -172,5 +242,7 @@ export default function useEditProfileForm() {
     validationErrors: validationErrors,
     handleProfileSubmit,
     handlePasswordSubmit,
+    handleBackgroundMusicChange,
+    handleBackgroundMusicVolumeChange,
   };
 }

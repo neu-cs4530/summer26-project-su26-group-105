@@ -41,6 +41,8 @@ function recordToSafeSelfUserInfo(record: UserRecord): SafeSelfUserInfo {
       receivesGameInviteNotifications: record.settings.receivesGameInviteNotifications,
       receivesFriendGameActivityNotifications:
         record.settings.receivesFriendGameActivityNotifications,
+      backgroundMusic: record.settings.backgroundMusic ?? "off",
+      backgroundMusicVolume: record.settings.backgroundMusicVolume ?? 0.25,
     },
   };
 }
@@ -122,7 +124,7 @@ export async function createUser(
   if (disallowedUsernames.has(username)) {
     return { error: "That is not a permitted username" };
   }
-  const record = {
+  const record: UserRecord = {
     username,
     createdAt: createdAt.toISOString(),
     display: username,
@@ -134,6 +136,8 @@ export async function createUser(
       receivesFriendAcceptedNotifications: true,
       receivesGameInviteNotifications: true,
       receivesFriendGameActivityNotifications: true,
+      backgroundMusic: "off",
+      backgroundMusicVolume: 0.25,
     },
   };
   const id = await UserRepo.add(record);
@@ -183,6 +187,8 @@ export async function updateUser(
     receivesGameInviteNotifications: newUser.settings.receivesGameInviteNotifications ?? true,
     receivesFriendGameActivityNotifications:
       newUser.settings.receivesFriendGameActivityNotifications ?? true,
+    backgroundMusic: newUser.settings.backgroundMusic ?? "off",
+    backgroundMusicVolume: newUser.settings.backgroundMusicVolume ?? 0.25,
   };
   if (display !== undefined) newUser.display = display;
   if (bio !== undefined) newUser.bio = bio;
@@ -194,6 +200,8 @@ export async function updateUser(
       receivesFriendAcceptedNotifications,
       receivesGameInviteNotifications,
       receivesFriendGameActivityNotifications,
+      backgroundMusic,
+      backgroundMusicVolume,
     } = settings;
     if (receivesFriendRequestNotifications !== undefined)
       newUser.settings.receivesFriendRequestNotifications = receivesFriendRequestNotifications;
@@ -204,6 +212,9 @@ export async function updateUser(
     if (receivesFriendGameActivityNotifications !== undefined)
       newUser.settings.receivesFriendGameActivityNotifications =
         receivesFriendGameActivityNotifications;
+    if (backgroundMusic !== undefined) newUser.settings.backgroundMusic = backgroundMusic;
+    if (backgroundMusicVolume !== undefined)
+      newUser.settings.backgroundMusicVolume = backgroundMusicVolume;
   }
   await UserRepo.set(user.userId, newUser);
   return populateSafeSelfUserInfo(user.userId);

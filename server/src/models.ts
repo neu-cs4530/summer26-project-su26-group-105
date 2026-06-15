@@ -1,4 +1,4 @@
-import type { GameKey } from "@gamenite/shared";
+import type { GameKey, BackgroundMusicTrack } from "@gamenite/shared";
 
 /**
  * Record identifiers used to look up records in a database. This type
@@ -120,6 +120,8 @@ export interface UserRecord {
     receivesFriendAcceptedNotifications: boolean;
     receivesGameInviteNotifications: boolean;
     receivesFriendGameActivityNotifications: boolean;
+    backgroundMusic: BackgroundMusicTrack;
+    backgroundMusicVolume: number;
   };
   createdAt: DateISO;
 }
