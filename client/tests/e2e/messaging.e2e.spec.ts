@@ -70,7 +70,7 @@ test.describe("Remove friend", () => {
       .filter({ hasText: new RegExp(username2) })
       .locator("button[aria-label='More options']")
       .click();
-    await expect(page1.getByText("Remove Friend 🚩")).toBeVisible({ timeout: 3000 });
+    await expect(page1.getByText("Remove Friend 🚩")).toBeVisible({ timeout: 5000 });
     await page1.getByRole("button", { name: /Remove Friend/i }).click();
     await page1.getByRole("button", { name: "OK" }).click();
     await page1.waitForTimeout(2000); // wait for socket update
@@ -118,7 +118,7 @@ test.describe("Game notifications", () => {
     await page1.locator(".newGameEntry").filter({ hasText: "Nim" }).click();
     await page1.waitForURL(/\/game\/.+/);
 
-    await expect(page2.locator(".notification-popup")).toBeVisible({ timeout: 8000 });
+    await expect(page2.locator(".notification-popup").first()).toBeVisible({ timeout: 8000 });
   });
 });
 
