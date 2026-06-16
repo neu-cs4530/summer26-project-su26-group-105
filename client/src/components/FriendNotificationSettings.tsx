@@ -12,8 +12,6 @@ export default function FriendNotificationSettings() {
   const friendRequests: boolean = user.settings.receivesFriendRequestNotifications;
   // stores if the user wants to see if their friend request was accepted
   const acceptedFriendRequests: boolean = user.settings.receivesFriendAcceptedNotifications;
-  // stores if the user wants to see if their friend invited them
-  const gameInvites: boolean = user.settings.receivesGameInviteNotifications;
   // stores if the user wants to see if their friend created/joined a game
   const friendGameActivity: boolean = user.settings.receivesFriendGameActivityNotifications;
 
@@ -32,12 +30,6 @@ export default function FriendNotificationSettings() {
       checked: acceptedFriendRequests,
     },
     {
-      setting: "receivesGameInviteNotifications",
-      title: "Game Invites",
-      description: "Get notified when someone invites you to a game.",
-      checked: gameInvites,
-    },
-    {
       setting: "receivesFriendGameActivityNotifications",
       title: "Friend Game Activity",
       description: "Get notified when a friend starts or joins a game.",
@@ -54,7 +46,6 @@ export default function FriendNotificationSettings() {
     setting:
       | "receivesFriendRequestNotifications"
       | "receivesFriendAcceptedNotifications"
-      | "receivesGameInviteNotifications"
       | "receivesFriendGameActivityNotifications",
     value: boolean,
   ) {

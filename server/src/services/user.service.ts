@@ -41,7 +41,6 @@ function recordToSafeSelfUserInfo(record: UserRecord): SafeSelfUserInfo {
     settings: {
       receivesFriendRequestNotifications: record.settings.receivesFriendRequestNotifications,
       receivesFriendAcceptedNotifications: record.settings.receivesFriendAcceptedNotifications,
-      receivesGameInviteNotifications: record.settings.receivesGameInviteNotifications,
       receivesFriendGameActivityNotifications:
         record.settings.receivesFriendGameActivityNotifications,
       backgroundMusic: record.settings.backgroundMusic ?? "off",
@@ -221,7 +220,6 @@ export async function createUser(
     settings: {
       receivesFriendRequestNotifications: true,
       receivesFriendAcceptedNotifications: true,
-      receivesGameInviteNotifications: true,
       receivesFriendGameActivityNotifications: true,
       backgroundMusic: "off",
       backgroundMusicVolume: 0.25,
@@ -272,7 +270,6 @@ export async function updateUser(
     receivesFriendRequestNotifications: newUser.settings.receivesFriendRequestNotifications ?? true,
     receivesFriendAcceptedNotifications:
       newUser.settings.receivesFriendAcceptedNotifications ?? true,
-    receivesGameInviteNotifications: newUser.settings.receivesGameInviteNotifications ?? true,
     receivesFriendGameActivityNotifications:
       newUser.settings.receivesFriendGameActivityNotifications ?? true,
     backgroundMusic: newUser.settings.backgroundMusic ?? "off",
@@ -288,7 +285,6 @@ export async function updateUser(
     const {
       receivesFriendRequestNotifications,
       receivesFriendAcceptedNotifications,
-      receivesGameInviteNotifications,
       receivesFriendGameActivityNotifications,
       backgroundMusic,
       backgroundMusicVolume,
@@ -298,8 +294,6 @@ export async function updateUser(
       newUser.settings.receivesFriendRequestNotifications = receivesFriendRequestNotifications;
     if (receivesFriendAcceptedNotifications !== undefined)
       newUser.settings.receivesFriendAcceptedNotifications = receivesFriendAcceptedNotifications;
-    if (receivesGameInviteNotifications !== undefined)
-      newUser.settings.receivesGameInviteNotifications = receivesGameInviteNotifications;
     if (receivesFriendGameActivityNotifications !== undefined)
       newUser.settings.receivesFriendGameActivityNotifications =
         receivesFriendGameActivityNotifications;
