@@ -200,6 +200,36 @@ describe("getLeaderboard — win status", () => {
     const alice = rows.find((r) => r.user.username === "alice");
     expect(alice!.status).toBe("Silver");
   });
+
+  it("returns Gold for 200+ points", async () => {
+    // 20 wins = 200 points
+    for (let i = 0; i < 20; i++) {
+      await addFinishedGame([userAId, userBId], userAId);
+    }
+    const rows = await getLeaderboard({ leaderboard: "global", dateShow: "all" });
+    const alice = rows.find((r) => r.user.username === "alice");
+    expect(alice!.status).toBe("Gold");
+  });
+
+  it("returns Platinum for 300+ points", async () => {
+    // 30 wins = 300 points
+    for (let i = 0; i < 30; i++) {
+      await addFinishedGame([userAId, userBId], userAId);
+    }
+    const rows = await getLeaderboard({ leaderboard: "global", dateShow: "all" });
+    const alice = rows.find((r) => r.user.username === "alice");
+    expect(alice!.status).toBe("Platinum");
+  });
+
+  it("returns Champion for 500+ points", async () => {
+    // 50 wins = 500 points
+    for (let i = 0; i < 50; i++) {
+      await addFinishedGame([userAId, userBId], userAId);
+    }
+    const rows = await getLeaderboard({ leaderboard: "global", dateShow: "all" });
+    const alice = rows.find((r) => r.user.username === "alice");
+    expect(alice!.status).toBe("Champion");
+  });
 });
 
 // game specific leaderboard filter

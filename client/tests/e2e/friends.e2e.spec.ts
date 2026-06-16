@@ -164,3 +164,164 @@ test.describe("Activity status", () => {
     await expect(friendEntry.locator(".status-dot--dnd")).toBeVisible({ timeout: 10000 });
   });
 });
+
+test.describe("Friends page UI", () => {
+  let username1: string;
+  let username2: string;
+
+  test.beforeEach(async () => {
+    const user1 = await createUser(page1);
+    const user2 = await createUser(page2);
+    username1 = user1.username;
+    username2 = user2.username;
+  });
+
+  test("search tab finds users by username", async () => {
+    await page1.getByRole("link", { name: "Friends" }).click();
+    await page1.getByRole("button", { name: "Search Users" }).click();
+    await page1.getByPlaceholder("Search by username or display name...").fill(username2);
+    await expect(page1.getByText(`@${username2}`)).toBeVisible();
+  });
+
+  test("add friend button appears for non-friends in search", async () => {
+    await page1.getByRole("link", { name: "Friends" }).click();
+    await page1.getByRole("button", { name: "Search Users" }).click();
+    await page1.getByPlaceholder("Search by username or display name...").fill(username2);
+    await expect(
+      page1
+        .getByRole("row")
+        .filter({ hasText: `@${username2}` })
+        .getByRole("button", { name: "Add Friend" }),
+    ).toBeVisible();
+  });
+
+  test("pending tab shows incoming request after friend request sent", async () => {
+    // user1 sends request to user2
+    await page1.getByRole("link", { name: "Friends" }).click();
+    await page1.getByRole("button", { name: "Search Users" }).click();
+    await page1.getByPlaceholder("Search by username or display name...").fill(username2);
+    await expect(page1.getByText(`@${username2}`)).toBeVisible();
+    await page1
+      .getByRole("row")
+      .filter({ hasText: `@${username2}` })
+      .getByRole("button", { name: "Add Friend" })
+      .click();
+
+    // user2 sees incoming request
+    await page2.getByRole("link", { name: "Friends" }).click();
+    await page2.getByRole("button", { name: "Pending" }).click();
+    await expect(page2.getByText("Incoming Requests")).toBeVisible();
+    await expect(page2.getByRole("row").filter({ hasText: username1 })).toBeVisible();
+  });
+
+  test("decline friend request removes it from pending", async () => {
+    // user1 sends request
+    await page1.getByRole("link", { name: "Friends" }).click();
+    await page1.getByRole("button", { name: "Search Users" }).click();
+    await page1.getByPlaceholder("Search by username or display name...").fill(username2);
+    await expect(page1.getByText(`@${username2}`)).toBeVisible();
+    await page1
+      .getByRole("row")
+      .filter({ hasText: `@${username2}` })
+      .getByRole("button", { name: "Add Friend" })
+      .click();
+
+    // user2 declines
+    await page2.getByRole("link", { name: "Friends" }).click();
+    await page2.getByRole("button", { name: "Pending" }).click();
+    await page2.getByRole("button", { name: "Decline" }).click();
+    await expect(page2.getByText("No pending requests.")).toBeVisible();
+  });
+
+  test("accepted friend appears in friends list", async () => {
+    await makeFriends(page1, username1, page2, username2);
+    await expect(page1.getByRole("row").filter({ hasText: new RegExp(username2) })).toBeVisible();
+  });
+
+  test("blocking a user from search moves them to blocked tab", async () => {
+    await page1.getByRole("link", { name: "Friends" }).click();
+    await page1.getByRole("button", { name: "Search Users" }).click();
+    await page1.getByPlaceholder("Search by username or display name...").fill(username2);
+    await expect(page1.getByText(`@${username2}`)).toBeVisible();
+
+    // open three dot menu and block
+    await page1
+      .getByRole("row")
+      .filter({ hasText: `@${username2}` })
+      .getByRole("button", { name: "More options" })
+      .click();
+    await page1.getByRole("button", { name: /Block User/i }).click();
+    await page1.getByRole("button", { name: "OK" }).click();
+
+    // check blocked tab
+    await page1.getByRole("button", { name: /Blocked/i }).click();
+    await expect(page1.getByText(`@${username2}`)).toBeVisible();
+  });
+
+  test("unblocking a user removes them from blocked tab", async () => {
+    // block first
+    await page1.getByRole("link", { name: "Friends" }).click();
+    await page1.getByRole("button", { name: "Search Users" }).click();
+    await page1.getByPlaceholder("Search by username or display name...").fill(username2);
+    await expect(page1.getByText(`@${username2}`)).toBeVisible();
+    await page1
+      .getByRole("row")
+      .filter({ hasText: `@${username2}` })
+      .getByRole("button", { name: "More options" })
+      .click();
+    await page1.getByRole("button", { name: /Block User/i }).click();
+    await page1.getByRole("button", { name: "OK" }).click();
+
+    // then unblock
+    await page1.getByRole("button", { name: /Blocked/i }).click();
+    await page1.getByRole("button", { name: "Unblock" }).click();
+    await page1.getByRole("button", { name: "OK" }).click();
+    await expect(page1.getByText("You haven't blocked anyone.")).toBeVisible();
+  });
+});
+
+test.describe("Shared stats", () => {
+  let username1: string;
+  let username2: string;
+
+  test.beforeEach(async () => {
+    const user1 = await createUser(page1);
+    const user2 = await createUser(page2);
+    username1 = user1.username;
+    username2 = user2.username;
+  });
+
+  test("shared stats section does not appear on non-friend profile", async () => {
+    await page1.goto(`/profile/${username2}`);
+    await expect(page1.getByText("Your Shared Stats")).not.toBeVisible();
+  });
+
+  test("shared stats section appears on friend's profile", async () => {
+    await makeFriends(page1, username1, page2, username2);
+    // Navigate via UI instead of goto
+    await page1.getByRole("link", { name: "Friends" }).click();
+    await expect(page1.getByRole("row").filter({ hasText: new RegExp(username2) })).toBeVisible();
+    await page1
+      .getByRole("row")
+      .filter({ hasText: new RegExp(username2) })
+      .getByRole("link")
+      .first()
+      .click();
+    await expect(page1.getByText("Your Shared Stats")).toBeVisible({ timeout: 8000 });
+  });
+
+  test("shared stats shows empty state when no games played together", async () => {
+    await makeFriends(page1, username1, page2, username2);
+    await page1.getByRole("link", { name: "Friends" }).click();
+    await expect(page1.getByRole("row").filter({ hasText: new RegExp(username2) })).toBeVisible();
+    await page1
+      .getByRole("row")
+      .filter({ hasText: new RegExp(username2) })
+      .getByRole("link")
+      .first()
+      .click();
+    await expect(page1.getByText("You haven't finished any games together yet")).toBeVisible({
+      timeout: 8000,
+    });
+  });
+});
