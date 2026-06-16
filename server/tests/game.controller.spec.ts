@@ -269,3 +269,56 @@ describe("socketMakeMove", () => {
     expect(toChain.emit).not.toHaveBeenCalledWith("gameStateUpdated", expect.any(Object));
   });
 });
+
+describe("socketJoinAsPlayer — with friends", () => {
+  it("emits notificationPopup to friends when user joins", async () => {
+    // Make alice and bob friends
+    const { sendFriendRequest, acceptFriendRequest } = await import("../src/services/friend.service.ts");
+    const { friendId } = (await sendFriendRequest(userA.userId, userB.userId)) as { friendId: string };
+    await acceptFriendRequest(friendId, userB.userId);
+
+    // Carol creates a game, alice joins
+    await createUser("carol", "pwdC", new Date());
+    const carolAuth = await getUserByUsername("carol");
+    const carol = { userId: carolAuth!.userId, username: "carol" };
+    const game = await createGame(carol, "nim", new Date());
+
+    const socket = makeMockSocket();
+    const { io, toChain } = makeMockIo();
+
+    await socketJoinAsPlayer(socket, io)({
+      auth: { username: "alice", password: "pwdA" },
+      payload: game.gameId,
+    });
+
+    expect(toChain.emit).toHaveBeenCalledWith(
+      "notificationPopup",
+      expect.objectContaining({ type: "friendGameActivity" }),
+    );
+  });
+});
+
+// testing socket start with friends notifications
+describe("socketStart — with friends", () => {
+  it("emits notificationPopup to friends when game starts", async () => {
+    const { sendFriendRequest, acceptFriendRequest } = await import("../src/services/friend.service.ts");
+    const { friendId } = (await sendFriendRequest(userA.userId, userB.userId)) as { friendId: string };
+    await acceptFriendRequest(friendId, userB.userId);
+
+    const game = await createGame(userA, "nim", new Date());
+    await joinGame(game.gameId, userB);
+
+    const socket = makeMockSocket();
+    const { io, toChain } = makeMockIo();
+
+    await socketStart(socket, io)({
+      auth: { username: "alice", password: "pwdA" },
+      payload: game.gameId,
+    });
+
+    expect(toChain.emit).toHaveBeenCalledWith(
+      "notificationPopup",
+      expect.objectContaining({ type: "friendGameActivity" }),
+    );
+  });
+});
