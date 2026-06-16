@@ -157,7 +157,6 @@ export interface UserRecord {
   settings: {
     receivesFriendRequestNotifications: boolean;
     receivesFriendAcceptedNotifications: boolean;
-    receivesGameInviteNotifications: boolean;
     receivesFriendGameActivityNotifications: boolean;
     backgroundMusic: BackgroundMusicTrack;
     backgroundMusicVolume: number;

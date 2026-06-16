@@ -21,8 +21,7 @@ import {
 } from "../src/services/friend.service.ts";
 import type { GameServerSocket, GameServer } from "../src/types.ts";
 
-// ── Mock helpers ──────────────────────────────────────────────────────────────
-
+// mock helpers
 function makeMockSocket() {
   const socket = {
     emit: vi.fn(),
@@ -49,8 +48,6 @@ function auth(username: string, password: string) {
   return { auth: { username, password }, payload: {} };
 }
 
-// ── Setup ─────────────────────────────────────────────────────────────────────
-
 let userAId: string;
 let userBId: string;
 
@@ -65,8 +62,7 @@ beforeEach(async () => {
   userBId = (await getUserByUsername("bob"))!.userId;
 });
 
-// ── socketList ────────────────────────────────────────────────────────────────
-
+// testing socket list of friends
 describe("socketList", () => {
   it("joins the user's personal room and emits friendListUpdated", async () => {
     const socket = makeMockSocket();
@@ -91,8 +87,7 @@ describe("socketList", () => {
   });
 });
 
-// ── socketRequest ─────────────────────────────────────────────────────────────
-
+// testing socket send and receive friend request
 describe("socketRequest", () => {
   it("sends a friend request and pushes updated lists to both users", async () => {
     const socket = makeMockSocket();
@@ -140,8 +135,7 @@ describe("socketRequest", () => {
   });
 });
 
-// ── socketAccept ──────────────────────────────────────────────────────────────
-
+// testing socket accept friend request
 describe("socketAccept", () => {
   it("accepts a pending request and pushes updated lists", async () => {
     const { friendId } = (await sendFriendRequest(userAId, userBId)) as { friendId: string };
@@ -175,8 +169,7 @@ describe("socketAccept", () => {
   });
 });
 
-// ── socketDecline ─────────────────────────────────────────────────────────────
-
+// testing socket decline friend request
 describe("socketDecline", () => {
   it("declines a pending request and pushes updated lists", async () => {
     const { friendId } = (await sendFriendRequest(userAId, userBId)) as { friendId: string };
@@ -210,8 +203,7 @@ describe("socketDecline", () => {
   });
 });
 
-// ── socketRemove ──────────────────────────────────────────────────────────────
-
+// testing socket remove user as friend
 describe("socketRemove", () => {
   it("removes an accepted friendship and pushes updated lists", async () => {
     const { friendId } = (await sendFriendRequest(userAId, userBId)) as { friendId: string };
@@ -246,8 +238,7 @@ describe("socketRemove", () => {
   });
 });
 
-// ── socketBlock ───────────────────────────────────────────────────────────────
-
+// testing socket block user
 describe("socketBlock", () => {
   it("blocks a user and pushes updated lists to both", async () => {
     const socket = makeMockSocket();
@@ -280,8 +271,7 @@ describe("socketBlock", () => {
   });
 });
 
-// ── socketUnblock ─────────────────────────────────────────────────────────────
-
+// testing socket unblock user
 describe("socketUnblock", () => {
   it("unblocks a user and pushes updated list", async () => {
     await blockUser(userAId, userBId);
@@ -315,8 +305,7 @@ describe("socketUnblock", () => {
   });
 });
 
-// ── socketSearch ──────────────────────────────────────────────────────────────
-
+// testing socket search for user
 describe("socketSearch", () => {
   it("returns search results matching query", async () => {
     const socket = makeMockSocket();
@@ -388,8 +377,7 @@ describe("socketSearch", () => {
   });
 });
 
-// ── socketSetStatus ───────────────────────────────────────────────────────────
-
+// testing socket set activity status
 describe("socketSetStatus", () => {
   it("sets status without error for valid status", async () => {
     const socket = makeMockSocket();
@@ -422,8 +410,7 @@ describe("socketSetStatus", () => {
   });
 });
 
-// ── socketUserConnect ─────────────────────────────────────────────────────────
-
+// testing socket user connect
 describe("socketUserConnect", () => {
   it("joins user room and sets userId on socket", async () => {
     const socket = makeMockSocket();
@@ -442,5 +429,29 @@ describe("socketUserConnect", () => {
     await socketUserConnect(socket, io)(auth("alice", "wrong"));
 
     expect(socket.join).not.toHaveBeenCalledWith(`friend-${userAId}`);
+  });
+});
+
+// testing socket remove friends when unauthorized
+describe("socketRemove — unauthorized", () => {
+  it("does not emit friendListUpdated when user tries to remove someone else's friendship", async () => {
+    // alice and bob are friends
+    const { friendId } = (await sendFriendRequest(userAId, userBId)) as { friendId: string };
+    await acceptFriendRequest(friendId, userBId);
+
+    // carol tries to remove alice-bob friendship
+    await createUser("carol", "pwdC", new Date());
+    const socket = makeMockSocket();
+    const { io, toChain } = makeMockIo();
+
+    await socketRemove(
+      socket,
+      io,
+    )({
+      auth: { username: "carol", password: "pwdC" },
+      payload: { requestId: friendId },
+    });
+
+    expect(toChain.emit).not.toHaveBeenCalledWith("friendListUpdated", expect.any(Object));
   });
 });
