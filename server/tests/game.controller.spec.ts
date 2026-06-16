@@ -273,8 +273,11 @@ describe("socketMakeMove", () => {
 describe("socketJoinAsPlayer — with friends", () => {
   it("emits notificationPopup to friends when user joins", async () => {
     // Make alice and bob friends
-    const { sendFriendRequest, acceptFriendRequest } = await import("../src/services/friend.service.ts");
-    const { friendId } = (await sendFriendRequest(userA.userId, userB.userId)) as { friendId: string };
+    const { sendFriendRequest, acceptFriendRequest } =
+      await import("../src/services/friend.service.ts");
+    const { friendId } = (await sendFriendRequest(userA.userId, userB.userId)) as {
+      friendId: string;
+    };
     await acceptFriendRequest(friendId, userB.userId);
 
     // Carol creates a game, alice joins
@@ -286,7 +289,10 @@ describe("socketJoinAsPlayer — with friends", () => {
     const socket = makeMockSocket();
     const { io, toChain } = makeMockIo();
 
-    await socketJoinAsPlayer(socket, io)({
+    await socketJoinAsPlayer(
+      socket,
+      io,
+    )({
       auth: { username: "alice", password: "pwdA" },
       payload: game.gameId,
     });
@@ -301,8 +307,11 @@ describe("socketJoinAsPlayer — with friends", () => {
 // testing socket start with friends notifications
 describe("socketStart — with friends", () => {
   it("emits notificationPopup to friends when game starts", async () => {
-    const { sendFriendRequest, acceptFriendRequest } = await import("../src/services/friend.service.ts");
-    const { friendId } = (await sendFriendRequest(userA.userId, userB.userId)) as { friendId: string };
+    const { sendFriendRequest, acceptFriendRequest } =
+      await import("../src/services/friend.service.ts");
+    const { friendId } = (await sendFriendRequest(userA.userId, userB.userId)) as {
+      friendId: string;
+    };
     await acceptFriendRequest(friendId, userB.userId);
 
     const game = await createGame(userA, "nim", new Date());
@@ -311,7 +320,10 @@ describe("socketStart — with friends", () => {
     const socket = makeMockSocket();
     const { io, toChain } = makeMockIo();
 
-    await socketStart(socket, io)({
+    await socketStart(
+      socket,
+      io,
+    )({
       auth: { username: "alice", password: "pwdA" },
       payload: game.gameId,
     });
