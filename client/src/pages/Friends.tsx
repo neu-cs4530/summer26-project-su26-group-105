@@ -1,10 +1,12 @@
 import { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
+import { Link } from "react-router-dom";
 import useSocketsForFriends from "../hooks/useSocketsForFriends";
 import type { FriendEntry, SearchResult } from "@gamenite/shared/src/friend.types";
 import Modal from "../components/Modal";
 import ProfileImage from "../components/ProfileImage";
 import "./Friends.css";
+import DisplayName from "../components/DisplayName";
 
 type Tab = "friends" | "pending" | "search" | "blocked";
 
@@ -149,9 +151,9 @@ export default function Friends() {
     return () => clearTimeout(timer);
   }, [searchInput, tab, searchUsers]);
 
-  function confirmRemove(f: { display: string; username: string; friendId: string }) {
+  function confirmRemove(f: FriendEntry) {
     setModal({
-      message: `Warning! You are about to remove ${f.display} (@${f.username}) as a friend.
+      message: `Warning! You are about to remove ${f.user.display} (@${f.user.username}) as a friend.
                     To befriend them again, a new request would be necessary. Click OK if you wish to proceed.`,
       onConfirm: () => {
         removeFriend(f.friendId);
@@ -160,12 +162,12 @@ export default function Friends() {
     });
   }
 
-  function confirmBlock(f: { display: string; username: string }) {
+  function confirmBlock(f: FriendEntry) {
     setModal({
-      message: `Warning! Blocking ${f.display} (@${f.username}) means you can no longer view
+      message: `Warning! Blocking ${f.user.display} (@${f.user.username}) means you can no longer view
                     each other's profiles or play together. Click OK if you wish to proceed.`,
       onConfirm: () => {
-        blockUser(f.username);
+        blockUser(f.user.username);
         setModal(null);
       },
     });
@@ -257,26 +259,12 @@ export default function Friends() {
                       marginBottom: "0.5rem",
                     }}
                   >
-                    <ProfileImage
-                      src={f.user.image}
-                      decorations={f.user.decorations}
-                      size="small"
-                      activityStatus={"activityStatus" in f ? f.activityStatus : undefined}
-                    />
                     <span style={{ flex: 1 }}>
-                      {f.user.display} <span className="smallAndGray">@{f.user.username}</span>
+                      <DisplayName user={f.user} showFullInfo />
                     </span>
                     <ThreeDotMenu
-                      onRemove={() =>
-                        confirmRemove({
-                          display: f.user.display,
-                          username: f.user.username,
-                          friendId: f.friendId,
-                        })
-                      }
-                      onBlock={() =>
-                        confirmBlock({ display: f.user.display, username: f.user.username })
-                      }
+                      onRemove={() => confirmRemove(f as FriendEntry)}
+                      onBlock={() => confirmBlock(f as FriendEntry)}
                     />
                   </li>
                 ))}
@@ -303,7 +291,7 @@ export default function Friends() {
                     }}
                   >
                     <span style={{ flex: 1 }}>
-                      {f.user.display} <span className="smallAndGray">@{f.user.username}</span>
+                      <DisplayName user={f.user} showFullInfo />
                     </span>
                     <button className="primary narrow" onClick={() => acceptRequest(f.friendId)}>
                       Accept
@@ -331,7 +319,7 @@ export default function Friends() {
                     }}
                   >
                     <span style={{ flex: 1 }}>
-                      {f.user.display} <span className="smallAndGray">@{f.user.username}</span>
+                      <DisplayName user={f.user} showFullInfo />
                     </span>
                     <span className="smallAndGray">Pending...</span>
                   </li>
@@ -372,10 +360,13 @@ export default function Friends() {
                       marginBottom: "0.5rem",
                     }}
                   >
-                    <span style={{ flex: 1 }}>
+                    <Link
+                      to={`/profile/${r.user.username}`}
+                      style={{ flex: 1, textDecoration: "none", color: "inherit" }}
+                    >
                       {r.user.display} <span className="smallAndGray">@{r.user.username}</span>
                       {relationshipLabel(r.relationship)}
-                    </span>
+                    </Link>
                     {r.relationship === "none" && (
                       <button
                         className="primary narrow"
@@ -408,7 +399,7 @@ export default function Friends() {
                     marginBottom: "0.5rem",
                   }}
                 >
-                  <ProfileImage src={null} decorations={[]} size="small" blocked />
+                  <ProfileImage src={null} size="small" blocked decorations={[]} />
                   <span style={{ flex: 1 }} className="smallAndGray">
                     @{f.user.username}
                   </span>
