@@ -2,6 +2,35 @@
   color: var(--text-color);
 }
 
+/* Tournament-only settings */
+.tournamentSettings {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.tournamentSetting {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.9rem;
+}
+
+.tournamentSetting input,
+.tournamentSetting select {
+  padding: 0.4rem 0.6rem;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--card-background-solid);
+  color: var(--text-color);
+}
+
+.tournamentSetting input {
+  width: 6rem;
+}
+
 /* Row with friends only switch and the text for it */
 .newGameToggleRow {
   display: flex;

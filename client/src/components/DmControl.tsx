@@ -276,10 +276,8 @@ export default function DMControlPanel() {
           </div>
         ) : (
           <div className="chat-fallback-empty">
-            <h3>No Active Conversation Selected</h3>
-            <p className="smallAndGray">
-              Choose a thread from the sidebar or initialize a new user session link below.
-            </p>
+            <h3>No Conversation Selected</h3>
+            <p className="smallAndGray">Choose a thread from the sidebar or create a new one!</p>
           </div>
         )}
       </div>

@@ -137,7 +137,7 @@ test.describe("Direct messaging", () => {
 
   test("messaging page loads with no active conversation", async () => {
     await navigateToMessaging(page1);
-    await expect(page1.getByText("No Active Conversation Selected")).toBeVisible();
+    await expect(page1.getByText("No Conversation Selected")).toBeVisible();
   });
 
   test("user can search for and start a DM with another user", async () => {

@@ -1,0 +1,74 @@
+.tournamentPage {
+  color: var(--text-color);
+}
+
+.tournamentSection {
+  margin-top: 1.25rem;
+}
+
+.tournamentParticipants {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0.5rem 0 1rem;
+}
+
+.tournamentEnterMatch {
+  margin-bottom: 1rem;
+}
+
+.tournamentBracket {
+  display: flex;
+  gap: 1.5rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+}
+
+.tournamentRound {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-width: 12rem;
+}
+
+.tournamentRound h4 {
+  margin: 0;
+}
+
+.tournamentMatch {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  background: var(--card-background-solid);
+  color: var(--text-color);
+  cursor: pointer;
+  text-align: left;
+}
+
+.tournamentMatch:hover {
+  border-color: var(--primary-button);
+}
+
+.tournamentMatchPlayers {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.tournamentMatchWinner {
+  font-weight: 700;
+}
+
+.tournamentMatchStatus {
+  font-size: 0.8rem;
+  color: var(--gray-foreground);
+}
+
+.tournamentChampion {
+  font-size: 1.1rem;
+}

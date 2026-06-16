@@ -1,12 +1,12 @@
 import { GameService } from "./gameServiceManager.ts";
-import { type NimState, type NimView, zNimMove } from "@gamenite/shared";
+import { type NimState, type NimView, zNimMove, gamePlayerLimits } from "@gamenite/shared";
 import { type GameLogic } from "./gameLogic.ts";
 
 const START_NIM_OBJECTS = 21;
 
 export const nimLogic: GameLogic<NimState, NimView> = {
-  minPlayers: 2,
-  maxPlayers: 2,
+  minPlayers: gamePlayerLimits.nim.min,
+  maxPlayers: gamePlayerLimits.nim.max,
   start: () => ({ remaining: START_NIM_OBJECTS, nextPlayer: 0 }),
   update: ({ remaining, nextPlayer }, payload, playerIndex) => {
     const move = zNimMove.safeParse(payload);

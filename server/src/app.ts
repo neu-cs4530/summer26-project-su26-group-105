@@ -9,6 +9,7 @@ import * as friend from "./controllers/friend.controller.ts";
 import * as game from "./controllers/game.controller.ts";
 import * as user from "./controllers/user.controller.ts";
 import * as thread from "./controllers/thread.controller.ts";
+import * as tournament from "./controllers/tournament.controller.ts";
 import * as leaderboard from "./controllers/leaderboard.controller.ts";
 import { type GameServer, type GameServerSocket } from "./types.ts";
 import { clearStatus } from "./services/activityStatus.service.ts";
@@ -37,6 +38,14 @@ app.use(
         .post("/create", game.postCreate)
         .get("/list", game.getList)
         .get("/:id", game.getById),
+    )
+    .use(
+      "/tournament",
+      express
+        .Router() //
+        .post("/create", tournament.postCreate)
+        .get("/list", tournament.getList)
+        .get("/:id", tournament.getById),
     )
     .use(
       "/thread",
@@ -87,7 +96,11 @@ io.on("connection", (socket) => {
   socket.on("gameMakeMove", game.socketMakeMove(socket, io));
   socket.on("gameStart", game.socketStart(socket, io));
   socket.on("gameWatch", game.socketWatch(socket, io));
+  socket.on("gameReplayVote", game.socketReplayVote(socket, io));
   socket.on("friendGameCreated", game.socketFriendGameCreated(socket, io));
+
+  socket.on("tournamentWatch", tournament.socketWatch(socket, io));
+  socket.on("tournamentJoin", tournament.socketJoin(socket, io));
 
   socket.on("gameAddBot", game.socketAddBot(socket, io));
 

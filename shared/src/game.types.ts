@@ -13,6 +13,8 @@ import { type SafeUserInfo } from "./user.types.ts";
  * - `minPlayers`: the minimum number of players required to start the game
  * - `winner`: the winner of the game
  * - `endedAt`: when the game finished (for leaderboard)
+ * - `tournamentId`: set if this game is a match within a tournament bracket
+ * - `tournamentRound`: which round of the tournament this match belongs to
  */
 export interface GameInfo {
   gameId: string;
@@ -25,8 +27,11 @@ export interface GameInfo {
   minPlayers: number;
   maxPlayers?: number;
   winner?: string;
+  winnerUser?: SafeUserInfo;
   friendOnly?: boolean;
   endedAt?: Date;
+  tournamentId?: string;
+  tournamentRound?: number;
 }
 
 /**
@@ -68,6 +73,25 @@ export * from "./games/one.types.ts";
  */
 export type GameKey = z.infer<typeof zGameKey>;
 export const zGameKey = z.union([z.literal("nim"), z.literal("guess"), z.literal("one")]);
+
+/**
+ * The allowed number of players per game, by game type
+ *  `max` is null when a game allows any number of players
+ */
+export const gamePlayerLimits: { [key in GameKey]: { min: number; max: number | null } } = {
+  nim: { min: 2, max: 2 },
+  guess: { min: 2, max: null },
+  one: { min: 2, max: 10 },
+};
+
+/**
+ * Returns true if a game type can be played with exactly `size` players, used
+ * to decide which games are eligible for a tournament with a given match size.
+ */
+export function gameSupportsPlayerCount(type: GameKey, size: number): boolean {
+  const { min, max } = gamePlayerLimits[type];
+  return size >= min && (max === null || size <= max);
+}
 
 /**
  * The TaggedGameView type allows the views for different game to be

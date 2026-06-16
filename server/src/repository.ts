@@ -7,6 +7,7 @@ import {
   type GameRecord,
   type MessageRecord,
   type ThreadRecord,
+  type TournamentRecord,
   type UserRecord,
   type ChannelRecord,
   type DirectMessageRecord,
@@ -18,6 +19,7 @@ export const CommentRepo = createRepo<CommentRecord>("comment");
 export const GameRepo = createRepo<GameRecord>("game");
 export const MessageRepo = createRepo<MessageRecord>("message");
 export const ThreadRepo = createRepo<ThreadRecord>("thread");
+export const TournamentRepo = createRepo<TournamentRecord>("tournament");
 export const UserRepo = createRepo<UserRecord>("user");
 export const FriendRepo = createRepo<FriendsRecord>("friend");
 export const ChannelRepo = createRepo<ChannelRecord>("channel");
