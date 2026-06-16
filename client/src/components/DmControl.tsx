@@ -103,7 +103,8 @@ export default function DMControlPanel() {
     if (!searchInput.trim()) return null;
     const filtered = searchResults.filter(
       (r) =>
-        r.username !== user.username && !(showGroupForm && selectedMembers.includes(r.username)),
+        r.user.username !== user.username &&
+        !(showGroupForm && selectedMembers.includes(r.user.username)),
     );
     return (
       <div className="dm-search-results">
@@ -115,10 +116,10 @@ export default function DMControlPanel() {
               key={r.userId}
               type="button"
               className="dm-search-result-item"
-              onClick={() => handleResultClick(r.username)}
+              onClick={() => handleResultClick(r.user.username)}
             >
-              <span className="dm-search-display">{r.display}</span>
-              <span className="smallAndGray">@{r.username}</span>
+              <span className="dm-search-display">{r.user.display}</span>
+              <span className="smallAndGray">@{r.user.username}</span>
             </button>
           ))
         )}
