@@ -2,7 +2,6 @@
 
 [Trello Invite Link](https://trello.com/invite/b/6a19f2e98d1952c76b348584/ATTI5ce80793c716781cd9a1d5e3714bc545C337A816/project)
 
-
 The individual and team project for this class are designed to mirror the
 experiences of a software engineer joining a new development team: you will be
 “onboarded” to our codebase, make several individual contributions, and then
