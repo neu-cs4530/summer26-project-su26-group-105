@@ -1,10 +1,10 @@
 .header {
   display: grid;
   align-items: center;
-  height: 3rem;
-  gap: 0.5rem;
-  padding-inline: 1rem;
-  grid-template-columns: max-content max-content 1fr repeat(3, max-content);
+  height: 3.5rem;
+  gap: 0.75rem;
+  padding-inline: 1.5rem;
+  grid-template-columns: 1fr repeat(3, max-content);
   width: 100%;
   color: var(--text-color);
   background: var(--card-background);
@@ -22,7 +22,7 @@
 .header-music {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.5rem;
   white-space: nowrap;
   font-size: 0.9rem;
   margin-left: 2rem;
@@ -30,13 +30,14 @@
 
 .header-music-label {
   font-weight: 600;
-  color: var(--text-color);
+  color: var(--muted-text);
+  font-size: 0.8rem;
 }
 
 .header-music-toggle {
   border: none;
   border-radius: 999px;
-  padding: 0.35rem 0.8rem;
+  padding: 0.2rem 0.6rem;
   font-size: 0.8rem;
   font-weight: 700;
   background: linear-gradient(135deg, var(--primary-color), var(--primary-hover-color));
@@ -57,9 +58,10 @@
 .header-user {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.5rem;
   white-space: nowrap;
-  grid-column: 4;
+  font-size: 0.9rem;
+  color: var(--text-color);
 }
 
 /* Avatar button */
@@ -88,21 +90,21 @@
   position: absolute;
   top: calc(100% + 0.5rem);
   right: 0;
-  background: var(--gray-background, #2b2d31);
-  border: 1px solid var(--border, rgba(255, 255, 255, 0.08));
-  border-radius: 8px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
-  min-width: 210px;
+  background: var(--card-background-solid);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px var(--shadow-color);
+  min-width: 220px;
   padding: 0.4rem;
   z-index: 500;
 }
 
 .status-menu-title {
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: var(--gray-foreground, #80848e);
+  color: var(--muted-text);
   padding: 0.3rem 0.6rem 0.4rem;
   margin: 0;
 }
@@ -112,31 +114,31 @@
   flex-direction: column;
   align-items: flex-start;
   width: 100%;
-  padding: 0.45rem 0.6rem;
+  padding: 0.5rem 0.7rem;
   background: none;
   border: none;
-  border-radius: 4px;
+  border-radius: 8px;
   cursor: pointer;
   text-align: left;
   transition: background 0.12s;
 
   &:hover {
-    background: var(--hover-background, rgba(255, 255, 255, 0.06));
+    background: var(--cloud-one);
   }
 
   &.status-menu-item--active {
-    background: var(--hover-background, rgba(255, 255, 255, 0.1));
+    background: var(--cloud-two);
   }
 }
 
 .status-menu-label {
   font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--foreground, #dbdee1);
+  font-weight: 600;
+  color: var(--text-color);
 }
 
 .status-menu-desc {
   font-size: 0.72rem;
-  color: var(--gray-foreground, #80848e);
-  margin-top: 0.1rem;
+  color: var(--muted-text);
+  margin-top: 0.15rem;
 }
