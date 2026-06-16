@@ -5,18 +5,12 @@ import {
   populateRecentlyPlayedGames,
   getUsersByUsername,
   updateUser,
+  populateSafeSelfUserInfo,
 } from "../../src/services/user.service.ts";
 import { GameRepo, UserRepo } from "../../src/repository.ts";
 import { enforceAuth, getUserByUsername } from "../../src/services/auth.service.ts";
 
-beforeEach(async () => {
-  await UserRepo.clear();
-  await GameRepo.clear();
-});
-
-// enforceAuth isn't tested by current integration tests,
-// because existing tests exercise the REST api, and enforceAuth
-// is only used in the socket api
+// tests auth for users
 describe("enforceAuth", () => {
   it("should return a user and id on good auth", async () => {
     const user = await enforceAuth({ username: "user1", password: "pwd1111" });
@@ -28,113 +22,50 @@ describe("enforceAuth", () => {
   });
 });
 
-// updateUser can't be fully tested by current integration tests; part of its
-// contract is that it throws if updateUser is called with an invalid user id,
-// but a well-behaved controller won't ever invoke updateUser with an invalid
-// user id
+// tests update users
 describe("updateUser", () => {
   it("should throw if given an invalid user id", async () => {
     await expect(updateUser("fake", { display: "Stacey Fakename" })).rejects.toThrow();
   });
 
   it("should update a user's background music setting", async () => {
-    const updatedUser = await updateUser("user1", {
-      settings: {
-        backgroundMusic: "arcade",
-      },
-    });
-
+    const updatedUser = await updateUser("user1", { settings: { backgroundMusic: "arcade" } });
     expect(updatedUser.settings.backgroundMusic).toBe("arcade");
   });
 
   it("should change a user's background music from one track to another", async () => {
-    await updateUser("user1", {
-      settings: {
-        backgroundMusic: "lofi",
-      },
-    });
-
-    const updatedUser = await updateUser("user1", {
-      settings: {
-        backgroundMusic: "sleepy",
-      },
-    });
-
+    await updateUser("user1", { settings: { backgroundMusic: "lofi" } });
+    const updatedUser = await updateUser("user1", { settings: { backgroundMusic: "sleepy" } });
     expect(updatedUser.settings.backgroundMusic).toBe("sleepy");
   });
 
   it("should turn background music off", async () => {
-    await updateUser("user1", {
-      settings: {
-        backgroundMusic: "arcade",
-      },
-    });
-
-    const updatedUser = await updateUser("user1", {
-      settings: {
-        backgroundMusic: "off",
-      },
-    });
-
+    await updateUser("user1", { settings: { backgroundMusic: "arcade" } });
+    const updatedUser = await updateUser("user1", { settings: { backgroundMusic: "off" } });
     expect(updatedUser.settings.backgroundMusic).toBe("off");
   });
 
   it("should update a user's background music volume setting", async () => {
-    const updatedUser = await updateUser("user1", {
-      settings: {
-        backgroundMusicVolume: 0.5,
-      },
-    });
-
+    const updatedUser = await updateUser("user1", { settings: { backgroundMusicVolume: 0.5 } });
     expect(updatedUser.settings.backgroundMusicVolume).toBe(0.5);
   });
 
   it("should change a user's background music volume more than once", async () => {
-    await updateUser("user1", {
-      settings: {
-        backgroundMusicVolume: 0.75,
-      },
-    });
-
-    const updatedUser = await updateUser("user1", {
-      settings: {
-        backgroundMusicVolume: 0.1,
-      },
-    });
-
+    await updateUser("user1", { settings: { backgroundMusicVolume: 0.75 } });
+    const updatedUser = await updateUser("user1", { settings: { backgroundMusicVolume: 0.1 } });
     expect(updatedUser.settings.backgroundMusicVolume).toBe(0.1);
   });
 
   it("should keep the selected music track when only the volume changes", async () => {
-    await updateUser("user1", {
-      settings: {
-        backgroundMusic: "lofi",
-      },
-    });
-
-    const updatedUser = await updateUser("user1", {
-      settings: {
-        backgroundMusicVolume: 0.6,
-      },
-    });
-
+    await updateUser("user1", { settings: { backgroundMusic: "lofi" } });
+    const updatedUser = await updateUser("user1", { settings: { backgroundMusicVolume: 0.6 } });
     expect(updatedUser.settings.backgroundMusic).toBe("lofi");
     expect(updatedUser.settings.backgroundMusicVolume).toBe(0.6);
   });
 
   it("should keep the selected volume when only the music track changes", async () => {
-    await updateUser("user1", {
-      settings: {
-        backgroundMusicVolume: 0.4,
-      },
-    });
-
-    const updatedUser = await updateUser("user1", {
-      settings: {
-        backgroundMusic: "arcade",
-      },
-    });
-
+    await updateUser("user1", { settings: { backgroundMusicVolume: 0.4 } });
+    const updatedUser = await updateUser("user1", { settings: { backgroundMusic: "arcade" } });
     expect(updatedUser.settings.backgroundMusic).toBe("arcade");
     expect(updatedUser.settings.backgroundMusicVolume).toBe(0.4);
   });
@@ -142,14 +73,18 @@ describe("updateUser", () => {
   it("should give users default background music settings", async () => {
     const user = await enforceAuth({ username: "user1", password: "pwd1111" });
     const safeUser = await populateSafeSelfUserInfo(user.userId);
-
     expect(safeUser.settings.backgroundMusic).toBeDefined();
     expect(safeUser.settings.backgroundMusicVolume).toBeDefined();
   });
 });
 
-// tests creating user
+// tests create users
 describe("createUser", () => {
+  beforeEach(async () => {
+    await UserRepo.clear();
+    await GameRepo.clear();
+  });
+
   it("returns error for duplicate username", async () => {
     await createUser("alice", "pwdA", new Date());
     const result = await createUser("alice", "pwdB", new Date());
@@ -172,7 +107,7 @@ describe("createUser", () => {
   });
 });
 
-// tests populating bot users
+// tests bot users
 describe("populateSafeUserInfo — bot users", () => {
   it("returns a virtual bot profile without hitting the database", async () => {
     const bot = await populateSafeUserInfo("bot_TestBotName:TestBotName");
@@ -196,8 +131,13 @@ describe("populateSafeUserInfo — bot users", () => {
   });
 });
 
-// tests recently played games for user
+// recently played games tests
 describe("populateRecentlyPlayedGames", () => {
+  beforeEach(async () => {
+    await UserRepo.clear();
+    await GameRepo.clear();
+  });
+
   it("returns empty array when user has no games", async () => {
     await createUser("alice", "pwdA", new Date());
     const auth = await getUserByUsername("alice");
@@ -211,7 +151,6 @@ describe("populateRecentlyPlayedGames", () => {
     const authA = await getUserByUsername("alice");
     const authB = await getUserByUsername("bob");
 
-    // game alice played and finished
     await GameRepo.add({
       type: "nim",
       done: true,
@@ -222,8 +161,6 @@ describe("populateRecentlyPlayedGames", () => {
       state: {},
       endedAt: new Date().toISOString(),
     });
-
-    // game alice played but is not finished
     await GameRepo.add({
       type: "guess",
       done: false,
@@ -233,8 +170,6 @@ describe("populateRecentlyPlayedGames", () => {
       players: [authA!.userId],
       state: {},
     });
-
-    // game alice did not play at all
     await GameRepo.add({
       type: "nim",
       done: true,
@@ -256,14 +191,12 @@ describe("populateRecentlyPlayedGames", () => {
     const auth = await getUserByUsername("alice");
     const userId = auth!.userId;
 
-    const dates = [
+    for (const date of [
       new Date("2025-01-01"),
       new Date("2025-03-01"),
       new Date("2025-05-01"),
       new Date("2025-06-01"),
-    ];
-
-    for (const date of dates) {
+    ]) {
       await GameRepo.add({
         type: "nim",
         done: true,
@@ -278,18 +211,22 @@ describe("populateRecentlyPlayedGames", () => {
 
     const result = await populateRecentlyPlayedGames(userId);
     expect(result).toHaveLength(3);
-
     expect(result[0].datePlayed.getTime()).toBeGreaterThan(result[1].datePlayed.getTime());
     expect(result[1].datePlayed.getTime()).toBeGreaterThan(result[2].datePlayed.getTime());
   });
 });
 
-// tests getting users by username
+// ── getUsersByUsername ────────────────────────────────────────────────────────
+
 describe("getUsersByUsername", () => {
+  beforeEach(async () => {
+    await UserRepo.clear();
+    await GameRepo.clear();
+  });
+
   it("returns users for valid usernames", async () => {
     await createUser("alice", "pwdA", new Date());
     await createUser("bob", "pwdB", new Date());
-
     const result = await getUsersByUsername(["alice", "bob"]);
     expect(result).toHaveLength(2);
     expect(result.map((u) => u.username)).toContain("alice");
@@ -306,9 +243,11 @@ describe("getUsersByUsername", () => {
   });
 });
 
-// tests updating user
-describe("updateUser", () => {
+// update user tests for alice
+describe("updateUser — alice", () => {
   beforeEach(async () => {
+    await UserRepo.clear();
+    await GameRepo.clear();
     await createUser("alice", "pwdA", new Date());
   });
 
