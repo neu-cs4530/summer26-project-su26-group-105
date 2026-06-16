@@ -431,3 +431,27 @@ describe("socketUserConnect", () => {
     expect(socket.join).not.toHaveBeenCalledWith(`friend-${userAId}`);
   });
 });
+
+// testing socket remove friends when unauthorized
+describe("socketRemove — unauthorized", () => {
+  it("does not emit friendListUpdated when user tries to remove someone else's friendship", async () => {
+    // alice and bob are friends
+    const { friendId } = (await sendFriendRequest(userAId, userBId)) as { friendId: string };
+    await acceptFriendRequest(friendId, userBId);
+
+    // carol tries to remove alice-bob friendship
+    await createUser("carol", "pwdC", new Date());
+    const socket = makeMockSocket();
+    const { io, toChain } = makeMockIo();
+
+    await socketRemove(
+      socket,
+      io,
+    )({
+      auth: { username: "carol", password: "pwdC" },
+      payload: { requestId: friendId },
+    });
+
+    expect(toChain.emit).not.toHaveBeenCalledWith("friendListUpdated", expect.any(Object));
+  });
+});
