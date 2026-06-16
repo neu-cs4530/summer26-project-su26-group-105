@@ -13,6 +13,8 @@ import {
   getOutgoingRequests,
   getBlockedUsers,
   searchUsers,
+  areUsersFriends,
+  isBlockedBetween,
 } from "../../src/services/friend.service.ts";
 
 // user ids for tests
@@ -340,6 +342,16 @@ describe("searchUsers", () => {
       expect(results).toHaveLength(0);
     });
 
+    it("searchUsers returns empty array for empty query", async () => {
+      const results = await searchUsers(userAId, "", "all");
+      expect(results).toHaveLength(0);
+    });
+
+    it("searchUsers with existing type returns empty for empty query", async () => {
+      const results = await searchUsers(userAId, "", "existing");
+      expect(results).toHaveLength(0);
+    });
+
     it("annotates results with correct relationship status", async () => {
       // userA -> userB pending -- outgoing for userA
       await sendFriendRequest(userAId, userBId);
@@ -393,5 +405,65 @@ describe("searchUsers", () => {
       const results = await searchUsers(userAId, "zzznomatch", "existing");
       expect(results).toHaveLength(0);
     });
+  });
+});
+
+// tests when users are friends
+describe("areUsersFriends", () => {
+  it("returns false when no relationship exists", async () => {
+    expect(await areUsersFriends(userAId, userBId)).toBe(false);
+  });
+
+  it("returns false when request is pending", async () => {
+    await sendFriendRequest(userAId, userBId);
+    expect(await areUsersFriends(userAId, userBId)).toBe(false);
+  });
+
+  it("returns true when friendship is accepted", async () => {
+    const { friendId } = (await sendFriendRequest(userAId, userBId)) as { friendId: string };
+    await acceptFriendRequest(friendId, userBId);
+    expect(await areUsersFriends(userAId, userBId)).toBe(true);
+  });
+
+  it("returns true regardless of direction", async () => {
+    const { friendId } = (await sendFriendRequest(userAId, userBId)) as { friendId: string };
+    await acceptFriendRequest(friendId, userBId);
+    expect(await areUsersFriends(userBId, userAId)).toBe(true);
+  });
+
+  it("returns false after friend is removed", async () => {
+    const { friendId } = (await sendFriendRequest(userAId, userBId)) as { friendId: string };
+    await acceptFriendRequest(friendId, userBId);
+    await removeFriend(userAId, userBId);
+    expect(await areUsersFriends(userAId, userBId)).toBe(false);
+  });
+});
+
+// tests when users are blocked
+describe("isBlockedBetween", () => {
+  it("returns false when no relationship exists", async () => {
+    expect(await isBlockedBetween(userAId, userBId)).toBe(false);
+  });
+
+  it("returns false when users are friends", async () => {
+    const { friendId } = (await sendFriendRequest(userAId, userBId)) as { friendId: string };
+    await acceptFriendRequest(friendId, userBId);
+    expect(await isBlockedBetween(userAId, userBId)).toBe(false);
+  });
+
+  it("returns true when A blocks B", async () => {
+    await blockUser(userAId, userBId);
+    expect(await isBlockedBetween(userAId, userBId)).toBe(true);
+  });
+
+  it("returns true when B blocks A", async () => {
+    await blockUser(userBId, userAId);
+    expect(await isBlockedBetween(userAId, userBId)).toBe(true);
+  });
+
+  it("returns false after unblocking", async () => {
+    await blockUser(userAId, userBId);
+    await unblockUser(userAId, userBId);
+    expect(await isBlockedBetween(userAId, userBId)).toBe(false);
   });
 });
