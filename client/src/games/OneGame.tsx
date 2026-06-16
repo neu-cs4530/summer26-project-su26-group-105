@@ -258,8 +258,13 @@ export default function OneGame({
       {otherPlayers.flatMap((p) => {
         const idx = players.indexOf(p);
         const hand = view.playerHandIds[idx];
-        return hand.map((c) => (
-          <Card card={getOtherCard(c)} location={getOtherCardCoordinates(p, c)} key={c} />
+        return hand.map((c, i) => (
+          <Card
+            card={getOtherCard(c)}
+            location={getOtherCardCoordinates(p, c)}
+            key={c}
+            data-testid={"other-hand-" + idx + "-card-" + i}
+          />
         ));
       })}
       <Card card={null} location={{ x: "10%", y: "15%" }} onClick={drawFunction} isButton />
@@ -275,6 +280,7 @@ export default function OneGame({
             onHover={() => setHoveredCardIdx(i)}
             location={{ x: `${loc.x}%`, y: `${loc.y}%` }}
             rotation={loc.rotation}
+            data-testid={"hand-card-" + i}
           />
         );
       })}

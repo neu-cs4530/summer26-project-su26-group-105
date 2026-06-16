@@ -9,7 +9,7 @@ type CardProps = {
   onHover?: () => void;
   location: { x: string; y: string; isSmall?: boolean };
   rotation?: number;
-};
+} & { [data: `data-${string}`]: string | boolean };
 
 /**
  * Represents a Card in the One game, showing its value and color
@@ -20,7 +20,15 @@ type CardProps = {
  * @param location The position of the card, and whether it's a smaller card (for other players' hands)
  * @param rotation The rotation of the card
  */
-export default function Card({ card, onClick, isButton, onHover, location, rotation }: CardProps) {
+export default function Card({
+  card,
+  onClick,
+  isButton,
+  onHover,
+  location,
+  rotation,
+  ...props
+}: CardProps) {
   const style: CSSProperties & { [key: `--${string}`]: string } = {
     "--left": location.x,
     "--top": location.y,
@@ -57,6 +65,7 @@ export default function Card({ card, onClick, isButton, onHover, location, rotat
       onClick={() => onClick?.()}
       onMouseEnter={() => onHover?.()}
       style={style}
+      {...props}
     >
       <span className="one-card-top">{text}</span>
       <span className="one-card-middle">{text}</span>
