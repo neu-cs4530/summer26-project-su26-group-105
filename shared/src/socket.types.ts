@@ -15,6 +15,7 @@ import {
 import { type SafeUserInfo } from "./user.types.ts";
 import { type ActivityStatus, type FriendEntry, type SearchResult } from "./friend.types.ts";
 import { type MessageChannel, type ChatMessage } from "./dms.types.ts";
+import { type TournamentInfo } from "./tournament.types.ts";
 
 /**
  * The Socket.io interface for client to server communication
@@ -36,6 +37,9 @@ export interface ClientToServerEvents {
   gameStart: (payload: WithAuth<string>) => void;
   gameWatch: (payload: WithAuth<string>) => void;
   friendGameCreated: (payload: WithAuth<string>) => void;
+  tournamentWatch: (payload: WithAuth<string>) => void;
+  tournamentJoin: (payload: WithAuth<string>) => void;
+  gameReplayVote: (payload: WithAuth<string>) => void;
   gameAddBot: (payload: WithAuth<string>) => void; // string represents the gameId
   setStatus: (payload: WithAuth<{ status: ActivityStatus }>) => void;
   userConnect: (payload: WithAuth<Record<string, never>>) => void;
@@ -83,6 +87,16 @@ export interface ServerToClientEvents {
   gameWatched: (payload: GamePlayInfo) => void;
   gameWatchError: (payload: { error: string }) => void;
   leaderboardUpdated: (payload: { gameType: GameKey }) => void;
+  // Tournaments
+  tournamentUpdated: (payload: TournamentInfo) => void;
+  tournamentError: (payload: { error: string }) => void;
+  //Replay Games
+  gameReplayUpdated: (payload: {
+    gameId: string;
+    voters: string[];
+    required: number;
+    replayGameId?: string;
+  }) => void;
 
   //DMS
   globalChatJoined: (data: { channelId: string; messages: ChatMessage[] }) => void;

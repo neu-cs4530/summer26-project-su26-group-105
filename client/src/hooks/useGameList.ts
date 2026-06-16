@@ -27,6 +27,8 @@ export default function useGameList(maxGames?: number): { message: string } | Ga
   if ("error" in games) return { message: `Error: ${games.error}` };
 
   const visible = games.filter((game) => {
+    // tournament matches are managed from the tournament page, not the open list
+    if (game.tournamentId) return false;
     if (!game.friendOnly) return true;
     if (game.createdBy.username === user.username) return true;
     return statusMap.has(game.createdBy.username);

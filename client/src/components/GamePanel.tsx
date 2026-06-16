@@ -4,6 +4,7 @@ import { gameInstructions, gameNames, type GameInstructionsType } from "../util/
 import useLoginContext from "../hooks/useLoginContext.ts";
 import GameDispatch from "../games/GameDispatch.tsx";
 import useSocketsForGame from "../hooks/useSocketsForGame.ts";
+import useGameReplay from "../hooks/useGameReplay.ts";
 import useTimeSince from "../hooks/useTimeSince.ts";
 import DisplayName from "./DisplayName.tsx";
 import { useState } from "react";
@@ -26,6 +27,10 @@ export default function GamePanel({
 
   const { view, players, userPlayerIndex, hasWatched, joinGame, startGame, addBot } =
     useSocketsForGame(gameId, initialPlayers);
+
+  // rematch voting
+  const isPlayer = userPlayerIndex >= 0;
+  const { gameOver, voters, required, hasVoted, voteReplay } = useGameReplay(gameId, isPlayer);
 
   const gameSupportsBots = type === "one";
 
@@ -91,6 +96,22 @@ export default function GamePanel({
             </button>
           )}
         </div>
+        {/* Rematch prompt, shown to players once a non-tournament game ends */}
+        {gameOver && isPlayer && (
+          <div className="replayPrompt">
+            <button
+              className="primary narrow"
+              onClick={voteReplay}
+              disabled={hasVoted}
+              title="Start a new game with the same players"
+            >
+              {hasVoted ? "Waiting for others…" : "Play again"}
+            </button>
+            <span className="smallAndGray">
+              {voters.length}/{required} players want a rematch
+            </span>
+          </div>
+        )}
       </div>
       {view ? (
         <div className="gameFrame">

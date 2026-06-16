@@ -6,6 +6,7 @@ import { nimGameService } from "../games/nim.ts";
 import { guessGameService } from "../games/guess.ts";
 import { oneGameService } from "../games/one.ts";
 import { type GameViewUpdates, type UserWithId } from "../types.ts";
+import { type GameRecord } from "../models.ts";
 import { GameRepo } from "../repository.ts";
 import { getFriends } from "./friend.service.ts";
 
@@ -33,13 +34,27 @@ async function populateGameInfo(gameId: string): Promise<GameInfo> {
     createdAt: new Date(game.createdAt),
     endedAt: game.endedAt ? new Date(game.endedAt) : undefined,
     winner: game.winner,
+    winnerUser: game.winner ? await populateSafeUserInfo(game.winner) : undefined,
     players: await Promise.all(game.players.map(populateSafeUserInfo)),
     type: game.type,
     status: !game.state ? "waiting" : game.done ? "done" : "active",
     minPlayers: gameServices[game.type].minPlayers,
     maxPlayers: gameServices[game.type].maxPlayers ?? undefined,
     friendOnly: game.friendOnly ?? false,
+    tournamentId: game.tournamentId,
+    tournamentRound: game.tournamentRound,
   };
+}
+
+/**
+ * Expose the populated game info for a single game id. Used by the tournament
+ * service to render bracket matches.
+ *
+ * @param gameId - Valid game id
+ * @returns the expanded game info object
+ */
+export async function getGameInfo(gameId: string): Promise<GameInfo> {
+  return populateGameInfo(gameId);
 }
 
 /** Returns true if userId is a friend of the game creator. */
@@ -171,8 +186,154 @@ export async function createGame(
 }
 
 /**
- * Retrieves a single game from the database. If you expect the id to be valid, use `forceGameById`.
+ * Create a tournament match that is already full and immediately started. The
+ * given players are seeded into a fresh game of `type`, its state is
+ * initialized, and the resulting view updates are returned so it can be sent
+ *  Tournament matches cannot be joined
  *
+ * @param type - Game key for the match
+ * @param playerIds - The set of players in this match
+ * @param tournamentId - Owning tournament id
+ * @param round - 0-indexed round number
+ * @param createdBy - User id of the tournament creator
+ * @param createdAt - Creation time for this match
+ * @param friendOnly - Inherited from the tournament
+ * @returns the new match's game id
+ */
+export async function createTournamentMatch(
+  type: GameKey,
+  playerIds: string[],
+  tournamentId: string,
+  round: number,
+  createdBy: string,
+  createdAt: Date,
+  friendOnly: boolean = false,
+): Promise<string> {
+  const chat = await createChat(createdAt);
+  const { state } = gameServices[type].create(playerIds);
+  return GameRepo.add({
+    type,
+    done: false,
+    state,
+    chat: chat.chatId,
+    createdAt: createdAt.toISOString(),
+    createdBy,
+    players: playerIds,
+    friendOnly,
+    tournamentId,
+    tournamentRound: round,
+  });
+}
+
+/** True for placeholder bot players */
+function isBotPlayer(userId: string): boolean {
+  return userId.startsWith("bot_");
+}
+
+/**
+ * Create a rematch: a brand-new game with the exact same players (including any
+ * bots) and friends-only setting as a finished game. The new game is started immediately
+ *
+ * @param original - The finished game being replayed
+ * @param createdAt - Creation time for the rematch
+ * @returns the new game's id
+ */
+async function createReplayGame(original: GameRecord, createdAt: Date): Promise<string> {
+  const chat = await createChat(createdAt);
+  const { state } = gameServices[original.type].create(original.players);
+  return GameRepo.add({
+    type: original.type,
+    done: false,
+    state,
+    chat: chat.chatId,
+    createdAt: createdAt.toISOString(),
+    createdBy: original.createdBy,
+    players: original.players,
+    friendOnly: original.friendOnly ?? false,
+  });
+}
+
+/**
+ * The current rematch state for a game: which players have agreed, how many
+ * agreements are required (all non-bot players), and the rematch game id once
+ * everyone has agreed
+ */
+export interface ReplayState {
+  gameId: string;
+  voters: string[]; // usernames of players who have agreed
+  required: number;
+  replayGameId?: string;
+}
+
+/** Build the rematch state payload for a finished game from its stored votes */
+async function buildReplayState(gameId: string, game: GameRecord): Promise<ReplayState> {
+  const votes = game.replayVotes ?? [];
+  const voters = await Promise.all(
+    votes.map(async (userId) => (await populateSafeUserInfo(userId)).username),
+  );
+  const required = game.players.filter((userId) => !isBotPlayer(userId)).length;
+  return { gameId, voters, required, replayGameId: game.replayGameId };
+}
+
+/**
+ * Read the rematch state for a game, or null if the game is not eligible for a
+ * rematch (it doesn't exist, isn't finished, or is a tournament match)
+ *
+ * @param gameId - game id
+ * @returns the rematch state, or null
+ */
+export async function getReplayState(gameId: string): Promise<ReplayState | null> {
+  const game = await GameRepo.find(gameId);
+  if (!game || !game.done || game.tournamentId) return null;
+  return buildReplayState(gameId, game);
+}
+
+/**
+ * Record a player's vote to replay a finished game
+ *  Once every non-bot player has agreed
+ * a rematch game with the same players is created and its id is
+ * stored on the original game
+ *
+ * @param gameId - game id
+ * @param user - player in the game
+ * @returns the updated rematch state
+ * @throws if the game is invalid, not finished, a tournament match, or the user
+ * is not one of its players
+ */
+export async function voteReplay(gameId: string, user: UserWithId): Promise<ReplayState> {
+  const game = await GameRepo.find(gameId);
+  if (!game) throw new Error(`user ${user.username} replaying invalid game`);
+  if (!game.done) throw new Error(`user ${user.username} replaying a game that isn't over`);
+  if (game.tournamentId) {
+    throw new Error(`Tournament matches cannot be replayed`);
+  }
+  if (!game.players.some((userId) => userId === user.userId)) {
+    throw new Error(`user ${user.username} replaying a game they weren't in`);
+  }
+
+  // if the rematch already exists, just report it
+  if (game.replayGameId) {
+    return buildReplayState(gameId, game);
+  }
+
+  const votes = game.replayVotes ?? [];
+  if (!votes.includes(user.userId)) {
+    game.replayVotes = [...votes, user.userId];
+  }
+
+  // once every human player has agreed, create the rematch
+  const humanPlayers = game.players.filter((userId) => !isBotPlayer(userId));
+  const everyoneAgreed = humanPlayers.every((userId) => game.replayVotes!.includes(userId));
+  if (humanPlayers.length > 0 && everyoneAgreed) {
+    game.replayGameId = await createReplayGame(game, new Date());
+  }
+
+  await GameRepo.set(gameId, game);
+  return buildReplayState(gameId, game);
+}
+
+/**
+ * Retrieves a single game from the database
  * @param gameId - Ostensible game id
  * @returns the game's info object, or null
  */
@@ -195,6 +356,11 @@ export async function getGameById(gameId: string): Promise<GameInfo | null> {
 export async function joinGame(gameId: string, user: UserWithId): Promise<GameInfo> {
   const game = await GameRepo.find(gameId);
   if (!game) throw new Error(`user ${user.username} joining invalid game`);
+  // tournament matches are filled by the bracket engine; nobody may join them directly,
+  // which keeps non-participants and eliminated players out of later rounds
+  if (game.tournamentId) {
+    throw new Error(`This game is part of a tournament and cannot be joined`);
+  }
   if (game.state) {
     throw new Error(`user ${user.username} joining game that started`);
   }
