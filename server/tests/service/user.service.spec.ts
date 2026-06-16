@@ -283,13 +283,11 @@ describe("updateUser — alice", () => {
       settings: {
         receivesFriendRequestNotifications: false,
         receivesFriendAcceptedNotifications: false,
-        receivesGameInviteNotifications: false,
         receivesFriendGameActivityNotifications: false,
       },
     });
     expect(result.settings.receivesFriendRequestNotifications).toBe(false);
     expect(result.settings.receivesFriendAcceptedNotifications).toBe(false);
-    expect(result.settings.receivesGameInviteNotifications).toBe(false);
     expect(result.settings.receivesFriendGameActivityNotifications).toBe(false);
   });
 
@@ -502,13 +500,11 @@ describe("updateUser", () => {
       settings: {
         receivesFriendRequestNotifications: false,
         receivesFriendAcceptedNotifications: false,
-        receivesGameInviteNotifications: false,
         receivesFriendGameActivityNotifications: false,
       },
     });
     expect(result.settings.receivesFriendRequestNotifications).toBe(false);
     expect(result.settings.receivesFriendAcceptedNotifications).toBe(false);
-    expect(result.settings.receivesGameInviteNotifications).toBe(false);
     expect(result.settings.receivesFriendGameActivityNotifications).toBe(false);
   });
 

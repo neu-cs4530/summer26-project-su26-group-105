@@ -45,7 +45,6 @@ export interface SafeSelfUserInfo extends SafeUserInfo {
   settings: {
     receivesFriendRequestNotifications: boolean;
     receivesFriendAcceptedNotifications: boolean;
-    receivesGameInviteNotifications: boolean;
     receivesFriendGameActivityNotifications: boolean;
     backgroundMusic: BackgroundMusicTrack;
     backgroundMusicVolume: number;
@@ -121,7 +120,6 @@ export const zUserUpdateRequest = z.object({
     .object({
       receivesFriendRequestNotifications: z.boolean().optional(),
       receivesFriendAcceptedNotifications: z.boolean().optional(),
-      receivesGameInviteNotifications: z.boolean().optional(),
       receivesFriendGameActivityNotifications: z.boolean().optional(),
       backgroundMusic: zBackgroundMusicTrack.optional(),
       backgroundMusicVolume: z.number().min(0).max(1).optional(),
