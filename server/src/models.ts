@@ -1,4 +1,4 @@
-import type { AvatarDecoration, GameKey } from "@gamenite/shared";
+import type { AvatarDecoration, GameKey, BackgroundMusicTrack } from "@gamenite/shared";
 import {
   type MessageChannel,
   type ChatMessage,
@@ -126,6 +126,8 @@ export interface UserRecord {
     receivesFriendAcceptedNotifications: boolean;
     receivesGameInviteNotifications: boolean;
     receivesFriendGameActivityNotifications: boolean;
+    backgroundMusic: BackgroundMusicTrack;
+    backgroundMusicVolume: number;
     allowMessagesFrom?: MessagePrivacySetting;
   };
   createdAt: DateISO;

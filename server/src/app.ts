@@ -53,6 +53,7 @@ app.use(
         .post("/list", user.postList)
         .post("/login", user.postLogin)
         .post("/signup", user.postSignup)
+        .post("/:username/friendstats", user.getFriendStatsHandler)
         .post("/:username", user.postByUsername)
         .get("/:username", user.getByUsername)
         .get("/:username/recently-played", user.getRecentlyPlayed),

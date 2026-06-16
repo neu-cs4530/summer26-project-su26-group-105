@@ -6,6 +6,7 @@ import TextInput from "./TextInput";
 import Loading from "./Loading";
 import "../pages/Profile.css";
 import "./profile/EditableProfile.css";
+import type { BackgroundMusicTrack } from "@gamenite/shared";
 
 export type ThemeMode = "light" | "dark";
 
@@ -36,11 +37,15 @@ export default function Settings() {
     setPassword,
     confirm,
     setConfirm,
+    backgroundMusic,
+    backgroundMusicVolume,
     isLoading,
     isSaved,
     err,
     validationErrors,
     handlePasswordSubmit,
+    handleBackgroundMusicChange,
+    handleBackgroundMusicVolumeChange,
   } = useEditProfileForm();
 
   //updates the theme when the user clicks one of the theme buttons
@@ -51,12 +56,20 @@ export default function Settings() {
     document.documentElement.dataset.theme = newTheme;
   };
 
+  //the music that the player can play in the background
+  const musicOptions: { value: BackgroundMusicTrack; label: string }[] = [
+    { value: "off", label: "Off" },
+    { value: "lofi", label: "Lo-fi" },
+    { value: "arcade", label: "Arcade" },
+    { value: "sleepy", label: "Sleepy" },
+  ];
+
   return (
     <div className="profile-settings">
       <h1>App Settings</h1>
       <hr />
       <div className="content spacedSection">
-        <h2 style={{ textAlign: "center" }}>Theme Settings</h2>
+        <h2 style={{ textAlign: "center" }}>Theme</h2>
 
         {/* light and dark mode */}
         <div className="theme-toggle-row">
@@ -79,7 +92,54 @@ export default function Settings() {
       </div>
       <hr />
       <div className="content spacedSection">
-        <h2 style={{ textAlign: "center" }}>Notification Settings</h2>
+        <h2 style={{ textAlign: "center" }}>Background Music</h2>
+
+        {/* the background music buttons*/}
+        <div className="theme-toggle-row">
+          {musicOptions.map((option) => (
+            <button
+              key={option.value}
+              className={backgroundMusic === option.value ? "primary narrow" : "secondary narrow"}
+              type="button"
+              onClick={() => handleBackgroundMusicChange(option.value)}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+        {/* volume adjustment  */}
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "0.5rem",
+            marginTop: "1rem",
+          }}
+        >
+          <label htmlFor="background-music-volume" style={{ fontWeight: 600, textAlign: "center" }}>
+            Volume
+          </label>
+          <input
+            id="background-music-volume"
+            type="range"
+            min="0"
+            max="1"
+            step="0.05"
+            value={backgroundMusicVolume}
+            onChange={(e) => handleBackgroundMusicVolumeChange(Number(e.target.value))}
+            style={{
+              width: "220px",
+              maxWidth: "80%",
+              cursor: "pointer",
+            }}
+          />
+        </div>
+      </div>
+      <hr />
+      <div className="content spacedSection">
+        <h2 style={{ textAlign: "center" }}>Notification</h2>
         <h3>Friend Notifications</h3>
         <FriendNotificationSettings />
       </div>
@@ -92,7 +152,7 @@ export default function Settings() {
       <hr />
       {/* Password Form */}
       <form className="content spacedSection" onSubmit={handlePasswordSubmit}>
-        <h2 style={{ textAlign: "center" }}>Password Settings</h2>
+        <h2 style={{ textAlign: "center" }}>Reset Password</h2>
 
         <div className="account-settings">
           <TextInput

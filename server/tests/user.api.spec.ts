@@ -19,6 +19,8 @@ const selfUserSettings = {
     receivesFriendAcceptedNotifications: true,
     receivesGameInviteNotifications: true,
     receivesFriendGameActivityNotifications: true,
+    backgroundMusic: "off",
+    backgroundMusicVolume: 0.25,
     allowMessagesFrom: "anyone",
   },
 };
