@@ -2,11 +2,13 @@ import { describe, it, expect, beforeEach } from "vitest";
 import {
   createGame,
   getGameById,
+  getReplayState,
   joinGame,
   startGame,
   getGames,
   updateGame,
   viewGame,
+  voteReplay,
 } from "../../src/services/game.service.ts";
 import { FriendRepo, GameRepo, UserRepo, ChatRepo } from "../../src/repository.ts";
 import { createUser } from "../../src/services/user.service.ts";
@@ -445,5 +447,73 @@ describe("getGameById — completed game fields", () => {
     const found = await getGameById(game.gameId);
     expect(found!.endedAt).toBeUndefined();
     expect(found!.winner).toBeUndefined();
+  });
+});
+
+// rematch ("replay") voting
+describe("voteReplay / getReplayState", () => {
+  /** Creates a 2-player nim game between A and B and plays it to completion. */
+  async function finishedNimGame(): Promise<string> {
+    const game = await createGame(userA, "nim", new Date());
+    await joinGame(game.gameId, userB);
+    await startGame(game.gameId, userA);
+    for (let i = 0; i < 7; i += 1) {
+      await updateGame(game.gameId, i % 2 === 0 ? userA : userB, 3);
+    }
+    return game.gameId;
+  }
+
+  it("returns null replay state for an unfinished game", async () => {
+    const game = await createGame(userA, "nim", new Date());
+    expect(await getReplayState(game.gameId)).toBeNull();
+  });
+
+  it("reports the required vote count once a game is finished", async () => {
+    const gameId = await finishedNimGame();
+    const state = await getReplayState(gameId);
+    expect(state).not.toBeNull();
+    expect(state!.required).toBe(2);
+    expect(state!.voters).toEqual([]);
+    expect(state!.replayGameId).toBeUndefined();
+  });
+
+  it("does not create a rematch until every player agrees", async () => {
+    const gameId = await finishedNimGame();
+    const afterFirst = await voteReplay(gameId, userA);
+    expect(afterFirst.voters).toEqual(["alice"]);
+    expect(afterFirst.replayGameId).toBeUndefined();
+  });
+
+  it("creates a rematch with the same players once everyone agrees", async () => {
+    const gameId = await finishedNimGame();
+    await voteReplay(gameId, userA);
+    const afterSecond = await voteReplay(gameId, userB);
+
+    expect(afterSecond.replayGameId).toBeDefined();
+    const replay = await getGameById(afterSecond.replayGameId!);
+    expect(replay!.type).toBe("nim");
+    expect(replay!.status).toBe("active"); // started immediately
+    expect(replay!.players.map((p) => p.username).sort()).toEqual(["alice", "bob"]);
+    expect(replay!.gameId).not.toBe(gameId);
+  });
+
+  it("ignores duplicate votes from the same player", async () => {
+    const gameId = await finishedNimGame();
+    await voteReplay(gameId, userA);
+    const again = await voteReplay(gameId, userA);
+    expect(again.voters).toEqual(["alice"]);
+    expect(again.replayGameId).toBeUndefined();
+  });
+
+  it("rejects a replay vote from someone who wasn't in the game", async () => {
+    const gameId = await finishedNimGame();
+    await expect(voteReplay(gameId, userC)).rejects.toThrow();
+  });
+
+  it("rejects replaying a game that isn't over", async () => {
+    const game = await createGame(userA, "nim", new Date());
+    await joinGame(game.gameId, userB);
+    await startGame(game.gameId, userA);
+    await expect(voteReplay(game.gameId, userA)).rejects.toThrow();
   });
 });

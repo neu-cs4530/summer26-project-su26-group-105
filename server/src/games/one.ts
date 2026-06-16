@@ -1,6 +1,7 @@
 import { GameService } from "./gameServiceManager.ts";
 import { type GameLogic } from "./gameLogic.ts";
 import { generateBotMove } from "../bots/oneBot.ts";
+import { gamePlayerLimits } from "@gamenite/shared";
 import {
   type OneState,
   type OneView,
@@ -15,8 +16,8 @@ import {
  * Game Logic for a Game of One (Uno)
  */
 export const oneLogic: GameLogic<OneState, OneView> = {
-  minPlayers: 2,
-  maxPlayers: 10,
+  minPlayers: gamePlayerLimits.one.min,
+  maxPlayers: gamePlayerLimits.one.max,
 
   start: (numPlayers) => {
     const deck = shuffle(generateDeck());

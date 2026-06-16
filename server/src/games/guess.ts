@@ -3,6 +3,7 @@ import {
   type GuessView,
   type GuessState,
   type UnfinishedGuessView,
+  gamePlayerLimits,
 } from "@gamenite/shared";
 import { GameService } from "./gameServiceManager.ts";
 import { type GameLogic } from "./gameLogic.ts";
@@ -12,8 +13,8 @@ function allGuessed(guesses: (number | null)[]): guesses is number[] {
 }
 
 export const guessLogic: GameLogic<GuessState, GuessView> = {
-  minPlayers: 2,
-  maxPlayers: null,
+  minPlayers: gamePlayerLimits.guess.min,
+  maxPlayers: gamePlayerLimits.guess.max,
   start: (numPlayers) => ({
     secret: Math.round(Math.random() * 100) + 1,
     guesses: Array.from({ length: numPlayers }).map(() => null),

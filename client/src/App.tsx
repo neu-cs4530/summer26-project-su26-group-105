@@ -14,6 +14,7 @@ import LoggedInRoute from "./components/LoggedInRoute.tsx";
 import NewGame from "./pages/NewGame.tsx";
 import Game from "./pages/Game.tsx";
 import GameList from "./pages/GameList.tsx";
+import Tournament from "./pages/Tournament.tsx";
 import ThreadPage from "./pages/ThreadPage.tsx";
 import { ErrorBoundary } from "react-error-boundary";
 import fallback from "./fallback.tsx";
@@ -88,7 +89,9 @@ export default function App() {
             <Route path="/forum/post/:threadId" element={<ThreadPage />} />
             <Route path="/games" element={<GameList />} />
             <Route path="/game/new" element={<NewGame />} />
+            <Route path="/tournament/new" element={<NewGame tournament />} />
             <Route path="/game/:gameId" element={<Game />} />
+            <Route path="/tournament/:tournamentId" element={<Tournament />} />
             <Route path="/leaderboard" element={<Leaderboard />} />
             <Route path="/profile/:username" element={<Profile />} />
             <Route path="/friends" element={<Friends />} />

@@ -47,10 +47,6 @@ export default function NotificationPopupContainer() {
         return;
       }
       //if the user turned notification off, return
-      if (payload.type === "gameInvite" && !user.settings.receivesGameInviteNotifications) {
-        return;
-      }
-      //if the user turned notification off, return
       if (
         payload.type === "friendGameActivity" &&
         !user.settings.receivesFriendGameActivityNotifications

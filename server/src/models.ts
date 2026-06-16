@@ -63,6 +63,8 @@ export interface CommentRecord {
  * - `createdAt`: when the game was created
  * - `createdBy`: user id of the person who created the game
  * - `endedAt`: when the game ended
+ * - `tournamentId`: set if this game is a match within a tournament bracket
+ * - `tournamentRound`: which round of the tournament this match belongs to (0-indexed)
  */
 export interface GameRecord {
   type: GameKey;
@@ -75,6 +77,37 @@ export interface GameRecord {
   winner?: RecordId;
   endedAt?: DateISO;
   friendOnly?: boolean; // friends only gameplay
+  tournamentId?: RecordId; // References Tournament records
+  tournamentRound?: number;
+  replayVotes?: RecordId[]; // players who agreed to a rematch (References User records)
+  replayGameId?: RecordId; // the rematch game created once everyone agreed (References Game records)
+}
+
+/**
+ * Represents a tournament document in the database. A tournament is a
+ * single-elimination bracket of games of a single game type.
+ * - `type`: which game is played in every match
+ * - `status`: registering (lobby open), active (matches underway), or done
+ * - `gameSize`: players per match
+ * - `bracketSize`: total participants required to fill the bracket (a power of `gameSize`)
+ * - `participants`: user ids registered for the tournament
+ * - `rounds`: game ids grouped by round; `rounds[0]` is the first round
+ * - `champion`: user id of the overall winner, set once `status` is `done`
+ * - `createdBy`: user id of the person who created the tournament
+ * - `createdAt`: when the tournament was created
+ * - `friendOnly`: if true, only friends of the creator may register
+ */
+export interface TournamentRecord {
+  type: GameKey;
+  status: "registering" | "active" | "done";
+  gameSize: number;
+  bracketSize: number;
+  participants: RecordId[]; // References User records
+  rounds: RecordId[][]; // References Game records, grouped by round
+  champion?: RecordId; // References User records
+  createdBy: RecordId; // References User records
+  createdAt: DateISO;
+  friendOnly?: boolean;
 }
 
 /**
@@ -124,7 +157,6 @@ export interface UserRecord {
   settings: {
     receivesFriendRequestNotifications: boolean;
     receivesFriendAcceptedNotifications: boolean;
-    receivesGameInviteNotifications: boolean;
     receivesFriendGameActivityNotifications: boolean;
     backgroundMusic: BackgroundMusicTrack;
     backgroundMusicVolume: number;

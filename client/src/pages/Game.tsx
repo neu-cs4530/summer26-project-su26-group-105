@@ -1,5 +1,5 @@
 import "./Game.css";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { getGameById } from "../services/gameService.ts";
 import { useEffect, useState } from "react";
 import type { GameInfo } from "@gamenite/shared";
@@ -52,9 +52,14 @@ export default function Game() {
   return (
     game && (
       <>
+        {game.tournamentId && (
+          <div className="content">
+            <Link to={`/tournament/${game.tournamentId}`}>← Back to tournament bracket</Link>
+          </div>
+        )}
         <div className="gameContainer">
-          <GamePanel {...game} />
-          <ChatPanel chatId={game.chat} />
+          <GamePanel key={game.gameId} {...game} />
+          <ChatPanel key={game.chat} chatId={game.chat} />
         </div>
       </>
     )

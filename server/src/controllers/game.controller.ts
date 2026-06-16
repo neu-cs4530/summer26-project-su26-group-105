@@ -6,16 +6,20 @@ import {
   gameServices,
   getGameById,
   getGames,
+  getReplayState,
   joinGame,
   startGame,
   updateGame,
   viewGame,
+  voteReplay,
 } from "../services/game.service.ts";
 import { z } from "zod";
 import { logSocketError } from "./socket.controller.ts";
 import { checkAuth, enforceAuth, getUserByUsername } from "../services/auth.service.ts";
 import { getFriends } from "../services/friend.service.ts";
 import { populateSafeUserInfo } from "../services/user.service.ts";
+import { advanceTournament } from "../services/tournament.service.ts";
+import { tournamentRoom } from "./tournament.controller.ts";
 
 /**
  * Handle POST requests to `/api/game/create` by creating a game. The game
@@ -107,6 +111,12 @@ export const socketWatch: SocketAPI = (socket) => async (body) => {
     const roomsToJoin = isPlayer ? [gameId, userRoom(gameId, user.userId)] : [gameId];
     await socket.join(roomsToJoin);
     socket.emit("gameWatched", { gameId, view, players });
+    // if the game is already over (and not a tournament match), send the current
+    // rematch state so a player sees the rematch option
+    const replay = await getReplayState(gameId);
+    if (replay) {
+      socket.emit("gameReplayUpdated", replay);
+    }
   } catch (err) {
     socket.emit("gameWatchError", {
       error: err instanceof Error ? err.message : "Unable to view game",
@@ -246,10 +256,49 @@ export const socketMakeMove: SocketAPI = (socket, io) => async (body) => {
       io.emit("leaderboardUpdated", {
         gameType: updatedGame.type,
       });
+      // if this match belongs to a tournament, advance the bracket (which may
+      // start the next round) and push the updated bracket to players
+      if (updatedGame.tournamentId) {
+        const tournament = await advanceTournament(updatedGame.tournamentId);
+        if (tournament) {
+          io.to(tournamentRoom(updatedGame.tournamentId)).emit("tournamentUpdated", tournament);
+        }
+      } else {
+        // a regular game just ended offer everyone in the room a rematch
+        const replay = await getReplayState(gameId);
+        if (replay) {
+          io.to(gameId).emit("gameReplayUpdated", replay);
+        }
+      }
     }
     const game = await GameRepo.find(gameId);
     if (game) {
       await checkAndRunBotTurn(io, gameId, game.players);
+    }
+  } catch (err) {
+    logSocketError(socket, err);
+  }
+};
+
+/**
+ * Handle a player's vote to replay a finished game
+ * Records the vote, then
+ * broadcasts the updated rematch progress to everyone in the game room
+ * this handler starts any bot turn in it so the game can begin immediately
+ */
+export const socketReplayVote: SocketAPI = (socket, io) => async (body) => {
+  try {
+    const { auth, payload: gameId } = withAuth(z.string()).parse(body);
+    const user = await enforceAuth(auth);
+    const replay = await voteReplay(gameId, user);
+    io.to(gameId).emit("gameReplayUpdated", replay);
+
+    // if the rematch was just created and a bot moves first, start its turn
+    if (replay.replayGameId) {
+      const replayGame = await GameRepo.find(replay.replayGameId);
+      if (replayGame) {
+        await checkAndRunBotTurn(io, replay.replayGameId, replayGame.players);
+      }
     }
   } catch (err) {
     logSocketError(socket, err);

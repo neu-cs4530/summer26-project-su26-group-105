@@ -14,6 +14,7 @@ export * from "./game.types.ts";
 export * from "./message.types.ts";
 export * from "./socket.types.ts";
 export * from "./thread.types.ts";
+export * from "./tournament.types.ts";
 export * from "./user.types.ts";
 export * from "./leaderboard.types.ts";
 export * from "./games/oneConsts.ts";
