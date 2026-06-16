@@ -14,6 +14,11 @@ export type RecentlyPlayedEntry = {
 };
 
 /**
+ * The types of music the player can play in the background
+ */
+export type BackgroundMusicTrack = "off" | "lofi" | "arcade" | "sleepy";
+
+/**
  * Represents a public "safe" user object that excludes sensitive information like
  * the password, suitable for exposing to clients,
  * - `username`: unique username of the user
@@ -41,6 +46,8 @@ export interface SafeSelfUserInfo extends SafeUserInfo {
     receivesFriendAcceptedNotifications: boolean;
     receivesGameInviteNotifications: boolean;
     receivesFriendGameActivityNotifications: boolean;
+    backgroundMusic: BackgroundMusicTrack;
+    backgroundMusicVolume: number;
   };
 }
 
@@ -81,6 +88,7 @@ export const zAvatarDecoration = z.object({
  * Represents allowed updates to a user.
  */
 export type UserUpdateRequest = z.infer<typeof zUserUpdateRequest>;
+export const zBackgroundMusicTrack = z.enum(["off", "lofi", "arcade", "sleepy"]);
 export const zUserUpdateRequest = z.object({
   password: z.preprocess(
     (p) => (p === "" ? undefined : p),
@@ -113,6 +121,8 @@ export const zUserUpdateRequest = z.object({
       receivesFriendAcceptedNotifications: z.boolean().optional(),
       receivesGameInviteNotifications: z.boolean().optional(),
       receivesFriendGameActivityNotifications: z.boolean().optional(),
+      backgroundMusic: zBackgroundMusicTrack.optional(),
+      backgroundMusicVolume: z.number().min(0).max(1).optional(),
     })
     .optional(),
 });
