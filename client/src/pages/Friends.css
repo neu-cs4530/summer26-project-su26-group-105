@@ -1,10 +1,17 @@
+.friendsPage {
+  width: 100%;
+  padding: 24px 32px;
+  color: var(--text-color);
+}
+
+/* tab bar */
 .friendsTabBar {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
   gap: 16px;
   align-items: flex-end;
-  margin: 24px;
+  margin: 0 0 24px 0;
   padding: 18px;
   border-radius: 1.25rem;
   background-color: var(--card-background);
@@ -16,7 +23,172 @@
   min-width: 140px;
 }
 
+/* search bar */
+.friendsSearchBar {
+  width: 100%;
+  max-width: 420px;
+  height: 40px;
+  padding: 0 16px;
+  border-radius: 999px;
+  border: 1px solid var(--border-color);
+  background-color: var(--card-background-solid);
+  color: var(--text-color);
+  font-size: 0.95rem;
+  margin-bottom: 16px;
+  display: block;
+}
+
+.friendsSearchBar:focus {
+  outline: none;
+  border-color: var(--primary-button);
+  box-shadow: 0 0 0 3px var(--cloud-two);
+}
+
+/* friend table */
+.friendsTable {
+  width: 100%;
+  border-collapse: collapse;
+  border-radius: 1rem;
+  background-color: var(--card-background);
+  box-shadow: 0 0 18px var(--shadow-color);
+}
+
+.friendsTable thead tr:first-child th:first-child {
+  border-top-left-radius: 1rem;
+}
+.friendsTable thead tr:first-child th:last-child {
+  border-top-right-radius: 1rem;
+}
+.friendsTable tbody tr:last-child td:first-child {
+  border-bottom-left-radius: 1rem;
+}
+.friendsTable tbody tr:last-child td:last-child {
+  border-bottom-right-radius: 1rem;
+}
+
+.friendsTable th,
+.friendsTable td {
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.friendsTable th:nth-child(2),
+.friendsTable td:nth-child(2) {
+  width: 200px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.friendsTable th:nth-child(3),
+.friendsTable td:nth-child(3) {
+  width: 80px;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.friendsTable th {
+  font-weight: bold;
+  color: var(--text-color);
+  background-color: var(--cloud-two);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.friendsTable td {
+  color: var(--text-color);
+  background-color: var(--card-background-solid);
+  vertical-align: middle;
+}
+
+.friendsTable tr:last-child td {
+  border-bottom: none;
+}
+
+.friendsTable td.friendsActions {
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* empty table */
+.friendsEmpty {
+  text-align: center;
+  padding: 48px 24px;
+  color: var(--muted-text);
+  background-color: var(--card-background-solid);
+  border-radius: 1rem;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 0 18px var(--shadow-color);
+}
+
+/* section headings */
+.friendsSectionTitle {
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted-text);
+  margin: 0 0 8px 4px;
+}
+
+/* three dot menu on side */
+.friendsMenuWrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.friendsMenuDropdown {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 4px);
+  background-color: var(--card-background-solid);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  box-shadow: 0 4px 16px var(--shadow-color);
+  z-index: 200;
+  min-width: 160px;
+  overflow: hidden;
+}
+
+.friendsMenuDropdown button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 16px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  color: var(--text-color);
+  font-size: 0.9rem;
+  transition: background 0.12s;
+}
+
+.friendsMenuDropdown button:hover {
+  background-color: var(--cloud-one);
+}
+
+.friendsMenuDropdown button.danger {
+  color: var(--error, #c00);
+}
+
+/* friendship badge */
+.friendsRelBadge {
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background-color: var(--cloud-two);
+  color: var(--muted-text);
+  margin-left: 6px;
+}
+
 @media (max-width: 700px) {
+  .friendsPage {
+    padding: 16px;
+  }
+
   .friendsTabBar {
     flex-direction: column;
     align-items: stretch;

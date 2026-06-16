@@ -144,12 +144,6 @@ export default function Header() {
       >
         Log Out
       </button>
-      <button
-        className="narrowcenter secondary"
-        onClick={() => navigate(`/profile/${user.username}`)}
-      >
-        View Profile
-      </button>
     </div>
   );
 }
