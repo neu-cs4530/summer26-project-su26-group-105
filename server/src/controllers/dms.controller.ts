@@ -116,7 +116,9 @@ export const socketOpenChannelById: SocketAPI = (socket, io) => async (body) => 
 };
 
 /**
- * create a groupchat
+ * Creates a new groupchat between multiple users
+ * Sends the channel to all involved members
+ *
  */
 export const socketCreateGroupChat: SocketAPI = (socket, io) => async (body) => {
   const ctx = await authenticate(
@@ -149,7 +151,11 @@ export const socketCreateGroupChat: SocketAPI = (socket, io) => async (body) => 
   });
 };
 
-//send messages
+/**
+ * Sends a chat message between users
+ * Will not deliver if users have blocked each other
+ * checks if privacy perms allow for message delivery
+ */
 export const socketSendChatMessage: SocketAPI = (socket, io) => async (body) => {
   const ctx = await authenticate(
     socket,
@@ -173,7 +179,7 @@ export const socketSendChatMessage: SocketAPI = (socket, io) => async (body) => 
   const channel = await ChannelRepo.find(payload.channelId);
   if (!channel) return;
 
-  // Don't deliver between users who have blocked each other, even in a shared group.
+  // Don't deliver between users who have blocked each other, even in a shared group
   const recipients = await filterDeliverableMembers(user.username, channel.memberIds);
   for (const memberId of recipients) {
     io.to(memberId).emit("globalChatMessageReceived", message);

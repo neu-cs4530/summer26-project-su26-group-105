@@ -13,7 +13,25 @@ function channelActivityTime(channel: MessageChannel): number {
 function byRecentActivity(a: MessageChannel, b: MessageChannel): number {
   return channelActivityTime(b) - channelActivityTime(a);
 }
-
+/**
+ * Manages the socket lifecycle and state for direct and group messaging.
+ * - Auto-emits registerUserSession on mount and on reconnect to ensure persistent message routing
+ * - Listens for incoming globalChatJoined and globalChatCreate events to set up Threads
+ * - Captures real-time globalChatMessageReceived events to update messages
+ * - and reorder active conversations by most recent message (either sent or recieved)
+ @returns an object containing:
+ * - `user`: the current user session data
+ * - `channels`: the list of conversation channels the user belongs to
+ * - `activeChannelId`: the unique ID of the currently selected conversation thread
+ * - `messages`: the array of real-time message history bubbles for the active channel
+ * - `error`: the active error banner message string
+ * - `searchResults`: the global user profile lookup search query results
+ * - `handleOpenDirectChat`: initializes or reopens a 1-on-1 direct message with another user
+ * - `handleSelectChannel`: switches the viewport active room stream to an existing channel ID
+ * - `handleCreateGroup`: creates a new group chat given a name and member list
+ * - `handleSendMessage`: transmits a new text message string into the active Channel
+ * - `handleSearchUsers`: searches the repo for users
+ */
 export default function useSocketsForGlobalChat() {
   const auth = useAuth();
   const { user, socket } = useLoginContext();

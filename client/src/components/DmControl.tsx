@@ -3,6 +3,10 @@ import { useState, useRef, useEffect } from "react";
 import useSocketsForGlobalChat from "../hooks/useSocketsForGlobalChat.ts";
 import useTimeSince from "../hooks/useTimeSince.ts";
 
+/**
+ * Adds DM and Groupchat functionality that will be part of the Messaging page
+ * @returns The DMs interface UI
+ */
 export default function DMControlPanel() {
   const formatTimeSince = useTimeSince();
   const [textInput, setTextInput] = useState("");
