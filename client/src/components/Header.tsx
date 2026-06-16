@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import ProfileImage from "./ProfileImage.tsx";
 import type { ActivityStatus } from "@gamenite/shared/src/friend.types.ts";
 import { WEBSITE_NAME } from "../util/consts.ts";
+import type { BackgroundMusicTrack } from "@gamenite/shared";
 
 // activity status icons
 const STATUS_OPTIONS: { value: ActivityStatus; label: string; description: string }[] = [
@@ -14,6 +15,17 @@ const STATUS_OPTIONS: { value: ActivityStatus; label: string; description: strin
   { value: "offline", label: "⚫ Appear Offline", description: "Hidden from friends" },
 ];
 
+//stores the display text for each background music option
+const musicLabels: Record<BackgroundMusicTrack, string> = {
+  off: "Music Off",
+  lofi: "Lo-fi",
+  arcade: "Arcade",
+  sleepy: "Sleepy",
+};
+
+//custom name so header can tell when the background music is paused/unpaused
+const BACKGROUND_MUSIC_PAUSED_EVENT = "backgroundMusicPausedChange";
+
 /**
  * Header component that renders the main title.
  */
@@ -22,6 +34,10 @@ export default function Header() {
   const navigate = useNavigate();
   const [status, setStatus] = useState<ActivityStatus>("online");
   const [menuOpen, setMenuOpen] = useState(false);
+  //keeps track if music was paused
+  const [musicPaused, setMusicPaused] = useState(() => {
+    return localStorage.getItem("backgroundMusicPaused") === "true";
+  });
   const menuRef = useRef<HTMLDivElement>(null);
 
   // close menu when clicking outside
@@ -44,9 +60,44 @@ export default function Header() {
     });
   }
 
+  //toggles whether the selected background music is playing or not
+  function handleToggleMusicPaused() {
+    setMusicPaused((currentPaused) => {
+      //flips the current state
+      const nextPaused = !currentPaused;
+      //saves pause state
+      localStorage.setItem("backgroundMusicPaused", String(nextPaused));
+      //emits so notify backgroundmusic that pause state changed
+      window.dispatchEvent(new Event(BACKGROUND_MUSIC_PAUSED_EVENT));
+      return nextPaused;
+    });
+  }
+
+  //gets user's selceted background music from settings
+  const selectedMusic = user.settings.backgroundMusic;
+  const musicIsOff = selectedMusic === "off";
+  //displays text whether music is being listened to or not
+  const musicText = musicIsOff
+    ? "No music is currently playing"
+    : `🎵 Currently listening to ${musicLabels[selectedMusic]}`;
+
   return (
     <div id="header" className="header">
       <div className="title">{WEBSITE_NAME}💤</div>
+      {/* Shows listening to music */}
+      <div className="header-music">
+        <span className="header-music-label">{musicText}</span>
+
+        <button
+          className="header-music-toggle secondary"
+          type="button"
+          disabled={musicIsOff}
+          onClick={handleToggleMusicPaused}
+          aria-label={musicPaused ? "Play background music" : "Pause background music"}
+        >
+          {musicPaused ? "Play" : "Pause"}
+        </button>
+      </div>
 
       <span className="header-user">
         signed in as {/* Clickable avatar with status dot, opens activity status picker */}

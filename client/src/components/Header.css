@@ -19,6 +19,41 @@
   color: var(--text-color);
 }
 
+.header-music {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  white-space: nowrap;
+  font-size: 0.9rem;
+  margin-left: 2rem;
+}
+
+.header-music-label {
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.header-music-toggle {
+  border: none;
+  border-radius: 999px;
+  padding: 0.35rem 0.8rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-hover-color));
+  color: white;
+  box-shadow: 0 3px 10px var(--shadow-color);
+  cursor: pointer;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease,
+    opacity 0.15s ease;
+}
+
+.header-music-toggle:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
 .header-user {
   display: flex;
   align-items: center;

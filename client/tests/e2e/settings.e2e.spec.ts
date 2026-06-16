@@ -12,12 +12,12 @@ test.describe("Settings page", () => {
     await page.getByRole("link", { name: "Profile" }).click();
     await page.getByRole("button", { name: "Settings" }).click();
 
-    await expect(page.getByRole("heading", { name: "Notification Settings" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Notification", exact: true })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Friend Notifications" })).toBeVisible();
-    await expect(page.getByRole("heading", { name: "Password Settings" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Reset Password", exact: true })).toBeVisible();
 
-    const notificationSettings = page.getByRole("heading", { name: "Notification Settings" });
-    const passwordSettings = page.getByRole("heading", { name: "Password Settings" });
+    const notificationSettings = page.getByRole("heading", { name: "Notification", exact: true });
+    const passwordSettings = page.getByRole("heading", { name: "Reset Password", exact: true });
 
     await expect(notificationSettings).toBeVisible();
     await expect(passwordSettings).toBeVisible();

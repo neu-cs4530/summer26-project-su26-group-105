@@ -1,4 +1,4 @@
-import type { AvatarDecoration, GameKey } from "@gamenite/shared";
+import type { AvatarDecoration, GameKey, BackgroundMusicTrack } from "@gamenite/shared";
 
 /**
  * Record identifiers used to look up records in a database. This type
@@ -121,6 +121,8 @@ export interface UserRecord {
     receivesFriendAcceptedNotifications: boolean;
     receivesGameInviteNotifications: boolean;
     receivesFriendGameActivityNotifications: boolean;
+    backgroundMusic: BackgroundMusicTrack;
+    backgroundMusicVolume: number;
   };
   createdAt: DateISO;
 }
