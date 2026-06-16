@@ -268,7 +268,7 @@ export default function Friends() {
           {friendsTabFriends.length === 0 ? (
             <div className="friendsEmpty">
               <p>
-                No friends yet. Use the <strong>Add Friend</strong> tab to get started!
+                No friends yet. Use the <strong>Search Friend</strong> tab to get started!
               </p>
             </div>
           ) : (
@@ -424,7 +424,10 @@ export default function Friends() {
                         {r.relationship === "none" && (
                           <button
                             className="primary narrow"
-                            onClick={() => sendRequest(r.user.username)}
+                            onClick={() => {
+                              sendRequest(r.user.username);
+                              setTimeout(() => searchUsers(searchInput, "all"), 300);
+                            }}
                           >
                             Add Friend
                           </button>
