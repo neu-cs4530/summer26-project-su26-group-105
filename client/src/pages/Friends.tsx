@@ -173,10 +173,10 @@ export default function Friends() {
 
   function confirmUnblock(f: FriendEntry) {
     setModal({
-      message: `Are you sure you want to unblock ${f.display} (@${f.username})? They will be
+      message: `Are you sure you want to unblock ${f.user.display} (@${f.user.username})? They will be
                     able to find you and send you a friend request again.`,
       onConfirm: () => {
-        unblockUser(f.username);
+        unblockUser(f.user.username);
         setModal(null);
       },
     });
@@ -258,16 +258,25 @@ export default function Friends() {
                     }}
                   >
                     <ProfileImage
-                      src={"image" in f ? f.image : null}
+                      src={f.user.image}
+                      decorations={f.user.decorations}
                       size="small"
                       activityStatus={"activityStatus" in f ? f.activityStatus : undefined}
                     />
                     <span style={{ flex: 1 }}>
-                      {f.display} <span className="smallAndGray">@{f.username}</span>
+                      {f.user.display} <span className="smallAndGray">@{f.user.username}</span>
                     </span>
                     <ThreeDotMenu
-                      onRemove={() => confirmRemove(f)}
-                      onBlock={() => confirmBlock(f)}
+                      onRemove={() =>
+                        confirmRemove({
+                          display: f.user.display,
+                          username: f.user.username,
+                          friendId: f.friendId,
+                        })
+                      }
+                      onBlock={() =>
+                        confirmBlock({ display: f.user.display, username: f.user.username })
+                      }
                     />
                   </li>
                 ))}
@@ -294,7 +303,7 @@ export default function Friends() {
                     }}
                   >
                     <span style={{ flex: 1 }}>
-                      {f.display} <span className="smallAndGray">@{f.username}</span>
+                      {f.user.display} <span className="smallAndGray">@{f.user.username}</span>
                     </span>
                     <button className="primary narrow" onClick={() => acceptRequest(f.friendId)}>
                       Accept
@@ -322,7 +331,7 @@ export default function Friends() {
                     }}
                   >
                     <span style={{ flex: 1 }}>
-                      {f.display} <span className="smallAndGray">@{f.username}</span>
+                      {f.user.display} <span className="smallAndGray">@{f.user.username}</span>
                     </span>
                     <span className="smallAndGray">Pending...</span>
                   </li>
@@ -364,11 +373,14 @@ export default function Friends() {
                     }}
                   >
                     <span style={{ flex: 1 }}>
-                      {r.display} <span className="smallAndGray">@{r.username}</span>
+                      {r.user.display} <span className="smallAndGray">@{r.user.username}</span>
                       {relationshipLabel(r.relationship)}
                     </span>
                     {r.relationship === "none" && (
-                      <button className="primary narrow" onClick={() => sendRequest(r.username)}>
+                      <button
+                        className="primary narrow"
+                        onClick={() => sendRequest(r.user.username)}
+                      >
                         Add Friend
                       </button>
                     )}
@@ -396,9 +408,9 @@ export default function Friends() {
                     marginBottom: "0.5rem",
                   }}
                 >
-                  <ProfileImage src={null} size="small" blocked />
+                  <ProfileImage src={null} decorations={[]} size="small" blocked />
                   <span style={{ flex: 1 }} className="smallAndGray">
-                    @{f.username}
+                    @{f.user.username}
                   </span>
                   <button className="secondary narrow" onClick={() => confirmUnblock(f)}>
                     Unblock

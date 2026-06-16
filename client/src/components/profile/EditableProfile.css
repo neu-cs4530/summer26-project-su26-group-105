@@ -9,7 +9,7 @@
     button {
       position: relative;
       background: none;
-      border-radius: 50%;
+      border-radius: 1rem;
       padding: 0;
       border: 0;
       outline: none;

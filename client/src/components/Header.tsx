@@ -57,7 +57,12 @@ export default function Header() {
             aria-label="Set activity status"
             title="Set activity status"
           >
-            <ProfileImage src={user.image} size="small" activityStatus={status} />
+            <ProfileImage
+              src={user.image}
+              decorations={user.decorations}
+              size="small"
+              activityStatus={status}
+            />
           </button>
 
           {menuOpen && (

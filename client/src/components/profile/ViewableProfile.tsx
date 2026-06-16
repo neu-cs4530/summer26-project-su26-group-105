@@ -35,7 +35,7 @@ export default function ViewableProfile({ username }: ViewableProfileProps) {
       <section className="profile-left-panel">
         {/* Shows user's profile pic */}
         <div className="pfp">
-          <ProfileImage src={user.image} size="large" />
+          <ProfileImage src={user.image} decorations={user.decorations} size="large" />
         </div>
 
         {/* show users display name and join date */}

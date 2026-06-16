@@ -3,10 +3,12 @@ import {
   type UserUpdateRequest,
   type SafeSelfUserInfo,
   type RecentlyPlayedEntry,
+  type AvatarDecoration,
 } from "@gamenite/shared";
 import { getUserByUsername, updateAuth } from "./auth.service.ts";
 import { GameRepo, UserRepo } from "../repository.ts";
 import type { UserRecord } from "../models.ts";
+import { createHash } from "node:crypto";
 
 const disallowedUsernames = new Set(["login", "signup", "list"]);
 
@@ -15,10 +17,11 @@ const disallowedUsernames = new Set(["login", "signup", "list"]);
  * @param record the user database record to convert
  * @returns public safe user info without private settings
  */
-function recordToSafeUserInfo(record: UserRecord): SafeUserInfo {
+export function recordToSafeUserInfo(record: UserRecord): SafeUserInfo {
   return {
     username: record.username,
     display: record.display,
+    decorations: record.decorations,
     createdAt: new Date(record.createdAt),
     bio: record.bio,
     image: record.image,
@@ -47,6 +50,87 @@ function recordToSafeSelfUserInfo(record: UserRecord): SafeSelfUserInfo {
 }
 
 /**
+ * Given an id, generates a deterministic set of avatar decorations for a bot user.
+ * @param id - the bot user's id, which should be in the format "bot_[displayName]"
+ * @returns a list of avatar decorations
+ */
+function generateBotDecorations(id: string) {
+  const decorations: AvatarDecoration[] = [];
+  let decorId = 0;
+
+  function getRandomNumber(key: string, range: number) {
+    return (
+      createHash("sha256")
+        .update(id + key)
+        .digest()
+        .readUInt32BE() % range
+    );
+  }
+
+  if (getRandomNumber("hashat", 2)) {
+    const hats: AvatarDecoration["type"][] = ["tophat", "party"];
+    const hat = hats[getRandomNumber("hattype", hats.length)];
+    const angle = getRandomNumber("hatangle", 30) - 15;
+    const x = 30 + getRandomNumber("hatx", 11) - 5;
+    const y = 0 + getRandomNumber("haty", 11) - 5;
+    decorations.push({
+      type: hat,
+      id: decorId++,
+      x,
+      y,
+      rotation: angle,
+    });
+  }
+
+  // Bots with shirts should be more rare since shirts take up more of the avatar
+  if (getRandomNumber("hasshirt", 4) === 0) {
+    const shirts: AvatarDecoration["type"][] = ["sweater", "suit"];
+    const shirt = shirts[getRandomNumber("shirttype", shirts.length)];
+    const angle = getRandomNumber("shirtangle", 30) - 15;
+    const x = 0 + getRandomNumber("shirtx", 11) - 5;
+    const y = 40 + getRandomNumber("shirty", 11) - 5;
+    decorations.push({
+      type: shirt,
+      id: decorId++,
+      x,
+      y,
+      rotation: angle,
+    });
+  }
+
+  if (getRandomNumber("hasneckdecor", 2)) {
+    const neck = "bowtie";
+    const angle = getRandomNumber("neckangle", 30) - 15;
+    const x = 25 + getRandomNumber("neckx", 11) - 5;
+    const y = 30 + getRandomNumber("necky", 11) - 5;
+    decorations.push({
+      type: neck,
+      id: decorId++,
+      x,
+      y,
+      rotation: angle,
+    });
+  }
+
+  if (getRandomNumber("hasglasses", 2)) {
+    const allGlasses: AvatarDecoration["type"][] = ["sunglasses", "glasses", "goggles"];
+    const glasses = allGlasses[getRandomNumber("glassestype", allGlasses.length)];
+    const angle = getRandomNumber("glassesangle", 30) - 15;
+    const x = 20 + getRandomNumber("glassesx", 11) - 5;
+    const y = 20 + getRandomNumber("glassesy", 11) - 5;
+    decorations.push({
+      type: glasses,
+      id: decorId++,
+      x,
+      y,
+      rotation: angle,
+    });
+  }
+
+  return decorations;
+}
+
+/**
  * Retrieves a single user from the database.
  *
  * @param userId - Valid user id.
@@ -63,6 +147,7 @@ export async function populateSafeUserInfo(userId: string): Promise<SafeUserInfo
       display: `🤖 ${displayName}`,
       createdAt: new Date(),
       image: null,
+      decorations: generateBotDecorations(userId),
       bio: `Hi, I'm ${displayName}!`,
       socialMedias: [],
       isBot: true,
@@ -129,6 +214,7 @@ export async function createUser(
     display: username,
     bio: `Hi, I'm ${username}!`,
     image: null,
+    decorations: [],
     socialMedias: [],
     settings: {
       receivesFriendRequestNotifications: true,
@@ -172,7 +258,7 @@ export async function getUsersByUsername(usernames: string[]): Promise<SafeUserI
  */
 export async function updateUser(
   username: string,
-  { display, password, bio, image, socialMedias, settings }: UserUpdateRequest,
+  { display, password, bio, image, decorations, socialMedias, settings }: UserUpdateRequest,
 ): Promise<SafeSelfUserInfo> {
   const user = await getUserByUsername(username);
   if (!user) throw new Error(`No user ${username}`);
@@ -190,6 +276,7 @@ export async function updateUser(
   if (display !== undefined) newUser.display = display;
   if (bio !== undefined) newUser.bio = bio;
   if (image !== undefined) newUser.image = image;
+  if (decorations) newUser.decorations = decorations;
   if (socialMedias !== undefined) newUser.socialMedias = socialMedias;
   if (settings) {
     const {

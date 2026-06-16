@@ -44,7 +44,7 @@ describe("sendFriendRequest", () => {
     const incoming = await getIncomingRequests(userBId);
     expect(incoming).toHaveLength(1);
     expect(incoming[0].userId).toBe(userAId);
-    expect(incoming[0].username).toBe("alice");
+    expect(incoming[0].user.username).toBe("alice");
   });
 
   it("does not allow a request to yourself", async () => {
@@ -322,7 +322,7 @@ describe("searchUsers", () => {
   describe("searching all users", () => {
     it("returns users matching a username query", async () => {
       const results = await searchUsers(userAId, "bob", "all");
-      expect(results.some((r) => r.username === "bob")).toBe(true);
+      expect(results.some((r) => r.user.username === "bob")).toBe(true);
     });
 
     it("does not return the searching user", async () => {
@@ -371,12 +371,12 @@ describe("searchUsers", () => {
       const { friendId } = (await sendFriendRequest(userAId, userBId)) as { friendId: string };
       await acceptFriendRequest(friendId, userBId);
       const results = await searchUsers(userAId, "bob", "existing");
-      expect(results.some((r) => r.username === "bob")).toBe(true);
+      expect(results.some((r) => r.user.username === "bob")).toBe(true);
     });
 
     it("does not return users matching a username query who are not friends", async () => {
       const results = await searchUsers(userAId, "bob", "existing");
-      expect(results.some((r) => r.username === "bob")).toBe(false);
+      expect(results.some((r) => r.user.username === "bob")).toBe(false);
     });
 
     it("does not return the searching user", async () => {

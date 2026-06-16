@@ -82,7 +82,7 @@ export const socketRequest: SocketAPI = (socket, io) => async (body) => {
     if (incomingRequest) {
       io.to(userRoom(requested.userId)).emit("notificationPopup", {
         type: "friendRequestReceived",
-        message: `${incomingRequest.display} sent you a friend request.`,
+        message: `${incomingRequest.user.display} sent you a friend request.`,
       });
     }
 
@@ -120,7 +120,7 @@ export const socketAccept: SocketAPI = (socket, io) => async (body) => {
       if (acceptedRequest) {
         io.to(userRoom(record.fromUserId)).emit("notificationPopup", {
           type: "friendRequestAccepted",
-          message: `${acceptedRequest.display} accepted your friend request.`,
+          message: `${acceptedRequest.user.display} accepted your friend request.`,
         });
       }
     }

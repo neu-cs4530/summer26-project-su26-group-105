@@ -22,7 +22,7 @@ export function userAnchor(user: SafeUserInfo) {
 export default function Player({ user, numCards, isTurn }: PlayerProps) {
   return (
     <div className="one-player" data-active={isTurn}>
-      <ProfileImage src={user.image} size="medium" />
+      <ProfileImage src={user.image} decorations={user.decorations} size="medium" />
       <span>
         <span className="name">{user.display}</span>
         <span className="cards-number" style={{ anchorName: userAnchor(user) }}>

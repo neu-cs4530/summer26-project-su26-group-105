@@ -37,6 +37,8 @@ export default function EditableProfile() {
     removeSocialMedia,
     image,
     setImage,
+    decorations,
+    setDecorations,
     isLoading,
     isSaved,
     err,
@@ -58,7 +60,7 @@ export default function EditableProfile() {
               onClick={() => setShowImageModal(true)}
               aria-label="Edit Profile Image"
             >
-              <ProfileImage src={image} size="large" />
+              <ProfileImage src={image} decorations={decorations} size="large" />
             </button>
           </div>
 
@@ -149,7 +151,15 @@ export default function EditableProfile() {
       )}
 
       {showImageModal && (
-        <ImageModal save={setImage} close={() => setShowImageModal(false)} currentImage={image} />
+        <ImageModal
+          save={(i, d) => {
+            setImage(i);
+            setDecorations(d);
+          }}
+          close={() => setShowImageModal(false)}
+          currentImage={image}
+          currentDecorations={decorations}
+        />
       )}
     </form>
   );
