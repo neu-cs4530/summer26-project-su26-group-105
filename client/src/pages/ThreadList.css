@@ -1,0 +1,22 @@
+/* Tab navigation row alignment */
+.content .profile-tabs {
+  display: flex;
+  gap: 12px;
+}
+
+.content .profile-tabs button {
+  padding: 10px 18px;
+  border: 1px solid var(--border-color);
+  background-color: var(--card-background-solid);
+  color: var(--text-color);
+  border-radius: 999px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.content .profile-tabs .active-tab {
+  background-color: var(--primary-button);
+  color: var(--button-text);
+  border-color: var(--primary-button);
+}

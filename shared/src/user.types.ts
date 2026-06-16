@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type { GameKey } from "./game.types.ts";
+import { zMessagePrivacySetting, type MessagePrivacySetting } from "./dms.types.ts";
 
 /**
  * Represents an entry for a game that a user has recently played.
@@ -48,6 +49,7 @@ export interface SafeSelfUserInfo extends SafeUserInfo {
     receivesFriendGameActivityNotifications: boolean;
     backgroundMusic: BackgroundMusicTrack;
     backgroundMusicVolume: number;
+    allowMessagesFrom: MessagePrivacySetting;
   };
 }
 
@@ -123,6 +125,7 @@ export const zUserUpdateRequest = z.object({
       receivesFriendGameActivityNotifications: z.boolean().optional(),
       backgroundMusic: zBackgroundMusicTrack.optional(),
       backgroundMusicVolume: z.number().min(0).max(1).optional(),
+      allowMessagesFrom: zMessagePrivacySetting.optional(),
     })
     .optional(),
 });

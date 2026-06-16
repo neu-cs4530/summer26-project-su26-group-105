@@ -21,6 +21,7 @@ const selfUserSettings = {
     receivesFriendGameActivityNotifications: true,
     backgroundMusic: "off",
     backgroundMusicVolume: 0.25,
+    allowMessagesFrom: "anyone",
   },
 };
 const auth1 = { username: "user1", password: "pwd1111" };

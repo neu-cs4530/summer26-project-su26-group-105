@@ -12,6 +12,13 @@ import * as thread from "./controllers/thread.controller.ts";
 import * as leaderboard from "./controllers/leaderboard.controller.ts";
 import { type GameServer, type GameServerSocket } from "./types.ts";
 import { clearStatus } from "./services/activityStatus.service.ts";
+import {
+  socketOpenDirectChat,
+  socketOpenChannelById,
+  socketCreateGroupChat,
+  socketSendChatMessage,
+  socketRegisterUserSession,
+} from "./controllers/dms.controller.ts";
 
 export const app = express();
 export const httpServer = http.createServer(app);
@@ -85,6 +92,39 @@ io.on("connection", (socket) => {
   socket.on("gameAddBot", game.socketAddBot(socket, io));
 
   socket.on("gameAddBot", game.socketAddBot(socket, io));
+
+  //DM stuff
+  socket.on("registerUserSession", (body) => {
+    if (body && typeof body === "object" && "payload" in body) {
+      void socketRegisterUserSession(socket)(body.payload);
+    } else {
+      void socketRegisterUserSession(socket)(body);
+    }
+  });
+
+  socket.on("openDirectChat", (body) => {
+    void (async () => {
+      await socketOpenDirectChat(socket, io)(body);
+    })();
+  });
+
+  socket.on("openChannelById", (body) => {
+    void (async () => {
+      await socketOpenChannelById(socket, io)(body);
+    })();
+  });
+
+  socket.on("createGroupChat", (body) => {
+    void (async () => {
+      await socketCreateGroupChat(socket, io)(body);
+    })();
+  });
+
+  socket.on("sendChatMessage", (body) => {
+    void (async () => {
+      await socketSendChatMessage(socket, io)(body);
+    })();
+  });
 
   socket.onAny((name, payload) => {
     const zPayload = z.object({ auth: z.object({ username: z.string() }), payload: z.any() });

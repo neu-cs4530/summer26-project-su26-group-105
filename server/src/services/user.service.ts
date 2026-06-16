@@ -46,6 +46,7 @@ function recordToSafeSelfUserInfo(record: UserRecord): SafeSelfUserInfo {
         record.settings.receivesFriendGameActivityNotifications,
       backgroundMusic: record.settings.backgroundMusic ?? "off",
       backgroundMusicVolume: record.settings.backgroundMusicVolume ?? 0.25,
+      allowMessagesFrom: record.settings.allowMessagesFrom ?? "anyone",
     },
   };
 }
@@ -224,6 +225,7 @@ export async function createUser(
       receivesFriendGameActivityNotifications: true,
       backgroundMusic: "off",
       backgroundMusicVolume: 0.25,
+      allowMessagesFrom: "anyone" as const,
     },
   };
   const id = await UserRepo.add(record);
@@ -275,6 +277,7 @@ export async function updateUser(
       newUser.settings.receivesFriendGameActivityNotifications ?? true,
     backgroundMusic: newUser.settings.backgroundMusic ?? "off",
     backgroundMusicVolume: newUser.settings.backgroundMusicVolume ?? 0.25,
+    allowMessagesFrom: newUser.settings.allowMessagesFrom ?? "anyone",
   };
   if (display !== undefined) newUser.display = display;
   if (bio !== undefined) newUser.bio = bio;
@@ -289,6 +292,7 @@ export async function updateUser(
       receivesFriendGameActivityNotifications,
       backgroundMusic,
       backgroundMusicVolume,
+      allowMessagesFrom,
     } = settings;
     if (receivesFriendRequestNotifications !== undefined)
       newUser.settings.receivesFriendRequestNotifications = receivesFriendRequestNotifications;
@@ -302,6 +306,7 @@ export async function updateUser(
     if (backgroundMusic !== undefined) newUser.settings.backgroundMusic = backgroundMusic;
     if (backgroundMusicVolume !== undefined)
       newUser.settings.backgroundMusicVolume = backgroundMusicVolume;
+    if (allowMessagesFrom !== undefined) newUser.settings.allowMessagesFrom = allowMessagesFrom;
   }
   await UserRepo.set(user.userId, newUser);
   return populateSafeSelfUserInfo(user.userId);

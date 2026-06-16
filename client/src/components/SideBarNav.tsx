@@ -31,7 +31,7 @@ export default function SideBarNav() {
         Leaderboard
       </NavLink>
       <NavLink to="/forum" className={navClass}>
-        Forum
+        Messaging
       </NavLink>
       <NavLink to="/friends" className={navClass}>
         Friends

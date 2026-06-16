@@ -1,0 +1,253 @@
+.dm-panel-wrapper {
+  margin-top: 16px;
+}
+
+.chat-sidebar {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.channels-pill-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+  overflow-y: auto;
+  max-height: calc(100vh - 360px);
+}
+
+.channel-pill-item {
+  width: 100%;
+  text-align: left;
+  padding: 12px 16px;
+  background-color: var(--card-background-solid);
+  border: 1px solid var(--border-color);
+  color: var(--text-color);
+  border-radius: 16px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.15s ease;
+}
+
+.channel-pill-item:hover {
+  background-color: var(--card-background);
+}
+
+.channels-pill-list .active-channel {
+  background-color: var(--primary-button);
+  color: var(--button-text);
+  border-color: var(--primary-button);
+}
+
+.new-dm-footer,
+.chat-input-bar {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.new-group-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.dm-search-results {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.dm-search-result-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  width: 100%;
+  text-align: left;
+  padding: 8px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  background-color: var(--card-background-solid);
+  color: var(--text-color);
+  cursor: pointer;
+}
+
+.dm-search-result-item:hover {
+  background-color: var(--card-background);
+}
+
+.dm-search-display {
+  font-weight: 600;
+}
+
+.group-member-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.group-member-chip {
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--primary-button);
+  background-color: var(--primary-button);
+  color: var(--button-text);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.chat-header {
+  padding: 0 0 12px;
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 12px;
+}
+
+.chat-header-title {
+  margin: 0;
+}
+
+.chat-header-members {
+  margin-top: 4px;
+  word-break: break-word;
+}
+
+.group-toggle-btn {
+  margin-top: 8px;
+  width: 100%;
+}
+
+.dm-error-banner {
+  margin-top: 12px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background-color: var(--card-background-solid);
+  border: 1px solid var(--error-color, #e0245e);
+  color: var(--error-color, #e0245e);
+  font-size: 0.9rem;
+}
+
+.new-dm-footer input,
+.new-group-footer input,
+.chat-input-bar input {
+  flex: 1;
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border-color);
+  background-color: var(--card-background-solid);
+  color: var(--text-color);
+  outline: none;
+}
+
+.action-pill-btn {
+  padding: 10px 20px;
+  border-radius: 999px;
+  background-color: var(--primary-button);
+  color: var(--button-text);
+  border: none;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.chat-viewport {
+  height: 100%;
+}
+
+.chat-stream-container {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 216px);
+  justify-content: space-between;
+}
+
+.message-bubbles-box {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 4px 8px 4px 4px;
+}
+
+.chat-bubble-item {
+  display: flex;
+  width: 100%;
+}
+
+.msg-right {
+  justify-content: flex-end;
+}
+
+.msg-left {
+  justify-content: flex-start;
+}
+
+.bubble-content {
+  position: relative;
+  max-width: 72%;
+  padding: 9px 15px;
+  border-radius: 18px;
+  text-align: left;
+  box-shadow: 0 1px 4px var(--shadow-color);
+  animation: bubble-pop-in 0.18s ease-out;
+}
+
+/* Received messages: clean bordered card that matches the rest of the surfaces */
+.msg-left .bubble-content {
+  background-color: var(--card-background-solid);
+  border: 1px solid var(--border-color);
+  color: var(--text-color);
+  border-bottom-left-radius: 5px;
+}
+
+/* Sent messages: the app's purple accent, like the active conversation pill */
+.msg-right .bubble-content {
+  background: linear-gradient(135deg, var(--primary-button), var(--secondary-button));
+  border: 1px solid transparent;
+  color: var(--button-text);
+  border-bottom-right-radius: 5px;
+}
+
+.message-text {
+  font-size: 0.95rem;
+  line-height: 1.4;
+  margin-bottom: 3px;
+  word-break: break-word;
+}
+
+/* The meta line ("You • 2m ago"); keep it legible on the purple sent bubble */
+.bubble-content .smallAndGray {
+  font-size: 0.72rem;
+}
+
+.msg-right .bubble-content .smallAndGray {
+  color: var(--button-text);
+  opacity: 0.8;
+}
+
+@keyframes bubble-pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.chat-fallback-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  text-align: center;
+  color: var(--secondary-text-color);
+}

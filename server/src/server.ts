@@ -10,6 +10,14 @@ import { app, httpServer } from "./app.ts";
 import { resetEverythingToDefaults } from "./initRepository.ts";
 import { createRepo, setDbInitializer } from "./keyv.ts";
 
+// basically I had issues so now the server keeps running even if something crashes...
+process.on("unhandledRejection", (reason) => {
+  console.error("Unhandled promise rejection:", reason);
+});
+process.on("uncaughtException", (err) => {
+  console.error("Uncaught exception:", err);
+});
+
 // If a MONGO_STR environment variable is given (or set in `server/.env`),
 // then use MongoDB to create the repository.
 const MONGO_STR = process.env.MONGO_STR || null;
