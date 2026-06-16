@@ -1,4 +1,4 @@
-import { zUserUpdateRequest } from "@gamenite/shared";
+import { zUserUpdateRequest, type AvatarDecoration } from "@gamenite/shared";
 import { useState } from "react";
 import { z, type ZodError } from "zod";
 
@@ -19,10 +19,12 @@ type Image = z.infer<typeof zImage>;
  */
 export default function useImageModal(
   existingImage: string | null,
-  save: (image: string | null) => void,
+  existingDecorations: AvatarDecoration[],
+  save: (image: string | null, decorations: AvatarDecoration[]) => void,
   close: () => void,
 ) {
   const [image, setImage] = useState<Image>(existingImage);
+  const [decorations, setDecorations] = useState<AvatarDecoration[]>(existingDecorations);
   const [validationError, setValidationError] = useState<null | ZodError<Image>>(null);
 
   const reset = () => {
@@ -37,7 +39,7 @@ export default function useImageModal(
       return;
     }
 
-    save(valid.data);
+    save(valid.data, decorations);
     reset();
   };
 
@@ -46,6 +48,8 @@ export default function useImageModal(
   return {
     image,
     setImage,
+    decorations,
+    setDecorations,
     validationErrors,
     confirm,
     reset,

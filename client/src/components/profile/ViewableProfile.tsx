@@ -5,6 +5,7 @@ import useUser from "../../hooks/useUser";
 import useTimeSince from "../../hooks/useTimeSince";
 import ProfileStats from "./ProfileStats";
 import RecentlyPlayedGames from "./RecentlyPlayedGames";
+import SharedStats from "./SharedStats";
 
 type ViewableProfileProps = {
   username: string;
@@ -35,7 +36,7 @@ export default function ViewableProfile({ username }: ViewableProfileProps) {
       <section className="profile-left-panel">
         {/* Shows user's profile pic */}
         <div className="pfp">
-          <ProfileImage src={user.image} size="large" />
+          <ProfileImage src={user.image} decorations={user.decorations} size="large" />
         </div>
 
         {/* show users display name and join date */}
@@ -55,10 +56,11 @@ export default function ViewableProfile({ username }: ViewableProfileProps) {
         </div>
       </section>
 
-      {/*Right side shows the game stats and recently played games */}
+      {/* Right side: game stats, recently played, and shared stats */}
       <section className="profile-right-panel">
         <ProfileStats username={username} />
         <RecentlyPlayedGames username={username} />
+        <SharedStats user={user} />
       </section>
     </div>
   );

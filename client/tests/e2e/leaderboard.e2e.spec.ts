@@ -32,7 +32,8 @@ async function mockLeaderboardRows(page: Page, currentUsername: string) {
             user: {
               username: currentUsername,
               display: "Current Player",
-              createdAt: new Date().toISOString(),
+              decorations: [],
+              createdAt: new Date(),
             },
             totalGames: 2,
             totalWins: 2,
@@ -54,6 +55,7 @@ async function mockLeaderboardRows(page: Page, currentUsername: string) {
             user: {
               username: "guessWinner",
               display: "Guess Winner",
+              decorations: [],
               createdAt: new Date().toISOString(),
             },
             totalGames: 3,
@@ -75,6 +77,7 @@ async function mockLeaderboardRows(page: Page, currentUsername: string) {
           user: {
             username: currentUsername,
             display: "Current Player",
+            decorations: [],
             createdAt: new Date().toISOString(),
           },
           totalGames: 5,
@@ -87,6 +90,7 @@ async function mockLeaderboardRows(page: Page, currentUsername: string) {
           user: {
             username: "otherPlayer",
             display: "Other Player",
+            decorations: [],
             createdAt: new Date().toISOString(),
           },
           totalGames: 4,

@@ -3,8 +3,11 @@ import ThreadSummaryView from "../components/ThreadSummaryView.tsx";
 import { useNavigate } from "react-router-dom";
 import useGameList from "../hooks/useGameList.ts";
 import GameSummaryView from "../components/GameSummaryView.tsx";
+import RecentlyPlayedGames from "../components/profile/RecentlyPlayedGames.tsx";
+import useAuth from "../hooks/useAuth.ts";
 
 export default function Home() {
+  const { username } = useAuth();
   const threadList = useThreadList(4);
   const gameList = useGameList(4);
   const navigate = useNavigate();
@@ -45,6 +48,7 @@ export default function Home() {
           </button>
         </div>
       </div>
+      <RecentlyPlayedGames username={username} />
     </div>
   );
 }

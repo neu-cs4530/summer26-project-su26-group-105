@@ -9,6 +9,7 @@ const baseUser = {
   bio: expect.any(String),
   createdAt: expect.any(String),
   image: null,
+  decorations: [],
   socialMedias: [],
   isBot: false,
 };

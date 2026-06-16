@@ -1,10 +1,12 @@
 import { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
+import { Link } from "react-router-dom";
 import useSocketsForFriends from "../hooks/useSocketsForFriends";
 import type { FriendEntry, SearchResult } from "@gamenite/shared/src/friend.types";
 import Modal from "../components/Modal";
 import ProfileImage from "../components/ProfileImage";
 import "./Friends.css";
+import DisplayName from "../components/DisplayName";
 
 type Tab = "friends" | "pending" | "search" | "blocked";
 
@@ -149,9 +151,9 @@ export default function Friends() {
     return () => clearTimeout(timer);
   }, [searchInput, tab, searchUsers]);
 
-  function confirmRemove(f: { display: string; username: string; friendId: string }) {
+  function confirmRemove(f: FriendEntry) {
     setModal({
-      message: `Warning! You are about to remove ${f.display} (@${f.username}) as a friend.
+      message: `Warning! You are about to remove ${f.user.display} (@${f.user.username}) as a friend.
                     To befriend them again, a new request would be necessary. Click OK if you wish to proceed.`,
       onConfirm: () => {
         removeFriend(f.friendId);
@@ -160,12 +162,12 @@ export default function Friends() {
     });
   }
 
-  function confirmBlock(f: { display: string; username: string }) {
+  function confirmBlock(f: FriendEntry) {
     setModal({
-      message: `Warning! Blocking ${f.display} (@${f.username}) means you can no longer view
+      message: `Warning! Blocking ${f.user.display} (@${f.user.username}) means you can no longer view
                     each other's profiles or play together. Click OK if you wish to proceed.`,
       onConfirm: () => {
-        blockUser(f.username);
+        blockUser(f.user.username);
         setModal(null);
       },
     });
@@ -173,10 +175,10 @@ export default function Friends() {
 
   function confirmUnblock(f: FriendEntry) {
     setModal({
-      message: `Are you sure you want to unblock ${f.display} (@${f.username})? They will be
+      message: `Are you sure you want to unblock ${f.user.display} (@${f.user.username})? They will be
                     able to find you and send you a friend request again.`,
       onConfirm: () => {
-        unblockUser(f.username);
+        unblockUser(f.user.username);
         setModal(null);
       },
     });
@@ -257,17 +259,12 @@ export default function Friends() {
                       marginBottom: "0.5rem",
                     }}
                   >
-                    <ProfileImage
-                      src={"image" in f ? f.image : null}
-                      size="small"
-                      activityStatus={"activityStatus" in f ? f.activityStatus : undefined}
-                    />
                     <span style={{ flex: 1 }}>
-                      {f.display} <span className="smallAndGray">@{f.username}</span>
+                      <DisplayName user={f.user} showFullInfo />
                     </span>
                     <ThreeDotMenu
-                      onRemove={() => confirmRemove(f)}
-                      onBlock={() => confirmBlock(f)}
+                      onRemove={() => confirmRemove(f as FriendEntry)}
+                      onBlock={() => confirmBlock(f as FriendEntry)}
                     />
                   </li>
                 ))}
@@ -294,7 +291,7 @@ export default function Friends() {
                     }}
                   >
                     <span style={{ flex: 1 }}>
-                      {f.display} <span className="smallAndGray">@{f.username}</span>
+                      <DisplayName user={f.user} showFullInfo />
                     </span>
                     <button className="primary narrow" onClick={() => acceptRequest(f.friendId)}>
                       Accept
@@ -322,7 +319,7 @@ export default function Friends() {
                     }}
                   >
                     <span style={{ flex: 1 }}>
-                      {f.display} <span className="smallAndGray">@{f.username}</span>
+                      <DisplayName user={f.user} showFullInfo />
                     </span>
                     <span className="smallAndGray">Pending...</span>
                   </li>
@@ -363,12 +360,18 @@ export default function Friends() {
                       marginBottom: "0.5rem",
                     }}
                   >
-                    <span style={{ flex: 1 }}>
-                      {r.display} <span className="smallAndGray">@{r.username}</span>
+                    <Link
+                      to={`/profile/${r.user.username}`}
+                      style={{ flex: 1, textDecoration: "none", color: "inherit" }}
+                    >
+                      {r.user.display} <span className="smallAndGray">@{r.user.username}</span>
                       {relationshipLabel(r.relationship)}
-                    </span>
+                    </Link>
                     {r.relationship === "none" && (
-                      <button className="primary narrow" onClick={() => sendRequest(r.username)}>
+                      <button
+                        className="primary narrow"
+                        onClick={() => sendRequest(r.user.username)}
+                      >
                         Add Friend
                       </button>
                     )}
@@ -396,9 +399,9 @@ export default function Friends() {
                     marginBottom: "0.5rem",
                   }}
                 >
-                  <ProfileImage src={null} size="small" blocked />
+                  <ProfileImage src={null} size="small" blocked decorations={[]} />
                   <span style={{ flex: 1 }} className="smallAndGray">
-                    @{f.username}
+                    @{f.user.username}
                   </span>
                   <button className="secondary narrow" onClick={() => confirmUnblock(f)}>
                     Unblock

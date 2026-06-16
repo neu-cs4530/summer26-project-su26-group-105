@@ -1,6 +1,6 @@
 .social {
   text-decoration: none;
-  color: #444444;
+  color: var(--text-color);
   img {
     display: inline-block;
     vertical-align: middle;

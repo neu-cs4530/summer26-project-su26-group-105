@@ -26,7 +26,7 @@ export default function Leaderboard() {
   const [leaderboardRows, setLeaderboardRows] = useState<LeaderboardPlayer[]>([]);
   const { socket, user } = useLoginContext();
   const { friends } = useSocketsForFriends();
-  const friendUsernames = new Set(friends.map((friend) => friend.username));
+  const friendUsernames = new Set(friends.map((friend) => friend.user.username));
 
   let leaderboardTitle = "Global Leaderboard";
 

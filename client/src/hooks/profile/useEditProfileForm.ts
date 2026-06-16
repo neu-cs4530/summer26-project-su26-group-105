@@ -1,6 +1,6 @@
 import { useRef, useState, type SubmitEvent } from "react";
 import useLoginContext from "../useLoginContext.ts";
-import { zUserUpdateRequest, type SocialMedia } from "@gamenite/shared";
+import { zUserUpdateRequest, type AvatarDecoration, type SocialMedia } from "@gamenite/shared";
 import { z, ZodError } from "zod";
 
 const zUpdateForm = zUserUpdateRequest
@@ -88,6 +88,7 @@ export default function useEditProfileForm() {
       bio: updatedForm.bio,
       socialMedias: updatedForm.socialMedias,
       image: updatedForm.image,
+      decorations: updatedForm.decorations,
     };
 
     const changedProfileForm = Object.fromEntries(
@@ -222,11 +223,13 @@ export default function useEditProfileForm() {
       }),
     backgroundMusicVolume:
       updatedForm.settings?.backgroundMusicVolume ?? user.settings.backgroundMusicVolume,
+    decorations: updatedForm.decorations ?? user.decorations,
     setDisplay: (display: string | undefined) => updateValue("display", display),
     setBio: (bio: string) => updateValue("bio", bio),
     setPassword: (password: string) => updateValue("password", password),
     setConfirm: (confirm: string) => updateValue("confirm", confirm),
     setImage: (image: string | null) => updateValue("image", image),
+    setDecorations: (decorations: AvatarDecoration[]) => updateValue("decorations", decorations),
     addSocialMedia: (socialMedia: SocialMedia) => {
       updateValue("socialMedias", (prev) => [...(prev ?? user.socialMedias), socialMedia]);
     },
