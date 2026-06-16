@@ -1,10 +1,11 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi, beforeEach } from "vitest";
 import type { GameServer, GameServerSocket } from "../src/types.ts";
 import { logSocketError } from "../src/controllers/socket.controller.ts";
-import { socketJoin } from "../src/controllers/chat.controller.ts";
+import { socketJoin, socketLeave, socketSendMessage } from "../src/controllers/chat.controller.ts";
 import { createChat } from "../src/services/chat.service.ts";
 import { populateSafeUserInfo } from "../src/services/user.service.ts";
 import { getUserByUsername } from "../src/services/auth.service.ts";
+import { ChatRepo, MessageRepo } from "../src/repository.ts";
 
 // Mock the logSocketError function so we can test error conditions in sockets
 vi.mock(import("../src/controllers/socket.controller.ts"), () => {
@@ -17,8 +18,12 @@ vi.mock(import("../src/controllers/socket.controller.ts"), () => {
  */
 const MockGameServer = vi.fn(
   class {
-    to = vi.fn(() => this); // allows chaining
+    id = "mockGameServerSocket";
+    join = vi.fn();
+    leave = vi.fn();
     emit = vi.fn();
+    to = vi.fn(() => this); // allows chaining
+    rooms = new Set<string>();
   },
 );
 
@@ -78,5 +83,85 @@ describe("socketJoin", () => {
       chatId: chat.chatId,
       user,
     });
+  });
+});
+
+// socket leave tests
+describe("socketLeave", () => {
+  it("should check auth and reject invalid auth", async () => {
+    const chat = await createChat(new Date());
+    await socketLeave(mockSocket, mockServer)({ auth: badAuth, payload: chat.chatId });
+    expect(logSocketError).toHaveBeenCalledExactlyOnceWith(mockSocket, new Error("Invalid auth"));
+  });
+
+  it("should reject leaving a chat the user is not in", async () => {
+    const chat = await createChat(new Date());
+    await socketLeave(mockSocket, mockServer)({ auth, payload: chat.chatId });
+    expect(logSocketError).toHaveBeenCalledOnce();
+    expect(logSocketError).toHaveBeenCalledWith(mockSocket, expect.any(Error));
+  });
+
+  it("should leave the chat room and emit chatUserLeft to others", async () => {
+    const chat = await createChat(new Date());
+    const record = await getUserByUsername(auth.username);
+    const user = await populateSafeUserInfo(record!.userId);
+
+    // first join the chat
+    await socketJoin(mockSocket, mockServer)({ auth, payload: chat.chatId });
+    vi.resetAllMocks();
+
+    // mock the rooms set to include the chat
+    (mockSocket as unknown as { rooms: Set<string> }).rooms = new Set([chat.chatId]);
+
+    await socketLeave(mockSocket, mockServer)({ auth, payload: chat.chatId });
+
+    expect(logSocketError).not.toHaveBeenCalled();
+    expect(mockSocket.leave).toHaveBeenCalledExactlyOnceWith(chat.chatId);
+    expect(mockSocket.to).toHaveBeenCalledExactlyOnceWith(chat.chatId);
+    expect(mockSocket.emit).toHaveBeenCalledWith("chatUserLeft", {
+      chatId: chat.chatId,
+      user,
+    });
+  });
+});
+
+// socket send message tests
+describe("socketSendMessage", () => {
+  beforeEach(async () => {
+    await ChatRepo.clear();
+    await MessageRepo.clear();
+  });
+
+  it("should check auth and reject invalid auth", async () => {
+    const chat = await createChat(new Date());
+    await socketSendMessage(
+      mockSocket,
+      mockServer,
+    )({
+      auth: badAuth,
+      payload: { chatId: chat.chatId, text: "hello" },
+    });
+    expect(logSocketError).toHaveBeenCalledExactlyOnceWith(mockSocket, new Error("Invalid auth"));
+  });
+
+  it("should send a message and emit chatNewMessage to the room", async () => {
+    const chat = await createChat(new Date());
+    await socketSendMessage(
+      mockSocket,
+      mockServer,
+    )({
+      auth,
+      payload: { chatId: chat.chatId, text: "hello world" },
+    });
+
+    expect(logSocketError).not.toHaveBeenCalled();
+    expect(mockServer.to).toHaveBeenCalledWith(chat.chatId);
+    expect(mockServer.emit).toHaveBeenCalledWith(
+      "chatNewMessage",
+      expect.objectContaining({
+        chatId: chat.chatId,
+        message: expect.objectContaining({ text: "hello world" }),
+      }),
+    );
   });
 });
